@@ -46,7 +46,7 @@ float StabilityCorrection(float Z, float d, float TSurf, float Tair,
 			  float Wind, float Z0)
 {
   float Correction;		/* Correction to aerodynamic resistance */
-  float Ri;			/* Richardson's Number */
+  float Ri;			    /* Richardson's Number */
   float RiCr = 0.2;		/* Critical Richardson's Number */
   float RiLimit;		/* Upper limit for Richardson's Number */
 

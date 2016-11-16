@@ -59,11 +59,7 @@
      float *Tcanopy         - Canopy temperature (C)
      float *MeltEnergy      - Energy used in heating and melting of the snow
                               (W/m2)
-     float *MomentSq        - Momentum squared for rain (kg* m/s)^2 /m^2*s)
-      float *Height          - Height of vegetation (m)
-      float MS_Rainfall      - Momentum for direct rainfall () COD
-      float LD_FallVelocity  - Leaf drip fall velocity corresponding to the
-                 canopy height in vegetation map (m/s)
+     float *Height          - Height of vegetation (m)
 
    Returns      : none
 
@@ -84,15 +80,14 @@
                   layers (similar to InterceptionStorage()).
                   Of course:  NO vegetation -> NO interception
  *****************************************************************************/
-void SnowInterception(int y, int x, int Dt, float F, float LAI,
-  float MaxInt, float MaxSnowIntCap, float MDRatio,
+void SnowInterception(OPTIONSTRUCT *Options, int y, int x, int Dt, float F, 
+  float Vf, float LAI, float MaxInt, float MaxSnowIntCap, float MDRatio,
   float SnowIntEff, float Ra, float AirDens, float EactAir,
   float Lv, PIXRAD *LocalRad, float Press, float Tair,
   float Vpd, float Wind, float *RainFall, float *SnowFall,
   float *IntRain, float *IntSnow, float *TempIntStorage,
   float *VaporMassFlux, float *Tcanopy, float *MeltEnergy,
-  float *MomentSq, float *Height, unsigned char Understory,
-  float MS_Rainfall, float LD_FallVelocity)
+  float *Height, unsigned char Understory)
 {
   float AdvectedEnergy;		/* Energy advected by the rain (W/m2) */
   float DeltaSnowInt;		/* Change in the physical swe of snow
@@ -130,6 +125,7 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
   OriginalRainfall = *RainFall;
   InitialWaterInt = *IntSnow + *IntRain;
 
+  /* Convert from pixel depth to physical depth*/
   *IntSnow /= F;
   *IntRain /= F;
 
@@ -212,8 +208,17 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
      canopy radiates in two directions */
   Tmp = *Tcanopy + 273.15;
   LongOut = STEFAN * (Tmp * Tmp * Tmp * Tmp);
-  NetRadiation = LocalRad->NetShort[0] + LocalRad->LongIn[0] - 2 * F * LongOut;
-  NetRadiation /= F;
+  
+  /* If the improved radiation scheme, the forested cell is considered continuous with
+  small canopy gaps. This assumption is valid for the typical DHSVM implmentation on the
+  spatial scale of 30-150 m. As such,  F is not needed for weighting radiation  */
+  if (Options->ImprovRadiation) {
+    NetRadiation = LocalRad->NetShort[0] + LocalRad->LongIn[0] - 2 * Vf * LongOut;
+  }
+  else {
+    NetRadiation = LocalRad->NetShort[0] + LocalRad->LongIn[0] - 2 * F * LongOut;
+    NetRadiation /= F;
+  }
 
   /* Calculate the vapor mass flux between the canopy and the surrounding air mass
      - snow covered aerodynamic resistance is assumed to increase by an order
@@ -237,11 +242,12 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
   /* Calculate the amount of energy available for refreezing */
   RefreezeEnergy = SensibleHeat + LatentHeat + NetRadiation + AdvectedEnergy;
   RefreezeEnergy *= Dt;
+
   /* if RefreezeEnergy is positive it means energy is available to melt the
      intercepted snow in the canopy.  If it is negative, it means that
      intercepted water will be refrozen */
 
-/* Update maximum water interception storage */
+  /* Update maximum water interception storage */
   MaxWaterInt = LIQUID_WATER_CAPACITY * (*IntSnow) + MaxInt;
 
   /* Convert the vapor mass flux from a flux to a depth per interval */
@@ -259,11 +265,11 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
 
     *MeltEnergy -= (LF * PotSnowMelt * WATER_DENSITY) / Dt;
 
+    /* if the intercepted rain and potential snowmelt is less than the
+    liquid water holding capacity of the intercepted snowpack, then simply
+    add the total potential snowmelt to the liquid water content of the
+    intercepted snowpack. */
     if ((*IntRain + PotSnowMelt) <= MaxWaterInt) {
-      /* if the intercepted rain and potential snowmelt is less than the
-         liquid water holding capacity of the intercepted snowpack, then simply
-         add the total potential snowmelt to the liquid water content of the
-         intercepted snowpack. */
       *IntSnow -= PotSnowMelt;
       *IntRain += PotSnowMelt;
       PotSnowMelt = 0.0;
@@ -294,7 +300,6 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
            substantial amount of intercepted snow at the beginning of the time
            step ( > MIN_INTERCEPTION_STORAGE).  Snow melt may generate mass release. */
         *TempIntStorage += ExcessSnowMelt;
-
       MassRelease(IntSnow, TempIntStorage, &ReleasedMass, &Drip, MDRatio);
     }
     /* If intercepted snow has melted, add the water it held to drip */
@@ -350,15 +355,4 @@ void SnowInterception(int y, int x, int Dt, float F, float LAI,
 
   *RainFall = RainThroughFall + Drip;
   *SnowFall = SnowThroughFall + ReleasedMass;
-
-  /* Find momentum squared of rainfall. */
-  if (Understory)
-    /* Since the understory is assumed to cover the entire grid cell, all
-       momentum is associated with leaf drip, eq. 2, Wicks and Bathurst (1996) */
-    *MomentSq = pow(LD_FallVelocity * WATER_DENSITY, 2) * PI / 6 *
-    pow(LEAF_DRIP_DIA, 3) * (*RainFall) / Dt;
-  else
-    /* If no understory, part of the rainfall reaches the ground as direct throughfall. */
-    *MomentSq = pow(LD_FallVelocity * WATER_DENSITY, 2) * PI / 6 *
-    pow(LEAF_DRIP_DIA, 3) * Drip / Dt + (1 - F) * MS_Rainfall;
 }

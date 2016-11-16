@@ -89,13 +89,18 @@ static char *ErrorMessage[] = {
   "Invalid Map->Resolution value for dumping map or image of variable ID:", /* 66 */
   "The options set in the input file do not support plotting variable ID:", /* 67 */
   "Riparian parameter < 0:", /* 68 */
+  "No gridded met file is found within the basin boundary:", /* 69 */
+  "Stream temp module must be turned on to allow canopy shading options:", /* 70 */
+  "Improved radiation scheme must be true if canopy gapping option is true:", /* 71 */
+  "Canopy gap area > grid cell area:", /* 72 */
+  "1-GapView must < Fractional Coverage (F):", /* 73 */
+  "GapWind adj factor must >0 and <=1:", /* 74 */
   NULL
 };
 
 void ReportError(char *ErrorString, int ErrorCode)
 {
   printf("%s %s\n", ErrorMessage[ErrorCode - 1], ErrorString);
-
   exit(ErrorCode);
 }
 

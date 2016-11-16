@@ -104,14 +104,20 @@ typedef unsigned int unint;
 #define MAP_OUTPUT 1
 #define IMAGE_OUTPUT 2
 
+// Canopy type used in canopy gapping option
+enum CanopyType {
+  Opening,
+  Forest
+};
+
 enum KEYS {
 /* Options *//* list order must match order in InitConstants.c */
   format = 0, extent, gradient, flow_routing, sensible_heat_flux,
-  infiltration, interpolation, mm5, qpf, prism, canopy_radatt, 
+  infiltration, interpolation, mm5, qpf, prism, grid, decimal, canopy_radatt,
   shading, snotel, outside, rhoverride, precipitation_source, wind_source, 
   temp_lapse, precip_lapse, cressman_radius, cressman_stations, prism_data_path, 
   prism_data_ext, shading_data_path, shading_data_ext, skyview_data_path, 
-  stream_temp, canopy_shading,
+  stream_temp, canopy_shading, improv_radiation, gapping,
   /* Area */
   coordinate_system, extreme_north, extreme_west, center_latitude,
   center_longitude, time_zone_meridian, number_of_rows,
@@ -122,7 +128,8 @@ enum KEYS {
   ground_roughness, snow_roughness, rain_threshold, snow_threshold,
   snow_water_capacity, reference_height, rain_lai_multiplier,
   snow_lai_multiplier, min_intercepted_snow, outside_basin,
-  temp_lapse_rate, precip_lapse_rate, precip_multiplier,
+  temp_lapse_rate, precip_lapse_rate, precip_multiplier, alb_acc_lambda, 
+  alb_melt_lambda, alb_acc_min, alb_melt_min, gapview_adj, gapwind_adj, 
   /* Station information */
   station_name = 0, station_north, station_east, station_elev, station_file,
   /* RADAR information */
@@ -133,22 +140,23 @@ enum KEYS {
   /* precipitation lapse rate information */
   precip_lapse_rate_file = 0,
   /* MM5 information */
-  MM5_start = 0,
-  MM5_temperature, MM5_humidity, MM5_wind, MM5_shortwave,
+  MM5_start = 0, MM5_temperature, MM5_humidity, MM5_wind, MM5_shortwave,
   MM5_longwave, MM5_precip, MM5_terrain, MM5_lapse,
   MM5_rows, MM5_cols, MM5_ext_north, MM5_ext_west, MM5_dy,
+  /* grid information */
+  grid_ext_north=0, grid_ext_south, grid_ext_east, grid_ext_west, tot_grid, decim,
+  grid_met_file, file_prefix,
   /* Soil information */
   soil_description = 0, lateral_ks, exponent, depth_thresh, max_infiltration, capillary_drive,
-  soil_albedo, manning,
-  number_of_layers, porosity, pore_size, bubbling_pressure, field_capacity,
-  wilting_point, bulk_density, vertical_ks, solids_thermal, thermal_capacity,
+  soil_albedo, number_of_layers, porosity, pore_size, bubbling_pressure, field_capacity,
+  wilting_point, bulk_density, vertical_ks, solids_thermal, residual, thermal_capacity,
   /* Vegetation information */
   veg_description = 0, overstory, understory, fraction, hemifraction, trunk_space,
-  aerodynamic_att, radiation_att, clumping_factor, leaf_angle_a, leaf_angle_b,
-  scat, snow_int_cap, mass_drip_ratio, snow_int_eff, imperv_frac, detention_frac, detention_decay, height, 
-  max_resistance, min_resistance, moisture_threshold, vpd, rpc,  
-  number_of_root_zones, root_zone_depth, overstory_fraction,
-  understory_fraction, overstory_monlai, understory_monlai, overstory_monalb,
+  aerodynamic_att, beam_attn, clumping_factor, leaf_angle_a, leaf_angle_b,
+  scat, snow_int_cap, mass_drip_ratio, snow_int_eff, imperv_frac, detention_frac, 
+  detention_decay, height, gap_diam, max_resistance, min_resistance, 
+  moisture_threshold, vpd, rpc, number_of_root_zones, root_zone_depth, overstory_fraction, 
+  understory_fraction, monextn, vf_adj, overstory_monlai, understory_monlai, overstory_monalb, 
   understory_monalb, 
   /* terrain information */
   demfile = 0, maskfile,

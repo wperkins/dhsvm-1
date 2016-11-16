@@ -57,10 +57,11 @@ Handbook of hydrology,  1993, McGraw-Hill, New York, etc..
 PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
                         OPTIONSTRUCT *Options, int NStats,
                         METLOCATION *Stat, uchar *MetWeights,
-                        float LocalElev, RADCLASSPIX *RadMap,
+                        float LocalElev, PIXRAD *RadMap,
                         PRECIPPIX *PrecipMap, MAPSIZE *Radar,
                         RADARPIX **RadarMap, float **PrismMap,
                         SNOWPIX *LocalSnow, SNOWTABLE *SnowAlbedo,
+                        CanopyGapStruct **Gap, VEGPIX *VegMap,
                         float ***MM5Input, float ***WindModel,
                         float **PrecipLapseMap, MET_MAP_PIX ***MetMap,
                         int NGraphics, int Month, float skyview,
@@ -69,15 +70,15 @@ PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
 {
   float CurrentWeight;		/* weight for current station */
   float ScaleWind = 1;		/* Wind to be scaled by model factors if 
-                            WindSource == MODEL */
-  float Temp;			/* Temporary variable */
-  float WeightSum;		/* sum of the weights */
-  int i;			/* counter */
-  int RadarX;			/* X coordinate of radar map coordinate */
-  int RadarY;			/* Y coordinate of radar map coordinate */
+                               WindSource == MODEL */
+  float Temp;			    /* Temporary variable */
+  float WeightSum;		    /* sum of the weights */
+  int i, j;			        /* counter */
+  int RadarX;			    /* X coordinate of radar map coordinate */
+  int RadarY;			    /* Y coordinate of radar map coordinate */
   float TempLapseRate;
   int WindDirection = 0;	/* Direction of model wind */
-  PIXMET LocalMet;		/* local met data */
+  PIXMET LocalMet;		    /* local met data */
 
   LocalMet.Tair = 0.0;
   LocalMet.Rh = 0.0;
@@ -176,7 +177,8 @@ PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
   /* into account the slope and aspect and topographic shading */
   /* of the local pixel.  If we wanted to use this value directly */
   /* then the correction to the observed beam w.r.t. a horizontal plane */
-  /* would be   actual = horizontal*shadefactor/255/sin(solar_altitude) */
+  /* would be   
+  /*        actual = horizontal*shadefactor/255/sin(solar_altitude) */
   /* the sin(solar_altitude) is necessary to convert horizontal into the maximum */
   /* possible flux */
 
@@ -216,13 +218,15 @@ PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
     LocalMet.SinBeam = LocalMet.Sin;
     LocalMet.SinDiffuse = 0;
   }
-  RadMap->Beam = LocalMet.SinBeam;
-  RadMap->Diffuse = LocalMet.SinDiffuse;
+  RadMap->BeamIn = LocalMet.SinBeam;
+  RadMap->DiffuseIn = LocalMet.SinDiffuse;
+  RadMap->Tair = LocalMet.Tair;
 
   /* Store the VIC incoming shortwave radiatio without topo or canopy shading */
-  if (Options->StreamTemp)
-    LocalMet.VICSin = LocalMet.Sin;
-  LocalMet.Sin = RadMap->Beam + RadMap->Diffuse;
+  LocalMet.VICSin = LocalMet.Sin;
+
+  /* the incoming shortwave radiation adjusted for shading */
+  LocalMet.Sin = RadMap->BeamIn + RadMap->DiffuseIn;
 
   if (Options->QPF == TRUE || Options->MM5 == FALSE) {
     if (Options->PrecipType == STATION && Options->Prism == FALSE) {
@@ -280,8 +284,15 @@ PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
   }
   else
     PrecipMap->SnowFall = 0.0;
-
   PrecipMap->RainFall = PrecipMap->Precip - PrecipMap->SnowFall;
+
+  if (VegMap->Gapping) {
+    for (j = 0; j < CELL_PARTITION; j++) {
+      (*Gap)[j].SnowFall = PrecipMap->SnowFall;
+      (*Gap)[j].RainFall = PrecipMap->RainFall;
+      (*Gap)[j].Precip = PrecipMap->Precip;
+    }
+  }
 
   /* Local heat of vaporization, Eq. 4.2.1, Shuttleworth (1993) */
   LocalMet.Lv = 2501000 - 2361 * LocalMet.Tair;
@@ -315,7 +326,24 @@ PIXMET MakeLocalMetData(int y, int x, MAPSIZE *Map, int DayStep,
       SnowAlbedo);
   }
   else
-    LocalSnow->LastSnow = 0;
+    LocalSnow->LastSnow = 0.;
+
+  /* if canopy gap is present */
+  if (VegMap->Gapping) {
+    for (j = 0; j < CELL_PARTITION; j++) {
+      if ((*Gap)[j].HasSnow) {
+        if ((*Gap)[j].SnowFall > 0.0)
+          (*Gap)[j].LastSnow = 0;
+        else
+          (*Gap)[j].LastSnow++;
+
+        (*Gap)[j].Albedo = CalcSnowAlbedo((*Gap)[j].TSurf, (*Gap)[j].LastSnow,
+          SnowAlbedo);
+      }
+      else
+        (*Gap)[j].LastSnow = 0.;
+    }
+  }
 
   if (NGraphics > 0) {
     (*MetMap)[y][x].accum_precip =

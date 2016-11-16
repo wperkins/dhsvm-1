@@ -45,28 +45,21 @@ float CalcEffectiveKh(int NSoilLayers, float Top, float Bottom,
 		      float *SoilDepth, float *KhDry, float *KhSol,
 		      float *Moisture, float *Porosity, float *TSoil)
 {
-  char NoEndLayer;		/* flag to indicate whether an end layer
-				   has been determined */
-  char NoStartLayer;		/* flag to indicate whether a start layer 
-				   has been determined */
-  float Dz;			/* Depth from soil surface (m) */
-  float Ke;			/* Kersten number (see reference) */
-  float KhEff;			/* Effective soil thermal conductivity 
-				   (W/(m*K)) */
-  float KhSat;			/* Thermal conductivity for saturated soils
-				   (W/(m*K)) */
-  float *LayerDepth;		/* Depth of each layer above the specified
-				   depth (m) */
-  float *LayerKh;		/* Effective thermal conductivity for each 
-				   soil layer above the specified depth 
-				   (W/(m*K)) */
-  float Sr;			/* degree of saturation */
-  float TotalDepth;		/* Depth of soil column for which to 
-				   calculate the effective thermal 
-				   conductivity (m) */
-  int i;			/* counter */
+  char NoEndLayer;		/* flag to indicate whether an end layer has been determined */
+  char NoStartLayer;    /* flag to indicate whether a start layer has been determined */
+  float Dz;			    /* Depth from soil surface (m) */
+  float Ke;			    /* Kersten number (see reference) */
+  float KhEff;			/* Effective soil thermal conductivity (W/(m*K)) */
+  float KhSat;			/* Thermal conductivity for saturated soils (W/(m*K)) */
+  float *LayerDepth;    /* Depth of each layer above the specified depth (m) */
+  float *LayerKh;		/* Effective thermal conductivity for each soil layer above the 
+                           specified depth (W/(m*K)) */
+  float Sr;			    /* degree of saturation */
+  float TotalDepth;		/* Depth of soil column for which to calculate the effective thermal 
+				           conductivity (m) */
+  int i;			    /* counter */
   int NLayers;			/* Number of soil layers in depth interval */
-  int StartLayer = 0;		/* First layer below top */
+  int StartLayer = 0;   /* First layer below top */
 
   TotalDepth = Bottom - Top;
 

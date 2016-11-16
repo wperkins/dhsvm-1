@@ -52,16 +52,12 @@ float CalcAvailableWater(int NRootLayers, float TotalDepth, float *RootDepth,
 			 float *Porosity, float *FCap, float TableDepth,
 			 float *Adjust)
 {
-  float AvailableWater;		/* amount of water available for movement
-				   (m) */
-  float DeepFCap;		/* field capacity of the layer below the
-				   deepest root layer */
-  float DeepLayerDepth;		/* depth of layer below deepest root zone
-				   layer */
-  float DeepPorosity;		/* porosity of the layer below
-				   the deepest root layer */
-  float Depth;			/* depth below the ground surface (m) */
-  int i;			/* counter */
+  float AvailableWater;		/* amount of water available for movement (m) */
+  float DeepFCap;		    /* field capacity of the layer below the  deepest root layer */
+  float DeepLayerDepth;		/* depth of layer below deepest root zone layer */
+  float DeepPorosity;		/* porosity of the layer below the deepest root layer */
+  float Depth;			    /* depth below the ground surface (m) */
+  int i;			        /* counter */
 
   AvailableWater = 0;
 

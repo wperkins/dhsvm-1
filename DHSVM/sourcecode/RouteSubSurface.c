@@ -100,7 +100,7 @@ void RouteSubSurface(int Dt, MAPSIZE *Map, TOPOPIX **TopoMap,
 		     ROADSTRUCT **Network, SOILTABLE *SType,
 		     SOILPIX **SoilMap, CHANNEL *ChannelData,
 		     TIMESTRUCT *Time, OPTIONSTRUCT *Options, 
-		     char *DumpPath, int MaxStreamID, SNOWPIX **SnowMap)
+		     char *DumpPath, SNOWPIX **SnowMap)
 {
   const char *Routine = "RouteSubSurface";
   int x;			/* counter */

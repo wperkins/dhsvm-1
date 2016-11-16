@@ -17,6 +17,7 @@
 #define CONSTANTS_H
 
 #define CELLFACTOR 3            /* For discretization of forest roads for kinematic wave routing */
+#define CELL_PARTITION 2        /* Number of veg type in a grid cell */
 #define CH_ICE     (2100.0e3)	/* Volumetric heat capacity (J/(m3*C) of ice (0C) */
 #define CH_WATER   (4186.8e3)	/* Volumetric heat capacity (J/(m3*C) of water */
 #define CP         1013.0		/* Specific heat of moist air at constant pressure (J/(kg*C)) */
@@ -53,6 +54,7 @@
 #define VON_KARMAN  0.4		    /* Von Karman's constant */
 #define WATER_DENSITY 1000.		/* Density of water in kg/m3 */
 #define Z0_MULTIPLIER 0.13		/* Multiplier for vegetation height to get roughness length (m) */
+#define MinDiff   (1.e-8)
 
 /**************** extern constants - see globals.c ****************/
 
@@ -75,5 +77,14 @@ extern int NWINDMAPS;					/* Number of wind maps in case the wind source is MODE
 extern float Z0_GROUND;					/* Roughness length for bare soil (m) */
 extern float Z0_SNOW;					/* Roughness length for snow (m) */
 extern float Zref;						/* Reference height (m) */
+
+extern float ALB_ACC_LAMBDA;            /* snow freeze albedo cruve control parameters */
+extern float ALB_MELT_LAMBDA;           /* snow thaw albedo cruve control parameters */
+extern float ALB_ACC_MIN;
+extern float ALB_MELT_MIN;
+
+extern int GRID_DECIMAL;               /* Number of digits after decimal point in forcing file names */
+extern float GAPVIEW_FACTOR;
+extern float GAPWIND_FACTOR;
 
 #endif

@@ -51,8 +51,8 @@
 
   Comments     :
 *****************************************************************************/
-void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
-		   SOLARGEOMETRY * SolarGeo, TIMESTRUCT * Time)
+void InitConstants(LISTPTR Input, OPTIONSTRUCT *Options, MAPSIZE *Map,
+		   SOLARGEOMETRY *SolarGeo, TIMESTRUCT *Time)
 {
   int i;			/* counter */
   double PointModelX;		/* X-coordinate for POINT model mode */
@@ -72,6 +72,8 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
     {"OPTIONS", "MM5", "", ""},
     {"OPTIONS", "QPF", "", ""},
     {"OPTIONS", "PRISM", "", ""},
+    {"OPTIONS", "GRIDDED MET DATA", "", "" },
+    {"OPTIONS", "GRID_DECIMAL", "", "" },
     {"OPTIONS", "CANOPY RADIATION ATTENUATION MODE", "", ""},
     {"OPTIONS", "SHADING", "", ""},
     {"OPTIONS", "SNOTEL", "", ""},
@@ -90,6 +92,8 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
     {"OPTIONS", "SKYVIEW DATA PATH", "", ""},
 	{"OPTIONS", "STREAM TEMPERATURE", "", ""}, 
 	{"OPTIONS", "RIPARIAN SHADING", "", ""}, 
+    {"OPTIONS", "IMPROVED RADIATION SCHEME", "", "" },
+    {"OPTIONS", "CANOPY GAPPING", "", "" },
     {"AREA", "COORDINATE SYSTEM", "", ""},
     {"AREA", "EXTREME NORTH", "", ""},
     {"AREA", "EXTREME WEST", "", ""},
@@ -117,6 +121,12 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
     {"CONSTANTS", "TEMPERATURE LAPSE RATE", "", ""},
     {"CONSTANTS", "PRECIPITATION LAPSE RATE", "", ""},
     {"CONSTANTS", "PRECIPITATION MULTIPLIER", "", ""},
+    {"CONSTANTS", "ALBEDO ACCUMULATION LAMBDA", "", "" },
+    {"CONSTANTS", "ALBEDO MELTING LAMBDA", "", "" },
+    {"CONSTANTS", "ALBEDO ACCUMULATION MIN", "", "" },
+    {"CONSTANTS", "ALBEDO MELTING MIN", "", "" },
+    {"CONSTANTS", "GAPVIEW ADJ FACTOR", "", ""}, 
+    {"CONSTANTS", "GAP WIND ADJ FACTOR", "", "" },
     {NULL, NULL, "", NULL}
   };
 
@@ -237,6 +247,19 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
   else
     ReportError(StrEnv[prism].KeyName, 51);
 
+  /* Determine whether gridded met forcing should be used */
+  if (strncmp(StrEnv[grid].VarStr, "TRUE", 4) == 0) {
+    Options->GRIDMET = TRUE;
+    if (!CopyInt(&GRID_DECIMAL, StrEnv[decimal].VarStr, 1))
+      ReportError(StrEnv[decimal].KeyName, 51);
+  }
+  else if (strncmp(StrEnv[grid].VarStr, "FALSE", 5) == 0) {
+    Options->GRIDMET = FALSE;
+    GRID_DECIMAL = NA;
+  }
+  else
+    ReportError(StrEnv[grid].KeyName, 51);
+
   /* Determine the kind of canopy radiation attenuation to be used */
   if (strncmp(StrEnv[canopy_radatt].VarStr, "FIXED", 3) == 0)
     Options->CanopyRadAtt = FIXED;
@@ -276,14 +299,34 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
   if (strncmp(StrEnv[canopy_shading].VarStr, "TRUE", 4) == 0) {
 	Options->CanopyShading = TRUE;
 	if (Options->StreamTemp == FALSE) {
-	  printf("Stream temp module must be turned on to allow canopy shading options\n");
-	  exit(-1);
+      ReportError(StrEnv[canopy_shading].KeyName, 70);
 	}
   }
   else if (strncmp(StrEnv[canopy_shading].VarStr, "FALSE", 5) == 0)
 	Options->CanopyShading = FALSE;
   else
     ReportError(StrEnv[canopy_shading].KeyName, 51);
+
+  /* Determine if then improved radiation scheme will be used */
+  if (strncmp(StrEnv[improv_radiation].VarStr, "TRUE", 4) == 0)
+    Options->ImprovRadiation = TRUE;
+  else if (strncmp(StrEnv[improv_radiation].VarStr, "FALSE", 5) == 0)
+    Options->ImprovRadiation = FALSE;
+  else
+    ReportError(StrEnv[improv_radiation].KeyName, 51);
+
+  /* Determine if canopy gapping will be modeled */
+  if (strncmp(StrEnv[gapping].VarStr, "TRUE", 4) == 0)
+    Options->CanopyGapping = TRUE;
+  else if (strncmp(StrEnv[gapping].VarStr, "FALSE", 5) == 0)
+    Options->CanopyGapping = FALSE;
+  else
+    ReportError(StrEnv[gapping].KeyName, 51);
+
+  /* If canopy gapping option is true, the improved radiation scheme must be true */
+  if (Options->CanopyGapping == TRUE && Options->ImprovRadiation == FALSE) {
+    ReportError(StrEnv[gapping].KeyName, 71);
+  }
 
   /* Determine if listed met stations outside bounding box are used */
   if (strncmp(StrEnv[outside].VarStr, "TRUE", 4) == 0)
@@ -293,6 +336,7 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
   else
     ReportError(StrEnv[outside].KeyName, 51);
 
+  /* The file path to PRIMS files */
   if (Options->Prism == TRUE) {
     if (IsEmptyStr(StrEnv[prism_data_path].VarStr))
       ReportError(StrEnv[prism_data_path].KeyName, 51);
@@ -323,7 +367,6 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
     ReportError(StrEnv[rhoverride].KeyName, 51);
 
   /* The other met options are only of importance if MM5 is FALSE */
-
   if (Options->MM5 == TRUE) {
     Options->PrecipType = NOT_APPLICABLE;
     Options->WindSource = NOT_APPLICABLE;
@@ -413,13 +456,10 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
   Map->NumCells = 0;
 
   if (Options->Extent == POINT) {
-
     if (!CopyDouble(&PointModelY, StrEnv[point_north].VarStr, 1))
       ReportError(StrEnv[point_north].KeyName, 51);
-
     if (!CopyDouble(&PointModelX, StrEnv[point_east].VarStr, 1))
       ReportError(StrEnv[point_east].KeyName, 51);
-
     Options->PointY =
       Round(((Map->Yorig - 0.5 * Map->DY) - PointModelY) / Map->DY);
     Options->PointX =
@@ -493,4 +533,30 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
 
   if (!CopyFloat(&PRECIPMULTIPLIER, StrEnv[precip_multiplier].VarStr, 1))
       ReportError(StrEnv[precip_multiplier].KeyName, 51);
+
+  if (!CopyFloat(&ALB_ACC_LAMBDA,
+    StrEnv[alb_acc_lambda].VarStr, 1))
+    ReportError(StrEnv[alb_acc_lambda].KeyName, 51);
+
+  if (!CopyFloat(&ALB_MELT_LAMBDA,
+    StrEnv[alb_melt_lambda].VarStr, 1))
+    ReportError(StrEnv[alb_melt_lambda].KeyName, 51);
+
+  if (!CopyFloat(&ALB_ACC_MIN,
+    StrEnv[alb_acc_min].VarStr, 1))
+    ReportError(StrEnv[alb_acc_min].KeyName, 51);
+
+  if (!CopyFloat(&ALB_MELT_MIN,
+    StrEnv[alb_melt_min].VarStr, 1))
+    ReportError(StrEnv[alb_melt_min].KeyName, 51);
+
+  if (Options->CanopyGapping) {
+    if (!CopyFloat(&GAPVIEW_FACTOR, StrEnv[gapview_adj].VarStr, 1))
+      ReportError(StrEnv[gapview_adj].KeyName, 51);
+
+    if (!CopyFloat(&GAPWIND_FACTOR, StrEnv[gapwind_adj].VarStr, 1))
+      ReportError(StrEnv[gapwind_adj].KeyName, 51);
+    if (GAPWIND_FACTOR<=0 || GAPWIND_FACTOR>1)
+      ReportError(StrEnv[gapwind_adj].KeyName, 74);
+  }
 }

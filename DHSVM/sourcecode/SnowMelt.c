@@ -164,6 +164,10 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
     SurfaceSwq, *SurfWater, OldTSurf,
     &RefreezeEnergy, VaporMassFlux);
 
+  /* debug */
+  printf("Qnet = %.2f  \n", Qnet);
+  /* debug ends */
+
   /* If Qnet == 0.0, then set the surface temperature to 0.0 */
   if (fequal(Qnet, 0.0)) {
     *TSurf = 0.0;
@@ -227,29 +231,28 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
 
   /* Else, SnowPackEnergyBalance(T=0.0) <= 0.0 */
   else {
-    /* Calculate surface layer temperature using "Brent method" */
 
+    /* debug */
+    printf("=======Qnet=%f=======\n", Qnet);
+    /* debug ends */
+    /* Calculate surface layer temperature using "Brent method" */
     *TSurf = RootBrent(y, x, (float)(*TSurf - DELTAT), (float) 0.0,
       SnowPackEnergyBalance, Dt, BaseRa, Z, Displacement,
       Z0, Wind, ShortRad, LongRadIn, AirDens, Lv, Tair,
       Press, Vpd, EactAir, RainFall, SurfaceSwq, *SurfWater,
       OldTSurf, &RefreezeEnergy, VaporMassFlux);
 
-    /* since we iterated, the surface layer is below freezing and no snowmelt
-     */
-
+    /* since we iterated, the surface layer is below freezing and no snowmelt */
     SnowMelt = 0.0;
 
     /* Since updated snow_temp < 0.0, all of the liquid water in the surface
        layer has been frozen */
-
     SurfaceSwq += *SurfWater;
     Ice += *SurfWater;
     *SurfWater = 0.0;
     *MeltEnergy += (*SurfWater * LF * WATER_DENSITY) / Dt;
 
     /* Convert mass flux to a depth per timestep and adjust SurfaceSwq */
-
     *VaporMassFlux *= Dt;
 
     if (SurfaceSwq < -(*VaporMassFlux)) {
@@ -265,7 +268,6 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
 
   /* Done with iteration etc, now Update the liquid water content of the
      surface layer */
-
   MaxLiquidWater = LIQUID_WATER_CAPACITY * SurfaceSwq;
   if (*SurfWater > MaxLiquidWater) {
     Outflow = *SurfWater - MaxLiquidWater;
@@ -313,7 +315,6 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
   }
 
   /* Update the liquid water content of the pack */
-
   MaxLiquidWater = LIQUID_WATER_CAPACITY * PackSwq;
   if (*PackWater > MaxLiquidWater) {
     Outflow = *PackWater - MaxLiquidWater;
@@ -323,7 +324,6 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
     Outflow = 0.0;
 
   /* Update snow properties */
-
   Ice = PackSwq + SurfaceSwq;
 
   if (Ice > MAX_SURFACE_SWE) {
@@ -351,6 +351,10 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
   }
 
   *Swq = Ice + *PackWater + *SurfWater;
+  /* debug */
+  printf("swq=%.3f, Ice=%.3f, PackWater=%.3f, SurfWater=%.3f\n", *Swq, Ice, *PackWater, *SurfWater);
+  printf("OldTSurf=%.2f, TSurf=%.2f\n", OldTSurf, *TSurf);
+  /* debug ends */
 
   if (fequal(*Swq, 0.0)) {
     *TSurf = 0.0;
@@ -358,9 +362,7 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
   }
 
   /* Mass balance test */
-
-  MassBalanceError = (InitialSwq - *Swq) + (RainFall + SnowFall) - Outflow +
-    *VaporMassFlux;
+  MassBalanceError = (InitialSwq - *Swq) + (RainFall + SnowFall) - Outflow + *VaporMassFlux;
 
   return (Outflow);
 }
@@ -384,10 +386,8 @@ float SnowMelt(int y, int x, int Dt, float Z, float Displacement, float Z0,
 *****************************************************************************/
 static float CalcSnowPackEnergyBalance(float Tsurf, ...)
 {
-  va_list ap;			/* Used in traversing variable argument list
-                 */
-  float Qnet;			/* Net energy exchange at the SnowPack snow
-                   surface (W/m^2) */
+  va_list ap;			/* Used in traversing variable argument list */
+  float Qnet;			/* Net energy exchange at the SnowPack snow surface (W/m^2) */
 
   va_start(ap, Tsurf);
   Qnet = SnowPackEnergyBalance(Tsurf, ap);

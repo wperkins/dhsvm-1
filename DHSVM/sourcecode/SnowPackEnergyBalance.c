@@ -140,6 +140,9 @@ float SnowPackEnergyBalance(float TSurf, va_list ap)
 
   /* Calculate the sensible heat flux */
   SensibleHeat = AirDens * CP * (Tair - TMean) / Ra;
+  /* debug */
+  printf("ShortRad=%.2f, LongRadIn=%.2f, LongRadOut=%.2f, Ra=%.2f, Wind=%.2f\n", ShortRad, LongRadIn, LongRadOut, Ra, Wind);
+  /* debug ends*/
 
   /* Calculate the mass flux of ice to or from the surface layer */
 
@@ -169,12 +172,23 @@ float SnowPackEnergyBalance(float TSurf, va_list ap)
 
   /* Calculate change in cold content */
   DeltaColdContent = CH_ICE * SweSurfaceLayer * (TSurf - OldTSurf) / Dt;
+  /* debug */
+  printf("DeltaColdContent=%.2f, swq=%.3f, Tdiff=%.2f\n", 
+    DeltaColdContent, SweSurfaceLayer, TSurf - OldTSurf);
+  /* debug ends */
 
   /* Calculate net energy exchange at the snow surface */
   RestTerm = NetRad + SensibleHeat + LatentHeat + AdvectedEnergy -
     DeltaColdContent;
+  /* debug */
+  printf("NetRad=%.2f, SensibleHeat=%.2f, LatentHeat = %.2f\n", 
+    NetRad, SensibleHeat, LatentHeat);
+  /* debug ends*/
 
   *RefreezeEnergy = (SurfaceLiquidWater * LF * WATER_DENSITY) / Dt;
+  /* debug */
+  printf("RefreezeEnergy=%.2f\n\n", *RefreezeEnergy);
+  /* debug ends*/
 
   if (fequal(TSurf, 0.0) && RestTerm > -(*RefreezeEnergy)) {
     *RefreezeEnergy = -RestTerm;	/* available energy input over cold content

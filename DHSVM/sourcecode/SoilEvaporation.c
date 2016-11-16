@@ -31,13 +31,10 @@ float SoilEvaporation(int Dt, float Temp, float Slope, float Gamma, float Lv,
 		      float *MoistContent, float Adjust)
 {
   float DesorptionVolume;	/* Amount of water the soil can deliver to the
-				   atmosphere during a timestep (mm) */
-  float EPot;			/* Potential evaporation from soil during
-				   timestep (mm) */
-  float SoilEvap;		/* Amount of evaporation directly from the soil
-				   (mm) */
-  float SoilMoisture;		/* Amount of water in surface soil layer 
-				   (mm) */
+				               atmosphere during a timestep (mm) */
+  float EPot;			    /* Potential evaporation from soil during timestep (mm) */
+  float SoilEvap;		    /* Amount of evaporation directly from the soil (mm) */
+  float SoilMoisture;		/* Amount of water in surface soil layer (mm) */
 
   DesorptionVolume = Desorption(Dt, *MoistContent, Porosity, Ks, Press, m);
 

@@ -11,14 +11,15 @@
  * FUNCTIONS:    
  * Modification 
  * $Id: CalcShadowLength.c, v3.1.2  2013/06/17 Ning Exp $    
+ * Reference:
 
- Reference:
-    Chen et al., Stream temperature simulation of forested riparian
-	area: I. Watershed-scale model development, Journal of Environmental 
-	Engineering, 1998.
+   Sun et al. (2014). Hydrol. Process. A spatially distributed model for the 
+   assessment of land use impacts on stream temperature in small urban watersheds. 
+   DOI: 10.1002/hyp.10363
 
-	Sridhar et al., Prediction of stream temperature in forested watersheds, 
-	JAWRS, 2004. 
+   Chen et al. (1998). Stream temperature simulation of forested riparian area: I. 
+   Watershed-scale model development, Journal of Environmental Engineering.
+
  */
 
 #include <stdlib.h>
@@ -66,7 +67,6 @@ void CalcCanopyShading(TIMESTRUCT *Time, Channel *Channel, SOLARGEOMETRY *SolarG
 	float Net_Shade_Fctr = 0.;  /* the effective shade density fro beam radiation */
 	float SKOP = 0.;            /* sky openess ranging from 0 to 1 */
 	int ShadeCase;
-	float debug;
 
 	/* compute solar altitude in radians */
 	SolarAltitude = asin(SolarGeo->SineSolarAltitude);
@@ -84,7 +84,6 @@ void CalcCanopyShading(TIMESTRUCT *Time, Channel *Channel, SOLARGEOMETRY *SolarG
 		  Channel->rveg.CanopyBankDist < 0. ) {
 		ReportError("CalcCanopyShading()", 68);
 	  }
-	  /* debug ends */
 
 	  /* compute the average height of the canopy */
 	  HDEM = Channel->rveg.TREEHEIGHT;
@@ -157,7 +156,6 @@ void CalcCanopyShading(TIMESTRUCT *Time, Channel *Channel, SOLARGEOMETRY *SolarG
 
 	  /* compute the net shortwave raidation adjusted by canopy shading */
 	  Channel->NSW = Channel->Diffuse + Channel->Beam;
-	  debug = Channel->NLW;
 	  Channel->NLW = Channel->NLW * MIN(Channel->skyview, SKOP) + 
 		   0.96*(1-MIN(Channel->skyview, SKOP))*0.96*STEFAN*pow((double)(Channel->ATP+273.15),4);
 

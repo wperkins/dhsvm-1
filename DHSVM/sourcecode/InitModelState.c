@@ -56,7 +56,7 @@ void InitModelState(DATE *Start, MAPSIZE *Map, OPTIONSTRUCT *Options, PRECIPPIX 
   char Str[NAMESIZE + 1];
   char FileName[NAMESIZE + 1];
   FILE *HydroStateFile;
-  int i;		     /* counter */
+  int i, j;		         /* counter */
   int x;				 /* counter */
   int y;				 /* counter */
   int NSet;				 /* Number of dataset to be read */
@@ -254,6 +254,10 @@ void InitModelState(DATE *Start, MAPSIZE *Map, OPTIONSTRUCT *Options, PRECIPPIX 
     for (x = 0; x < Map->NX; x++) {
       if (INBASIN(TopoMap[y][x].Mask)) {
         SnowMap[y][x].TSurf = ((float *)Array)[y * Map->NX + x];
+        if (Options->CanopyGapping) {
+          VegMap[y][x].Type[Opening].TSurf = ((float *)Array)[y * Map->NX + x];
+          VegMap[y][x].Type[Forest].TSurf = ((float *)Array)[y * Map->NX + x];
+        }
       }
     }
   }
@@ -275,10 +279,17 @@ void InitModelState(DATE *Start, MAPSIZE *Map, OPTIONSTRUCT *Options, PRECIPPIX 
   for (y = 0; y < Map->NY; y++) {
     for (x = 0; x < Map->NX; x++) {
       if (INBASIN(TopoMap[y][x].Mask)) {
-        if (SnowMap[y][x].HasSnow)
-          SnowMap[y][x].Albedo = CalcSnowAlbedo(SnowMap[y][x].TSurf, SnowMap[y][x].LastSnow, SnowAlbedo);
-        else
-          SnowMap[y][x].Albedo = 0;
+        if (Options->CanopyGapping) {
+          for (i = 0; i < CELL_PARTITION; i++)
+          VegMap[y][x].Type[i].Albedo =
+            CalcSnowAlbedo(SnowMap[y][x].TSurf, SnowMap[y][x].LastSnow, SnowAlbedo);
+        }
+        else {
+          if (SnowMap[y][x].HasSnow)
+            SnowMap[y][x].Albedo = CalcSnowAlbedo(SnowMap[y][x].TSurf, SnowMap[y][x].LastSnow, SnowAlbedo);
+          else
+            SnowMap[y][x].Albedo = 0;
+        }
       }
     }
   }
@@ -431,6 +442,28 @@ void InitModelState(DATE *Start, MAPSIZE *Map, OPTIONSTRUCT *Options, PRECIPPIX 
       SoilMap[y][x].DetentionStorage = 0.0;
       SoilMap[y][x].DetentionIn = 0.0;
       SoilMap[y][x].DetentionOut = 0.0;
+    }
+  }
+
+  if (Options->CanopyGapping) {
+    for (y = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++) {
+        if (INBASIN(TopoMap[y][x].Mask)) {
+          if (VegMap[y][x].Gapping) {
+            for (i = 0; i < CELL_PARTITION; i++) {
+              VegMap[y][x].Type[i].TPack = SnowMap[y][x].TPack;
+              VegMap[y][x].Type[i].SurfWater = SnowMap[y][x].SurfWater;
+              VegMap[y][x].Type[i].Swq = SnowMap[y][x].Swq;
+              VegMap[y][x].Type[i].LastSnow = SnowMap[y][x].LastSnow;
+              VegMap[y][x].Type[i].HasSnow = SnowMap[y][x].HasSnow;
+              for (j = 0; j < Soil.MaxLayers + 1; j++) {
+                if (j < NSoil)
+                  VegMap[y][x].Type[i].Moist[j] = SoilMap[y][x].Moist[j];
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

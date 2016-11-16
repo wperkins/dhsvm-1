@@ -2,31 +2,32 @@
 # SUMMARY:      makefile for DHSVM
 # USAGE:        make DHSVM
 
-#	$Id: makefile,v3.1.2 2015/11/12 Ning Exp $	
+#	$Id: makefile,v3.1.4 2016/7/12 Ning Exp $	
 
 OBJS = AdjustStorage.o Aggregate.o AggregateRadiation.o	CalcAerodynamic.o \
-CalcAvailableWater.o CalcDistance.o CalcEffectiveKh.o CalcKhDry.o \
-CalcKinViscosity.o CalcSatDensity.o CalcSnowAlbedo.o CalcSolar.o \
+CalcAvailableWater.o CalcDistance.o CalcEffectiveKh.o CalcKhDry.o   \
+CalcKinViscosity.o CalcSatDensity.o CalcSnowAlbedo.o CalcSolar.o    \
 CalcTotalWater.o CalcTransmissivity.o CalcWeights.o Calendar.o	     \
 CanopyResistance.o ChannelState.o CheckOut.o CutBankGeometry.o	     \
 DHSVMChannel.o Desorption.o Draw.o EvalExponentIntegral.o \
 EvapoTranspiration.o ExecDump.o FileIOBin.o FileIONetCDF.o Files.o   \
 FinalMassBalance.o GetInit.o GetMetData.o InArea.o InitAggregated.o  \
-InitArray.o InitConstants.o InitDump.o InitFileIO.o  \
+InitArray.o InitConstants.o InitDump.o InitFileIO.o   \
 InitInterpolationWeights.o InitMetMaps.o InitMetSources.o	     \
-InitModelState.o InitNetwork.o InitNewMonth.o InitSnowMap.o         \
-InitTables.o InitTerrainMaps.o InitUnitHydrograph.o InitXGraphics.o \
-InterceptionStorage.o IsStationLocation.o LapseT.o LookupTable.o    \
-MainDHSVM.o MakeLocalMetData.o MassBalance.o MassEnergyBalance.o    \
-MassRelease.o MaxRoadInfiltration.o NoEvap.o RadiationBalance.o     \
+InitModelState.o InitNetwork.o InitNewMonth.o InitSnowMap.o \
+InitTables.o InitTerrainMaps.o InitUnitHydrograph.o  InitXGraphics.o \
+InterceptionStorage.o IsStationLocation.o LapseT.o LookupTable.o  \
+MainDHSVM.o MakeLocalMetData.o MassBalance.o MassEnergyBalance.o     \
+MassRelease.o MaxRoadInfiltration.o NoEvap.o RadiationBalance.o      \
 ReadMetRecord.o ReadRadarMap.o ReportError.o ResetAggregate.o	     \
 RootBrent.o Round.o RouteSubSurface.o RouteSurface.o   \
 SatVaporPressure.o SensibleHeatFlux.o SeparateRadiation.o SizeOfNT.o \
-SlopeAspect.o SnowInterception.o SnowMelt.o SnowPackEnergyBalance.o  \
-SoilEvaporation.o StabilityCorrection.o StoreModelState.o	      \
-SurfaceEnergyBalance.o UnsaturatedFlow.o VarID.o WaterTableDepth.o   \
-channel.o channel_grid.o equal.o errorhandler.o globals.o tableio.o  \
-channel_complt.o RiparianShading.o
+SlopeAspect.o SnowInterception.o SnowMelt.o SnowPackEnergyBalance.o \
+SoilEvaporation.o StabilityCorrection.o StoreModelState.o	     \
+SurfaceEnergyBalance.o UnsaturatedFlow.o VarID.o WaterTableDepth.o  \
+channel.o channel_grid.o equal.o errorhandler.o globals.o tableio.o \
+channel_complt.o RiparianShading.o CanopyGapEnergyBalance.o deg2utm.o \
+CanopyGapRadiation.o
 
 SRCS = $(OBJS:%.o=%.c)
 
@@ -43,19 +44,19 @@ GET= co
 REL=
 
  
-DEFS =  -DHAVE_X11 -DHAVE_NETCDF
+DEFS =  -DHAVE_X11 
 #possible DEFS -DHAVE_NETCDF -DHAVE_X11 -DSHOW_MET_ONLY -DSNOW_ONLY
 CFLAGS =  -g -I/usr/X11R6/include -Wall  -I/usr/local/include/  $(DEFS) 
 
 CC = cc
 FLEX = /usr/bin/flex
-LIBS = -lm -L/usr/X11R6/lib -lX11 -L/sw/lib -L/usr/local/lib -lnetcdf
+LIBS = -lm -L/usr/X11R6/lib -lX11 -L/sw/lib -L/usr/local/lib 
 
 # possible libs:   
 #LIBS = -lm -L/usr/X11R6/lib -lX11 -L/sw/lib -L/usr/local/lib -lnetcdf
 
 DHSVM: $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) -o DHSVM3.1.2 $(LIBS)
+	$(CC) $(OBJS) $(CFLAGS) -o DHSVM3.1.4 $(LIBS)
 
 clean::
 	rm -f DHSVM
@@ -73,6 +74,7 @@ libBinIO.a: $(BINIOLIBOBJ)
 
 clean::
 	rm -f libBinIO.a
+
 
 # -------------------------------------------------------------
 # rules for individual objects (created with make depend)
@@ -111,6 +113,10 @@ CalcWeights.o: CalcWeights.c constants.h settings.h data.h Calendar.h \
  channel_grid.h
 Calendar.o: Calendar.c settings.h functions.h data.h Calendar.h \
  DHSVMChannel.h getinit.h channel.h channel_grid.h DHSVMerror.h
+CanopyGapEnergyBalance.o: CanopyGapEnergyBalance.c settings.h massenergy.h data.h \
+ constants.h DHSVMerror.h snow.h functions.h
+CanopyGapRadiation.o: CanopyGapRadiation.c settings.h massenergy.h data.h \
+ constants.h DHSVMerror.h functions.h
 RiparianShading.o: RiparianShading.c channel.h channel_grid.h constants.h \
  functions.h settings.h
 CanopyResistance.o: CanopyResistance.c settings.h massenergy.h data.h \
@@ -124,6 +130,7 @@ CheckOut.o: CheckOut.c DHSVMerror.h settings.h data.h Calendar.h \
  functions.h DHSVMChannel.h getinit.h channel.h channel_grid.h \
  constants.h
 CutBankGeometry.o: CutBankGeometry.c settings.h soilmoisture.h
+deg2utm.o: deg2utm.c settings.h functions.h constants.h
 DHSVMChannel.o: DHSVMChannel.c constants.h getinit.h DHSVMChannel.h \
  settings.h data.h Calendar.h channel.h channel_grid.h DHSVMerror.h \
  functions.h errorhandler.h fileio.h
@@ -275,7 +282,7 @@ SurfaceEnergyBalance.o: SurfaceEnergyBalance.c settings.h massenergy.h \
  data.h Calendar.h constants.h
 UnsaturatedFlow.o: UnsaturatedFlow.c constants.h settings.h \
  functions.h data.h Calendar.h DHSVMChannel.h getinit.h channel.h \
- channel_grid.h soilmoisture.h
+ channel_grid.h soilmoisture.h 
 VarID.o: VarID.c settings.h data.h Calendar.h DHSVMerror.h sizeofnt.h \
  varid.h
 WaterTableDepth.o: WaterTableDepth.c settings.h soilmoisture.h
