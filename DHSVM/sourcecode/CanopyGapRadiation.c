@@ -81,9 +81,6 @@ float CanopyGapShortRadiation(int Understory, float h, float dm, float SunAngle,
   float I2 = 0.;    /* area receiving incoming attenuated beam radiation */
   float Area;       /* gap area */
   float ls;         /* length along optical axis that defines shading area */
-  float GapView;    /* canopy view to sky adjusted for canopy gap */
-  float j;          /* temp variable */
-
   float Rbg = 0.;   /* net beam radiation incident on canopy gap */
   float Rdg = 0.;   /* net diffuse radiation incident on canopy gap */
   float Rsg;         /* net shortwave radiation - beam + diffuse radiation */
@@ -137,7 +134,7 @@ Function Name: CanopyGapLongRadiation()
 Purpose      : Calculate net long radiation incident on canopy gap
 ********************************************************************************/
 void CanopyGapLongRadiation(CanopyGapStruct *Gap, float h, float dm, float Ld, 
-  float Tsurf, float Vf)
+  float TCanopy, float Vf)
 {
   float GapView;    /* canopy view to sky adjusted for canopy gap */
   float temp;       /* temporary variable */
@@ -154,7 +151,7 @@ void CanopyGapLongRadiation(CanopyGapStruct *Gap, float h, float dm, float Ld,
   }
 
   /* calculate emitted longwave for each layer */
-  Tmp = Tsurf + 273.15;
+  Tmp = TCanopy + 273.15;
   /* understory */
   Gap->LongOut[1] = STEFAN * (Tmp*Tmp*Tmp*Tmp);
   /* removed overstory */

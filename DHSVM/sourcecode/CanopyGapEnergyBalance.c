@@ -81,9 +81,6 @@ void CanopyGapSnowMelt(OPTIONSTRUCT *Options, int y, int x, int Dt,
     junk = VType->RaSnow/LocalMet->Wind;
     SnowRa = junk - (junk-SnowRa)*GAPWIND_FACTOR;
     
-    /* debug */
-    printf("Gap Opening -- \n");
-    /* debug ends */
     (*Gap)[Opening].SnowPackOutflow =
       SnowMelt(y, x, Dt, 2. + Z0_SNOW, 0.f, Z0_SNOW, SnowRa, LocalMet->AirDens,
         LocalMet->Eact, LocalMet->Lv, SnowNetShort, SnowLongIn,
@@ -101,7 +98,7 @@ void CanopyGapSnowMelt(OPTIONSTRUCT *Options, int y, int x, int Dt,
     can recalculate the longwave balance */
     Tsurf = Gap[Opening]->TSurf;
     CanopyGapLongRadiation(&((*Gap)[Opening]), VType->Height[0],
-      VType->GapDiam, LocalMet->Lin, Tsurf, VType->Fract[0]);
+      VType->GapDiam, LocalMet->Lin, LocalVeg->Tcanopy, VType->Fract[0]);
     (*Gap)[Opening].LongIn[0] = 0.;
   }
   else {
@@ -270,10 +267,6 @@ void CalcGapSurroudingIntercept(OPTIONSTRUCT *Options, int HeatFluxOption,
     SnowWind = VType->USnow * LocalMet->Wind;
     SnowRa = VType->RaSnow / LocalMet->Wind;
 
-    /* debug */
-    printf("Gap Surrounding: \n");
-    /* debug ends */
-
     (*Gap)[Forest].SnowPackOutflow =
       SnowMelt(y, x, Dt, 2.+Z0_SNOW, 0.f, Z0_SNOW, SnowRa, LocalMet->AirDens,
         LocalMet->Eact, LocalMet->Lv, SnowNetShort, SnowLongIn,
@@ -411,9 +404,6 @@ void AggregateCanopyGap(CanopyGapStruct **Gap, VEGPIX *LocalVeg,
 
   LocalSnow->Swq = 
     weight*(*Gap)[Opening].Swq + (1-weight)*(*Gap)[Forest].Swq;
-  /* debug */
-  printf("swq(o, F)  =%.3f %.3f\n", (*Gap)[Opening].Swq, (*Gap)[Forest].Swq);
-  /* debug ends */
   LocalSnow->TPack = 
     weight*(*Gap)[Opening].TPack + (1-weight)*(*Gap)[Forest].TPack;
   LocalSnow->PackWater = 
@@ -430,10 +420,6 @@ void AggregateCanopyGap(CanopyGapStruct **Gap, VEGPIX *LocalVeg,
     weight*(*Gap)[Opening].MoistureFlux + (1-weight)*(*Gap)[Forest].MoistureFlux;
   LocalVeg->MeltEnergy =
     weight*(*Gap)[Opening].MeltEnergy + (1-weight)*(*Gap)[Forest].MeltEnergy;
-  /* debug */
-  printf("MeltEg(o, F)=%.3f %.3f\n\n", 
-    (*Gap)[Opening].MeltEnergy, (*Gap)[Forest].MeltEnergy);
-  /* debug ends */
 
   /* Intercepted rain/snow */
   for (i = 0; i < NVeg; i++) {
