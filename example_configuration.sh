@@ -10,16 +10,16 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2018-12-12 11:01:36 d3g096
+# Last Change: 2019-02-05 07:28:58 d3g096
 
 set -xue
 
 # -------------------------------------------------------------
 # handle command line options
 # -------------------------------------------------------------
-usage="$0 [-d|-r|-t] [name]"
+usage="$0 [-d|-r] [-t] [-M] [name]"
 
-set -- `getopt drt $*`
+set -- `getopt drtM $*`
 if [ $? != 0 ]; then
     echo $usage >&2
     exit 2
@@ -27,6 +27,7 @@ fi
 
 timing="OFF"
 build="RelWithDebInfo"
+mass1="OFF"
 for o in $*; do
     case $o in
         -d)
@@ -41,6 +42,10 @@ for o in $*; do
 	    timing="ON"
 	    shift
 	    ;;
+        -M)
+            mass1="ON"
+            shift
+            ;;
         --)
             shift
             break
@@ -68,6 +73,7 @@ common_flags="\
         -D DHSVM_SNOW_ONLY:BOOL=ON \
         -D DHSVM_BUILD_TESTS:BOOL=OFF \
         -D DHSVM_USE_RBM:BOOL=OFF \
+        -D DHSVM_USE_MASS1:BOOL=$mass1 \
         -D DHSVM_DUMP_TOPO:BOOL=ON \
 	-D DHSVM_USE_GPTL:BOOL=$timing \
         -D CMAKE_VERBOSE_MAKEFILE:BOOL=TRUE \

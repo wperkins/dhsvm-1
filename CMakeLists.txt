@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2018-11-30 13:53:39 d3g096
+# Last Change: 2019-02-05 07:28:19 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -61,6 +61,8 @@ set(DHSVM_TIMING_LEVEL "1" CACHE STRING "The level of timing to use (1-4)")
 if (NOT (DHSVM_TIMING_LEVEL MATCHES "^[1234]")) 
   message(ERROR "DHSVM_TIMING_LEVEL=\"${DHSVM_TIMING_LEVEL}\" not understood")
 endif()
+
+option (DHSVM_USE_MASS1 "Use MASS1 for channel network routing" OFF)
 
 # -------------------------------------------------------------
 # MPI is required
@@ -146,4 +148,6 @@ if (DHSVM_USE_RBM)
   add_subdirectory(RBM)
   add_subdirectory(Create)
 endif (DHSVM_USE_RBM)
-
+if (DHSVM_USE_MASS1)
+  add_subdirectory(MASS1)
+endif (DHSVM_USE_MASS1)
