@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2018-12-06 08:32:21 d3g096
+# Last Change: 2019-02-05 08:13:46 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -188,7 +188,14 @@ list(APPEND DHSVM_LIBS
 
 add_executable(DHSVM ${DHSVM_SRC})
 set_target_properties(DHSVM PROPERTIES LINKER_LANGUAGE CXX)
+
+if(DHSVM_USE_MASS1)
+  list(INSERT DHSVM_LIB 0 mass1lib)
+  target_compile_definitions(DHSVM PUBLIC MASS1_CHANNEL=1)
+endif(DHSVM_USE_MASS1)
+
 target_link_libraries(DHSVM ${DHSVM_LIBS})
+
 
 if(DHSVM_SNOW_ONLY)
   add_executable(DHSVM_SNOW ${DHSVM_SRC})
