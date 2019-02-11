@@ -1,0 +1,1674 @@
+2018-02-15  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* cross_section.f90 (general_read): make sure all the points are
+	read 
+
+	* gage_module.f90 (gage_output): leave the output unit open until
+	destruction 
+
+	* point_module.f90 (point_hydro_update): need to check depth
+	before updating the section
+
+	* profile_module.f90 (profile_output): leave the output unit open
+	until the profile is destroyed
+
+	* cross_section.f90 (cross_section): make
+	rectangular_flood_section a compound section
+
+2018-02-07  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_manager_module.f90 (link_manager_read): have all links do a
+	sanity check
+
+	* linear_link_module.f90 (linear_link_check): added
+
+	* link_module.f90 (link_check): added
+
+2018-02-06  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* fluvial_link_module.f90: use POINTERs for BCs instead of bc_ptr 
+
+	* linear_link_module.f90: use POINTERs for BCs and confluences
+	instead of _ptr
+
+	* link_module.f90: use POINTERs for BCs instead of bc_ptr; do away
+	with confluence_ptr
+
+	* nonfluvial_link_module.f90: use POINTERs for BCs instead of bc_ptr
+
+	* pid_link_module.f90: use POINTERs for BCs instead of bc_ptr
+
+2018-02-02  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* pid_link_module.f90 (pid_link_coeff): time step needs to be days
+	here, not seconds
+
+	* pidlink.f90 (pidlink_coeff): make a local time step variable for
+	readability 
+
+	* network.f90 (network_read_bcs): update the BCs after reading, so
+	they have a current value at initialization
+
+	* link_manager_module.f90 (link_manager_read): call
+	link_t%construct() after allocating the link
+
+	* fluvial_link_module.f90 (fluvial_link_construct): added
+
+	* gage_module.f90 (gage_output): add firstwrite attribute and use
+	it when opening the file
+
+	* link_module.f90 (link_construct): add construct method
+
+2018-01-26  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/flow/varied-pool/gage_control.dat: add / at line ends
+
+	* test/flow/varied-pid/gage_control.dat: add / at line ends
+
+	* point_module.f90 (point_hydro_update): allow deltax = 0
+
+	* gage_module.f90 (gage_manager_read): catch unknown link/point
+	ids correctly
+
+	* profile_module.f90 (profile_fill): fix profile distance
+	calculation 
+
+2018-01-24  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_module.f90 (confluence_coeff_e, confluence_coeff_f):
+	complete these
+
+	* network.f90 (network_read): call link_manager%scan before
+	reading BCs
+
+	* link_manager_module.f90 (link_manager_scan): add
+
+2018-01-23  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_manager_module.f90 (link_manager_read): set configuration
+	hydro BC flag when links w/ hydro BC's are encountered
+
+	* fluvial_link_module.f90 (fluvial_link_initialize): set link LPI
+	coefficient here
+
+2018-01-22  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* network.f90 (network_write_restart): added
+	(network_run): write restart at end
+	(network_read_restart): let the link manager do most of the work
+
+	* link_manager_module.f90 (link_manager_read_restart)
+	(link_manager_write_restart): added
+
+	* gage_module.f90 (gage_name): revert to old naming convention
+
+	* fluvial_link_module.f90 (fluvial_link_hupdate): update lateral
+	inflow too
+
+2017-09-11  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* cross_section_table.dat: add a rectangular w/ flood section
+
+	* cross_section.f90 (cross_section): add prismatic and compound
+	section base types; subclass existing prismatic sections on the
+	prismatic base class
+
+	* doc/section.md: document some more prismatic section types
+
+2017-08-29  Perkins  <d3g096@WE32673>
+
+	* scripts/CMakeLists.txt: install scripts in share directory
+
+	* cross_section_table.dat: add a triangular_rounded_section 
+
+	* cross_section.f90 (cross_section): add
+	triangular_rounded_section 
+
+2017-08-29  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/mass1profile.in: fix problem with deprecated array
+	references 
+
+2017-08-28  Perkins  <d3g096@WE32673>
+
+	* doc/section.md: add parabolic section
+
+	* cross_section_table.dat: add a parabolic section
+
+	* cross_section.f90 (cross_section): add a parabolic section
+
+	* cross_section_table.dat: add a triangular section
+
+	* doc/section.md: document trapezoidal and triangular section types
+
+	* cross_section.f90 (cross_section): add triangular section
+
+	* scripts/mass1bc.in: update to newer Date::Manip initialization
+
+	* scripts/mass1profile.in: update to newer Date::Manip initialization
+
+2017-08-28  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/Makefile.am (xsscript_DATA): install cross section
+	scripts in .../share/mass1
+
+	* gastemp/Makefile.am: do not install the TDG/temperature library 
+2017-08-21  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_manager_module.f90 (link_manager_read): just make a fluvial
+	link for type 20 for now
+
+	* bc_module.f90 (simple_bc_read): needed to specify the number of
+	fields 
+
+	* mass1_new.f90 (mass1): read network initial state 
+
+	* linear_link_module.f90 (linear_link_module)
+	(linear_link_read_restart, linear_link_write_restart): add
+	routines to read/write state
+
+	* link_module.f90 (link_module): declare routines to read initial
+	state 
+
+	* network.f90 (network_set_initial, network_read_restart)
+	(network_initialize): add methods to initialize network
+	(hydrodynamic) state
+
+2017-07-26  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* doc/bibliography.md: added
+
+	* README.md: add citation
+
+	* coeff.f90 (fluvial_coeff): oops: value of beta not returned to
+	default -- fixed
+
+2017-07-14  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/flow/normal-hydro: add a case for link type 6
+
+	* scripts/cross-section/XSection.pm (read_section): trim of trailing
+	white space necessary, maybe
+
+	* scripts/cross-section/CHARIMAnotch.pl: add verbose option
+
+	* doc/point.md: clarification of point numbering
+
+	* test/flow/fill-us/section.dat: add an alternative section with a 
+	notch
+
+	* test/flow/fill/section.dat: add an alternative section with a
+	notch 
+
+2017-07-12  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* network.f90 (network): add
+
+	* mass1_new.f90 (mass1): start a new MASS1 main program that uses
+	a single network
+
+	* linear_link_module.f90 (linear_link_module): take point types
+	and make a new module
+
+	* point_module.f90 (point_module): extract point types from link
+	module and make its own
+
+	* CMakeLists.txt: add mass1_new executable
+
+2017-07-11  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* flow_sim.f90 (flow_sim): incorrect point index was being used 
+
+2017-07-03  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* linear_link_module.f90: add
+
+	* flow_sim.f90 (flow_sim): adapt to new cross section props
+	interface
+
+	* nonfluvial_coeff.f90 (nonfluvial_coeff): adapt to new cross
+	section props interface
+
+	* scalars_module.f90 (tvd_interp): adapt to new cross section
+	props interface
+
+	* section_handler.f90 (section_handler_props): adapt to new cross
+	section props interface
+
+	* cross_section.f90 (cross_section): use a derived type to more
+	generally store cross section properties
+
+	* gastemp/CMakeLists.txt: add copyright
+
+	* banner.f90.in (banner): print out code branch
+
+	* CMakeLists.txt: find out which git branch is being used
+
+2017-06-29  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* profile_output.f90 (profile_output): NEVER use barometric
+	pressure from met data unless TDG is simulated
+
+	* confluence_module.f90 (confluence_conc): account for reverse
+	flow 
+
+	* link_module.f90 (link_manager_connect): write code to connect
+	network w/ confluences (compiles)
+	(confluence_conc): start coding of confluence routines (compiles)
+
+2017-06-28  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* bc_module.f90 (bc_list_current, bc_list_update): use the dlist
+	cursor
+
+	* dlist_module.f90 (dlist_begin): fix pointer assignment
+
+	* met_zone.f90 (met_list_current, met_list_update)
+	(met_list_find): use the dlist cursor
+
+	* section_handler.f90 (section_handler_write_geometry)
+	(section_list_find, section_list_current): use the dlist cursor
+
+	* cross_section.f90 (cross_section_table): include wetted
+	perimeter in output table
+
+	* section_handler.f90 (section_handler_props): get wetted
+	perimeter w/ other cross section properties
+
+	* scalars_module.f90 (tvd_interp): get wetted perimeter w/ other
+	cross section properties
+
+	* nonfluvial_coeff.f90 (nonfluvial_coeff): get wetted perimeter w/
+	other cross section properties
+
+	* flow_sim.f90 (flow_sim): get wetted perimeter w/ other cross
+	section properties
+
+	* cross_section.f90 (props_proc): include wetted perimeter in
+	returned properties
+
+2017-06-27  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* section.f90 (section): take some steps to catch bad
+	extrapolation of hydraulic radius
+
+2017-06-26  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_module.f90 (link_module): start a link module
+
+2017-06-23  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* kick_off.f90 (kick_off): make the depth parameters the same as
+	master branch
+
+	* flow_sim.f90 (flow_sim): check to make sure area is greater than
+	zero before using it in the denominator
+
+2017-06-22  William A. Perkins  <william.perkins@pnnl.gov>
+
+	*  time_series: point at the PNNL Github repository
+
+2017-06-06  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* read_config.f90 (read_config): set dry depth values more
+	appropriate to real channels
+
+	* section.f90 (section): make sure section properties are
+	nonnegative when appropriate
+
+	* scripts/profile_extract.py (read_next_profile): fix column numbers
+
+2017-05-24  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/flow/lateral-fill: use tecplot to animate profile output
+
+	* test/flow/fill: use tecplot to animate profile output
+
+	* test/flow/drain: use tecplot to animate profile output
+
+	* scripts/xy-looper.mcr: add
+
+	* scripts/xy-looper-png.mcr: add
+
+	* scripts/profile_tecplot.py: add 
+
+2017-05-23  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* mass1_config.f90 (mass1_config): put physical constants here
+	(configuration_read): set physical constants here
+
+	* flow_sim.f90 (flow_sim): use physical constants from
+	configuration 
+
+	* gage_output.f90 (gage_output): remove unused variables
+
+	* kick_off.f90 (kick_off): no need to set physical constants here 
+
+	* modules.f90 (general_vars): move physical constants to
+	configuration 
+
+	* pidlink.f90 (read_pidlink_info): make path names same length to
+	avoid compiler warning
+
+	* test/flow/lateral-fill: test filling a dry channel with lateral
+	inflow 
+
+	* test/flow/fill: test for filling a channel from downstream; 
+	doesn't work real well
+
+	* coeff.f90 (fluvial_coeff): when dry set beta to 1.0 (go all the
+	way) 
+
+	* test/flow/drain: several modifications to make test work
+
+	* flow_sim.f90 (flow_sim): do not get section properties for
+	depths less than depth_minimum
+
+2017-03-28  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* dlist_module.f90 (dlist_module): add a cursor to dlist, with
+	some routines to manipulate it
+
+	* gage_output.f90 (gage_output_module): Add
+	(gage_output): simplify with a gage_t type
+
+	* mass1_config.f90 (mass1_config): make path_length public
+
+	* pidlink.f90 (pidlink_assemble_lagged): remove extraneous USE 
+
+2017-03-27  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* read_config.f90 (read_config): better output format
+
+	* link_data.f90 (link_data): fix badly place ELSE IF
+2017-03-23  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scalars_module.f90 (tvd_transport): use BC pointers instead of
+	bctable: temperature works, TDG maybe not
+
+	* pidlink.f90: use bc_manager and BC pointers instead of bctable 
+
+	* mass1_config.f90 (mass1_config): add pid_file 
+
+	* mass1.f90 (mass1): don't read BCs w/ bctable code
+
+	* kick_off.f90 (kick_off): need to update BCs here
+
+	* CMakeLists.txt: remove bctable code
+
+2017-03-21  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* bc_module.f90 (hydro_bc_discharge): routine to split discharge
+	from hydro BC
+
+	* scalars_module.f90 (tvd_transport): switch out temperature
+	boundary conditions with BC pointers
+
+2017-03-20  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* mass1_config.f90 (mass1_config): add do_hydro_bc to
+	configuration 
+
+	* scalars_module.f90 (scalars): add BC pointers for transported
+	scalars and allocate them (remove from modules.f90)
+
+2017-03-15  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* modules.f90 (link_vars): add BC pointer arrays for temperature
+	and TDG
+
+2017-03-13  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* kick_off.f90 (kick_off): assign (hydro) boundary conditions to
+	links 
+
+2017-03-10  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* flow_sim.f90 (flow_sim): remove use of bc_table_interpolate()
+
+	* test/CMakeLists.txt: include new test directory
+
+	* test/flow/normal-hydro: add simple test w/ hydro BCs
+
+	* mass1.f90 (mass1): have BC manager read hydro BCs if needed
+
+	* link_data.f90 (link_data): set hydro BC flag
+
+	* modules.f90 (link_vars): add flag to indicate hydro BCs are
+	needed 
+
+2017-02-28  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* met_zone.f90 (met_zone_manager_read): forgot to initialize
+	zone%coeff with read coeff
+
+	* test/temperature/pond: fix plots for newer gnuplot
+
+	* CMakeLists.txt: use Git to fill MASS1_REVISION and
+	MASS1_REVISION_DATE 
+
+	* banner.f90.in (banner): include code revision and date
+
+	* scripts/read.R: add script to read MASS1 time series and BC files
+
+2017-02-24  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scalars_module.f90 (tvd_transport): compute energy_source
+	separately to help with debugging
+
+	* mass1.f90 (mass1): update met data at the right time
+
+	* confluence_module.f90 (confluence_conc): fix concentration
+	computation 
+
+2017-02-22  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* modules.f90 (allocate_section_vars): fix typo accidentally saved
+	in previous commit
+
+	* mass1.f90 (mass1): fix problem with reading gas exchange
+	coefficients (introduced in 2005). 
+
+2017-02-21  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* point_data.f90 (point_data): fix wrong unit variable
+
+	* tdg_equation_coeff.f90: remove tabs
+
+	* scalars_module.f90 (scalars): remove tabs
+
+	* pidlink.f90: remove unused variables and modules
+
+	* met_data_module.f90: remove TABS and unused variables
+
+	* hydro_output.f90 (hydro_output): remove unnecessary USE
+
+	* gastemp/gas_functions_module.f90: remove tabs
+
+	* gastemp/energy_flux_module.f90: remove tabs
+
+	* cross_section.f90: remove tabs
+
+	* CMakeLists.txt: add -Wall to GNU compiler options
+
+2017-02-17  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* flow_sim.f90 (flow_sim): make delta_x local; don't use global
+
+	* modules.f90 (general_vars): remove more unused global variables 
+
+	* tdg_equation_coeff.f90 (tdg_coeff_read): remove global
+	variable no longer used
+
+	* read_hotstart.f90 (read_hotstart): remove global
+	variable no longer used
+
+	* read_config.f90 (read_config): don't read ignored variables
+
+	* profile_output.f90 (profile_output_module): remove global
+	variable no longer used
+
+	* point_data.f90 (point_data): remove global variable no longer
+	used
+
+	* met_data_module.f90 (met_data_module): remove global variable no
+	longer used
+
+	* link_data.f90 (link_data): remove global variable no longer used
+
+	* initial_cond.f90 (initial_cond): remove global variable no longer
+	used
+
+	* gage_output.f90 (gage_output): remove global variable no longer
+	used
+
+	* modules.f90 (general_vars, logicals): remove variables no longer
+	used 
+
+2017-02-08  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scalars_module.f90 (tvd_transport): num_con_links() and
+	con_links() no longer needed
+
+	* array_dealloc.f90 (array_dealloc): num_con_links() and
+	con_links() no longer needed
+
+	* array_alloc.f90 (array_alloc): num_con_links() and con_links()
+	no longer needed
+
+	* flow_sim.f90 (flow_sim): num_con_links() and con_links() no
+	longer needed
+
+	* link_data.f90 (link_data, link_set_order): num_con_links() and
+	con_links() no longer needed
+
+	* modules.f90 (link_vars): remove num_con_links() and con_links()
+	because they are no longer needed
+
+2017-02-03  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scalars_module.f90 (tvd_transport): use confluence instances for
+	link end boundary conditions
+
+	* read_config.f90 (read_config): don't read stuff in deleted
+	section_vars module 
+
+	* print_output.f90 (print_output): remove section data print out 
+
+	* modules.f90: remove section_vars module - no longer needed
+
+	* link_data.f90 (link_set_order): use the confluences to get
+	computational order
+	(link_connect): build confluences and attach them to appropriate
+	links; array-based code is still there
+
+	* flow_sim.f90 (flow_sim): use confluence instances for link end
+	boundary conditions where appropriate (original array-based code
+	is still there)
+
+	* array_dealloc.f90 (array_dealloc): deallocate confluence
+	pointers  
+
+	* array_alloc.f90 (array_alloc): allocate pointers for upstream
+	and downstream confluences for each link
+
+	* confluence_module.f90 (confluence_module): encapsulate the idea
+	of a "confluence" -- where links connect to each other
+
+2017-02-01  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* link_data.f90 (link_set_order, link_connect): add routines to
+	determine connectivity and computational order based only on
+	downstream link; link input of upstream links and order are
+	ignored 
+
+2017-01-20  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* CMakeLists.txt: look for awk to use in tests
+
+	* test/CMakeLists.txt: add more subdirectories
+
+	* test/flow/drain: add automated test
+
+	* test/flow/lateral: add automated test
+
+	* test/flow/MacDonald-3: fix plots
+
+2017-01-17  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* coeff.f90 (fluvial_coeff): change direction of beta
+
+	* test/flow/drain: add more points; run longer with different time
+	step; try narrower section; stable, but not quite right
+
+2017-01-19  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/CMakeLists.txt: add more subdirectories
+
+	* test/flow/slopebreak2: add automated test
+
+	* test/flow/slopebreak1: add automated test
+
+	* test/flow/MacDonald-3: add automated test
+
+	* test/flow/MacDonald-4: add automated test
+
+	* test/flow/MacDonald-1: add automated test
+
+	* test/flow/normal: don't use shell script to run automated test 
+
+	* CMakeLists.txt: add test sub-directory and runtests target
+
+	* test/flow/normal: attempt to automate running this test
+
+	* test/CMakeLists.txt: add
+
+2017-01-16  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/flow/MacDonald-4: add test for super-critical flow
+
+2017-01-13  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/flow/drain: add test case for small depth (not working) 
+
+	* read_config.f90 (read_config): set depth_minimum and
+	depth_threshold but they really need to be read
+
+	* link_data.f90 (link_data): read and report lpiexp
+
+	* flow_sim.f90 (depth_check): add depth_check() and use it
+
+	* coeff.f90 (fluvial_coeff): modify coefficients when depth is
+	small or trans-critical flow is indicated
+
+	* array_dealloc.f90 (array_dealloc): deallocate lpiexp link
+	variable
+
+	* array_alloc.f90 (array_alloc): allocate and initialize lpiexp
+	link variable 
+
+	* modules.f90 (link_vars): add lpiexp link variable
+
+2017-01-10  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* nonfluvial_coeff.f90 (nonfluvial_coeff): use assigned cross
+	section here too
+
+	* scalars_module.f90 (tvd_interp): use assigned cross section here
+	too 
+
+	* array_dealloc.f90 (array_dealloc): deallocate cross section
+	pointer array
+
+	* array_alloc.f90 (array_alloc): allocate cross section pointer
+	array 
+
+	* flow_sim.f90 (flow_sim): use assigned point section instead of
+	the handler looking it up
+
+	* mass1.f90 (mass1): read sections before links and points
+
+	* point_data.f90 (point_data): look up and assign a cross section
+	to each point
+
+	* modules.f90 (point_vars): add array of cross section pointers
+
+	* flow_sim.f90 (flow_sim): fix wrong point index when getting
+	section properties
+
+2016-11-16  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* print_output.f90 (print_output): io unit number incorrectly
+	initialized 
+
+	* bctable.f90 (bctable): GNU Fortran chokes on ALLOCATABLE TYPE
+	members 
+
+2016-11-03  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* section.f90 (section): fix write typo
+
+2015-09-29  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/application/HanfordReach: update the Profiles case to have
+	output for Bateman Island
+
+2012-10-23  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/profile_extract.py (interpolate_profile) 
+	(read_next_profile): deal with those times when some fields are
+	unintelligible (e.g., ***)
+
+2012-09-05  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/profile_extract.py: add ability to read several river
+	miles, with ID's, from a file; fix bug where ID column was not
+	identified in output header
+
+	* test/temperature/pond: several changes to make it work better
+
+2012-09-04  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/profile_extract.py: add --metric option
+
+	* scripts/profile_extract.py: parse the profile output into a dict
+	instead of tuple; allow optional output of tdg and section
+	properties
+
+2012-07-24  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/application/HanfordReach/Profiles/stage_discharge.gp: added
+
+	* test/application/HanfordReach/Profiles/README.txt: added
+
+	* test/application/HanfordReach/Profiles/stage_discharge.sh: add a
+	script to extract and make some stage/discharge plots
+
+	* test/application/HanfordReach/BaseFiles/gage-control.dat: add
+	gage at downstream end of MASS2 mesh
+
+	* scripts/profile_extract.py: extract temperature and report if
+	called for; add --temperature, --start, and --end options
+
+2012-01-27  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/application/HanfordReach/Profiles/BCFiles/PRD-Qtotal.dat:  
+	make more steps
+	
+	* test/application/HanfordReach/Profiles/mass1.cfg: adjust run
+	time for new boundary conditions
+
+2012-01-26  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* scripts/bcsteps.py: added
+
+2012-01-10  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* test/application/HanfordReach/Forecast/runmass1.py (interpolate_profile) 
+	(read_next_profile, format_profiles): add top width to the
+	interpolated values
+	(main): add --disable-flatline option
+
+	* test/application/HanfordReach/Forecast/run.sh: copy top width
+	plots to the results directory
+
+	* test/application/HanfordReach/Forecast/plot1quad.gp: make a top
+	width plot
+
+	* gastemp/energy_flux_module.f90: re-indent only
+
+2011-11-30  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* gage_output.f90 (gage_output): rework so that an obituary number
+	of gages can be used and gage output files are only open one at a
+	time 
+
+2011-11-01  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* network-generation/yakima/runme.sh: use --gage-output
+
+	* network-generation/yakima/Yakima_network_info.dat: reduce some
+	slopes more because of channel units change
+
+	* network-generation/MASS1.py (Link.write): metzone was not listed 
+	(write_gage_control): added
+	(configuration_base): add stuff for gage output; channel units
+	were wrong
+
+	* network-generation/generate.py: add --gage-output option
+
+2011-10-31  William A. Perkins  <william.perkins@pnnl.gov>
+
+	* flow_sim.f90 (flow_sim): add a warning for super critical flow 
+
+	* section.f90 (section): crash when depth is zero or less
+
+	* section_table.f90 (section_table): build the table such that
+	depth=0 is in the table; avoids getting unreasonable values when
+	the depth is less than deltay
+
+	* network-generation/yakima: add an example
+
+	* network-generation: add some scripts to make MASS1
+	configurations from specific information
+
+	* test/application/LowerSnakeColumbia/Rampdown/mass1.cfg: print
+	section geometry
+
+2011-05-03  William A. Perkins  <william.perkins@pnl.gov>
+
+	* read_config.f90 (read_config): add the ability to specify time
+	step units
+
+	* test/flow/normal/mass1.cfg: use minutes for time step
+
+2011-04-19  William A. Perkins  <william.perkins@pnl.gov>
+
+	* mass1.f90 (mass1): reformat transport step report
+
+2011-03-23  William A. Perkins  <william.perkins@pnl.gov>
+
+	* test/application/HanfordReach/Forecast/run.sh: copy results and
+	graphs here, not in runmass1.py
+
+	* test/application/HanfordReach/Forecast/runmass1.py: make sure
+	boundary conditions are appropriate for an arbitrary time forecast 
+
+	* test/application/HanfordReach/Forecast/plotall.gp: use a smaller
+	font size
+
+2011-03-15  William A. Perkins  <william.perkins@pnl.gov>
+
+	* test/application/HanfordReach/Forecast/runmass1.py: make a
+	forecast for any date 
+
+	* test/application/HanfordReach/Forecast/gcpud.py: complete
+	prototype
+	
+	* test/application/HanfordReach/Forecast/plotall.gp: start at
+	quad 1 
+
+	* test/application/HanfordReach/Forecast/wmd.py: added
+
+	* test/application/HanfordReach/Profiles/BCFiles/PRD-Qtotal.dat:
+	start at 400 kcfs 
+
+	* scripts/profile_extract.py: added
+
+2011-03-09  William A. Perkins  <william.perkins@pnl.gov>
+
+	* test/application/HanfordReach/Forecast/runmass1.py: have options
+	to disable some steps; prepare graphs of all quadrants; work
+	towards specifying an arbitrary "now"
+
+	* test/application/HanfordReach/Forecast/plotall.gp: added
+
+	* test/application/HanfordReach/Forecast/plot1quad.gp: added
+
+	* test/application/HanfordReach/Forecast/gcpud.py: added
+
+2011-02-23  William A. Perkins  <william.perkins@pnl.gov>
+
+	* mass1.f90: changes to comments only
+
+	* point_data.f90 (point_data_scan): add
+
+	* link_data.f90 (link_data): put in some error checking
+
+2011-02-21  William A. Perkins  <william.perkins@pnl.gov>
+
+	* point_data.f90 (point_data): section_vars should not be USEd here
+
+	* test/application/LowerSnakeColumbia/BaseFiles/gage_control.dat:
+	add some estuary gage locations
+
+	* test/application/LowerSnakeColumbia/BaseFiles/profile_control.dat:
+	add a profile just for the estuary
+
+	* test/application/LowerSnakeColumbia/BaseFiles/colpoint-1.prn: added
+	new Columbia River estuary cross sections
+
+	* test/application/LowerSnakeColumbia/BaseFiles/collink-1.prn: added
+	new Columbia River estuary cross sections
+
+	* test/application/LowerSnakeColumbia/BaseFiles/xcolum.dat: added
+	new Columbia River estuary cross sections
+
+	* array_alloc.f90 (array_alloc): allocate cross section variables
+	elsewhere 
+
+	* mass1.f90 (mass1): count cross sections before reading them
+
+	* modules.f90 (point_vars): section_number needs to be declared
+	here 
+	(allocate_section_vars): add separate routine to allocate cross
+	section variables
+
+	* read_config.f90 (read_config): total_sections read, but is
+	overwritten later (comment)
+
+	* section_data.f90 (section_data, section_data_count): make a pass
+	to just count the sections
+
+	* test/application/HanfordReach/Forecast/: completely rework;
+	working now
+
+	* section.f90 (section): if a section cannot be found by its id, a
+	fatal error is generated
+
+	* test/application/HanfordReach/Forecast/BCFiles/: no longer needed
+
+	* test/application/HanfordReach/Profiles/mass1.cfg: resize for new
+	cross sections
+
+	* test/application/HanfordReach/Rampdown/mass1.cfg: resize for new
+	cross sections
+
+	* test/application/HanfordReach/BaseFiles/prd2mcn.point: add cross
+	sections from 2011 Hanford Reach LIDAR surface
+
+	* test/application/HanfordReach/BaseFiles/prd2mcn.link: add cross
+	sections from 2011 Hanford Reach LIDAR surface
+
+	* test/application/HanfordReach/BaseFiles/CAN2MCN.dat: add cross
+	sections from 2011 Hanford Reach LIDAR surface
+
+2010-12-17  William A. Perkins  <william.perkins@pnl.gov>
+
+	* Makefile.am (AM_FCFLAGS): add gastemp to include path
+
+	* configure.in: add gastemp subdirectory
+
+	* energy_flux_module.f90: now in gastemp
+
+	* gas_coeffs_module.f90: now in gastemp
+
+	* gas_functions_module.f90: now in gastemp
+
+	* gastemp: put gas and temperature stuff here
+
+2010-12-10  William A. Perkins  <william.perkins@pnl.gov>
+
+	* scalars_module.f90 (tvd_steps): make sure there is at least 1
+	transport time step
+
+2010-12-07  William A. Perkins  <william.perkins@pnl.gov>
+
+	* accumulator.f90 (accum_initialize, accum_reset, accumulate)
+	(accum_calc): add accumulators for computed Courant and
+	diffusion criteria
+
+	* mass1.f90 (mass1): use computed transport time step if called for
+
+	* profile_output.f90 (profile_output): output computed Courant and
+	diffusion criteria
+
+	* scalars_module.f90 (tvd_steps): compute transport time step
+
+	* array_dealloc.f90 (array_dealloc): deallocate variables for automatic
+	transport time stepping
+
+	* array_alloc.f90 (array_alloc): allocate variables for automatic
+	transport time stepping
+
+	* flow_sim.f90 (flow_sim): compute criteria for automatic
+	transport time stepping; re-indent
+
+	* modules.f90 (point_vars): add variables for automatic transport
+	time stepping: Courant number and diffusion criteria
+
+2010-12-02  William A. Perkins  <william.perkins@pnl.gov>
+
+	* linear_interp.f90 (dlinear_interp): better checking of double
+	precision zero
+
+	* Makefile.am (initial_cond.$(OBJEXT)): fixed dependency
+
+	* bctable.f90 (bc_table_index): fixed local variable declaration
+
+	* print_output.f90 (print_output):no need to report maxtimes or
+	maxtable anymore
+
+	* pidlink.f90 (read_pidlink_info): better check of link BC ids;
+	use error_message() to report errors
+
+	* met_data_module.f90 (met_zone_index): safer valid zone id check
+
+	* bctable.f90 (bc_table_id_ok): be able to check a table BC id
+	without crashing
+	(bc_table_index): add common way to get and check a table BC id
+
+	* array_alloc.f90 (array_alloc): no need to use maxtimes or
+	maxtable anymore
+
+	* read_config.f90 (read_config): add some error checking
+
+	* scalars_module.f90 (tvd_transport): rework the way met
+	coefficients are used
+
+	* mass1.f90 (mass1): update call to read_met_data()
+
+	* met_data_module.f90: rewrite to use time_series 
+
+2010-12-01  William A. Perkins  <william.perkins@pnl.gov>
+
+	* bctable.f90 (bc_table_interpolate): add some id error checks
+
+	* test/transport/lateral-inflow/lateral-t.dat: add lateral
+	inflow temperature
+
+	* test/transport/lateral-inflow/temp-bc-files.dat: add lateral
+	inflow temperature
+
+	* test/transport/lateral-inflow/plot.gp: change temperature axis
+	range to show the whole range
+
+	* test/transport/lateral-inflow/link.dat: add lateral inflow
+	temperature 
+
+	* scalars_module.f90 (tvd_transport): use specified lateral inflow
+	concentrations, if any.
+
+	* link_data.f90 (link_data): spit out a warning if lateral inflow
+	is specified but lateral concentration is not when gas or temp is
+	enabled; indent nicely
+
+	* test/application/HanfordReach/Rampdown/BCFiles/Yakima-Flow.dat:
+	fixed date problem
+
+	* print_output.f90 (print_output): remove unUSEd modules
+
+	* Makefile.am (mass1_SOURCES): add bctable.f90 remove those no
+	longer used
+
+	* array_alloc.f90 (array_alloc): variables in linkbc_vars
+	module no longer exist
+
+	* array_dealloc.f90 (array_dealloc): variables in linkbc_vars
+	module no longer exist
+
+	* flow_sim.f90 (flow_sim): use bc_table type in lieu of
+	table_interp()
+
+	* latflow_bc.f90 (latflow_bc): use bc_table to read lateral inflow
+
+	* mass1.f90 (mass1): need to call time_series_module_init() here 
+
+	* modules.f90 (module linkbc_vars): no longer necessary
+
+	* pidlink.f90 (pidlink_assemble_lagged, pidlink_initialize)
+	(pidlink_coeff): use bc_table type in lieu of
+	table_interp()
+
+	* scalars_module.f90 (tvd_transport): use bc_table type in lieu of
+	table_interp()
+
+	* trans_bc.f90 (transport_bc): use bc_table to read gas and temp
+	BC's 
+
+	* link_data.f90 (link_data): add BC numbers for gas and temp from
+	lateral inflow to link file
+
+	* link_bc.f90 (link_bc): use bc_table to read link and hydro BC's
+
+	* bctable.f90: new type to deal with BC's that uses the
+	time_series code
+
+	* test/application/Wanpum/BaseFiles/stage-plot.gp: make work with
+	newer gnuplot versions
+
+	* test/application/Wanpum/BaseFiles/flow-plot.gp: make work with
+	newer gnuplot versions 
+
+	* test/application/Wanpum/runit.sh: make it work again
+
+	* test/flow/runem.sh: automate running tests
+
+	* test/transport/runem.sh: automate running tests
+
+	* test/flow/varied-pid/runit.sh: make quiet; gnuplot not defined
+	correctly 
+
+	* test/flow/lateral/plot.gp: make work with newer gnuplot versions
+
+	* test/flow/varied-pid/plot.gp: make work with newer gnuplot versions
+
+	* table_interp.f90: no longer needed
+
+2010-11-30  William A. Perkins  <william.perkins@pnl.gov>
+
+	* test/transport/advection-diffusion-2-segment/plot.gp: modify for
+	multiple gnuplot versions
+
+	* test/transport/advection-varying-dx/Cn-plot.gp: modify for multiple
+	gnuplot versions
+
+	* test/transport/advection-varying-dx/mass-plot.gp: modify for multiple
+	gnuplot versions
+
+	* test/transport/advection-varying-dx/plot.gp: modify for multiple
+	gnuplot versions
+
+	* test/transport/variable-flow/plot.gp: modify for multiple
+	gnuplot versions
+
+	* hydro_bc.f90: no longer needed
+
+2010-10-01  William A. Perkins  <william.perkins@pnl.gov>
+
+	* tdg_equation_coeff.f90: use double precision everywhere
+
+	* table_interp.f90: use double precision everywhere
+
+	* svgrp.f90: use double precision everywhere
+
+	* svgrp-test.f90: use double precision everywhere
+
+	* section_table.f90: use double precision everywhere
+
+	* section_data.f90: use double precision everywhere
+
+	* section.f90: use double precision everywhere
+
+	* scalars_module.f90: use double precision everywhere
+
+	* profile_output.f90: use double precision everywhere
+
+	* print_output.f90: use double precision everywhere; reformat 
+
+	* point_data.f90: use double precision everywhere
+
+	* pidlink.f90: use double precision everywhere
+
+	* nonfluvial_coeff.f90: use double precision everywhere; reformat 
+
+	* modules.f90: use double precision everywhere; reformat 
+
+	* linear_interp.f90: use double precision everywhere
+
+	* initial_cond.f90: use double precision everywhere
+
+	* hydro_output.f90: use double precision everywhere
+
+	* gage_output.f90: use double precision everywhere
+
+	* flow_sim.f90: use double precision everywhere
+
+	* coeff.f90: use double precision everywhere; reformat
+
+	* accumulator.f90: use double precision everywhere 
+
+2010-09-29  William A. Perkins  <william.perkins@pnl.gov>
+
+	* scripts/profile2cgns.py: add verbosity option; extract stage and
+	discharge too
+
+	* scripts/mass1bc.in: add -S and -E options to extract only a
+	given date/time range
+
+2008-02-22  William A. Perkins  <william.perkins@pnl.gov>
+
+	* scripts/profile2cgns.py: adjust zero-length segments
+
+2007-02-05  William A. Perkins  <william.perkins@pnl.gov>
+
+	* write_restart.f90 (write_restart): make sure OPEN actually
+	succeeds 
+
+2005-07-20  William A. Perkins  <william.perkins@pnl.gov>
+
+	* mass1.f90 (mass1): fix model time increments
+
+2005-06-23  William A. Perkins  <william.perkins@pnl.gov>
+
+	* configure.in: perform several perl tests for scripts
+
+	* scripts/Makefile.am (Module): added script configuration
+
+	* scripts/mass1bc.in (Module): reworked from mass1bc.pl
+
+	* scripts/mass1profile.in (Module): copied from doprofile.pl
+
+2005-06-10  William A. Perkins  <william.perkins@pnl.gov>
+
+	* read_hotstart.f90 (read_hotstart): cannot use open_existing()
+	here 
+
+	* gastrans.f90: deleted, not used
+
+	* gage_output.f90: GNU gfortran had problems with TABs in this
+	file 
+
+2005-04-05  William A. Perkins  <william.perkins@pnl.gov>
+
+	* gage_output.f90 (gage_output): size of fixed gage location
+	arrays increased
+
+	* scalars_module.f90 (tvd_transport): concentration into
+	nonfluvial links needs to be based on mass flux
+
+2002-01-08  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90: added new gas production equation form,
+	number 4, S = a + b*ln(c*q)
+
+2001-11-19  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* met_data_module.f90: Print final met coefficients to status
+	file; ignore pressure unless gas is being simulated
+
+2001-11-12  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* pidlink.f90: Oops, forgot to initialize usebc
+
+2001-10-23  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* mass1.f90: renamed pidlink_assemble_lagged_flow to
+	pidlink_assemble_lagged 
+
+	* flow_sim.f90: added type 12 link
+
+	* nonfluvial_coeff.f90: added type 12 link
+
+	* pidlink.f90: Allow the use of arbitrary link BC's for lagged
+	flows, added type 12 link which follows discharge instead of
+	stage, renamed pidlink_assemble_lagged_flow to
+	pidlink_assemble_lagged. 
+
+2001-10-17  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90: Added nonfluvial link types 7 and 13
+
+	* nonfluvial_coeff.f90: Added link type 7, a sharp-crested weir
+	with movable crest -- DO NOT USE. Added link type 13, the PID dam
+	link.
+
+	* mass1.f90: move time into general_vars module, added call to
+	pidlink_assemble_lagged_flow 
+	
+	* modules.f90: moved time into general_vars module
+
+	* flow_sim.f90: included nonfluvial link 13
+
+	* makefile.sun:  updated to new f90 that makes a separate module
+	file for each module, and added pidlink
+
+	* makefile.linux (pidlink$(OBJ)): added
+
+2001-10-12  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* kick_off.f90: Call to pidhlink_initialize required.
+
+	* pidhlink.f90: Created.
+
+2001-06-12  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* energy_flux_module.f90: the coefficient for conduction is now
+	settable like the wind function coefficients
+
+2000-12-04  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile: added accumulator and profile output modules
+
+	* makefile.dec: made Linux compiler default and added the
+	accumulator module 
+
+	* profile_output.f90: initialization of `profile_max' in
+	profile_read. 
+
+2000-03-15  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/flow/slopebreak2: Created new test case
+
+	* test/flow/slopebreak1:  Created new test case
+
+2000-03-03  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* profile_output.f90: same as gage_output
+
+	* gage_output.f90: needed to re-call update_met_data in order to
+	get barometric pressure right
+
+2000-02-02  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile.lahey: created
+
+	* tdg_equation_coeff.f90: CALL EXIT needed argument to satisfy
+	Lahey compiler 
+
+	* scalars_module.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* gage_output.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* hydro_bc.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* initial_cond.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* latflow_bc.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* link_bc.f90: CALL EXIT needed argument to satisfy Lahey compiler 
+
+	* link_data.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* mass1.f90: CALL EXIT needed argument to satisfy Lahey compiler
+
+	* point_data.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler 
+
+	* profile_output.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler
+
+	* read_config.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler
+
+	* read_hotstart.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler
+
+	* section_data.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler
+
+	* trans_bc.f90: CALL EXIT needed argument to satisfy Lahey
+	compiler
+	
+
+1999-12-10  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/transport/advection-1-segment/gage_control.dat: created  
+
+	* makefile.linux (hydro_output$(OBJ)): added dependancy on
+	gas_function module 
+
+	* makefile.dec (hydro_output$(OBJ)): added dependancy on
+	gas_function module 
+
+	* makefile (hydro_output$(OBJ)): added dependancy on
+	gas_function module 
+
+	* hydro_output.f90: add output of pressure and delta pressure 
+
+1999-12-08  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/transport/variable-flow/runit.sh (model): model can be set
+		  from the environment variable MODEL if necessary 
+
+	* test/transport/advection-diffusion-2-segment/runit.sh (model):
+		  model can be set from the environment variable MODEL if 
+		  necessary 
+
+	* test/transport/advection-diffusion-1-segment/runit.sh (model):
+		  model can be set from the environment variable MODEL if
+		  necessary 
+
+	* test/transport/advection-2-segment/runit.sh (model): model can
+		  be set from the environment variable MODEL if necessary 
+
+	* read_hotstart.f90: initialize lateral_inflow and
+		  lateral_inflow_old 
+
+	* initial_cond.f90: initialize lateral_inflow and
+		  lateral_inflow_old 
+
+	* test/transport/advection-1-segment/runit.sh: reversed
+		  the run order - Cn = 0.1 is first
+	  (model): model can be set from the environment variable
+		  MODEL if necessary
+
+1999-11-03  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* profile_output.f90: changed the range of I/O units to from 81-90
+		  to 41-50
+
+	* hydro_output.f90: changed iobase to 100, all output files stay
+		  open now, and hydro_output_done is used to close them
+		  all 
+
+	* gage_output.f90: added call to hydro_output_done()
+
+1999-11-02  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile (SRCS): added hydro_output.f90
+
+	* makefile.linux (TARGET): changed default target to
+		  'mass1_v084.linux' and added hydro_output
+
+	* scalars_module.f90: the hydro_? arrays are filled for
+		  hydro_output
+
+	* gage_output.f90: added calls to hydro_ouput routines
+
+	* makefile.dec (hydro_output$(OBJ)): added
+
+	* hydro_output.f90: created -- routines to dump computed/read in
+		  spill wq data for hydro links (6, 21)
+
+1999-10-08  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90 (tvd_transport): for type 6 and type 21
+		  links, needed to deal with the case where the sum of
+		  spill and generation flow is zero
+
+1999-09-27  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90 (tvd_transport): added correction for lateral
+		  inflow
+
+	* test/transport/lateral-inflow/constant-t.dat: added $Id$
+
+	* scalars_module.f90: added latq and latq_old as PRIVATE
+		  variables to scalars module 
+	  include lateral_inflow and lateral_inflow_old from the
+		  point_vars module in tvd_interp.
+
+	* modules.f90 (point_vars): added lateral_inflow_old variable to
+		  module 
+
+1999-08-12  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/flow/lateral/runit-nt.sh: created
+
+	* makefile.dec (FLAGS): removed the -real_size 64 and -double_size
+		  64 options
+
+	* test/flow/storage/runit-nt.sh: created
+
+1999-07-13  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* flow_sim.f90: Assignment of downstream flow boundary condition
+	  resulted in an incorrect flow at the boundary -- fixed and
+	  tested with test/flow/storage case.
+
+1999-04-13  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90: add y and y_old as PRIVATE module variables.
+	  Allocate them and use them in tvd_interp. 
+
+	* flow_sim.f90: save fluvial link stage (y) in y_old
+
+	* array_dealloc.f90: deallocate y_old in point_vars
+
+	* array_alloc.f90: allocate y_old in point_vars
+
+	* modules.f90 (point_vars): added y_old to MODULE point_vars
+
+1999-04-07  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* flow_sim.f90: nonfluvial links now have a q_old, necessary in
+	  scalars_module.tvd_interp
+
+1999-04-06  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile.dec: lower-cased all of the module dependancies
+
+1999-04-02  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/transport/variable-flow: added case to test transport with
+	  varying flow
+
+	* scalars_module.f90 (tvd_interp): vel(link,point) is now computed
+	  as q_old/area_old, and interpolation is only performed for
+	  fluvial segments 
+
+1999-04-01  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* test/transport/advection-1-segment/runit-nt.sh (model): changed
+	  model to mass1_v082
+	
+	* test/transport/advection-2-segment/runit-nt.sh (model): changed
+	  model to mass1_v082
+
+	* test/transport/advection-diffusion-1-segment/runit-nt.sh (model): changed
+	  model to mass1_v082
+
+	* test/transport/advection-diffusion-2-segment/runit-nt.sh (model): changed
+	  model to mass1_v082
+
+	* test/transport/advection-diffusion-2-segment/runit.sh (model): changed
+	  model to mass1_v082
+
+	* test/transport/advection-diffusion-1-segment/runit.sh (model): changed 
+	  model to mass1_v082
+
+	* test/transport/advection-2-segment/runit.sh (model): changed
+	  model to mass1_v082
+
+	* test/transport/advection-1-segment/runit.sh (model): changed
+	  model to mass1_v082
+
+	* makefile (TARGET): TARGET changed to mass1_v082
+
+	* makefile.dec (TARGET): TARGET changed to mass1_v082
+
+	* makefile.linux (TARGET): TARGET changed to mass1_v082
+
+	* makefile.sun (TARGET): TARGET changed to mass1_v082
+
+1999-03-30  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* mass1.f90: added new calls to profile_output and gage_output so
+	  that initial conditions would be output; updated the time
+	  earlier in the time loop; moved the call to array_dealloc
+	  outside time loop; output should now report proper time
+	  
+
+1999-03-26  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile.sun: added TAGS target and emacs mode line
+
+	* test/transport/advection-diffusion-1-segment/runit-nt.sh:
+	  created, and successfully run 
+
+	* mass1.f90: removed local variable scalar_time, and put it in
+	  scalars_module
+
+	* scalars_module.f90 (tvd_transport): added local variable "time"
+	  and changed general_vars' time to htime
+
+1999-03-25  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile.linux: added EMACS mode line
+	 (tags): added tags target
+
+	* makefile.dec (TAGS): added TAGS target
+
+	* makefile (tags): added tags/TAGS target
+
+	* scalars_module.f90: added module variable scalar_delta_t
+
+1999-03-24  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* read_config.f90 (read_config): read scalar_steps right after
+	  maxtimes 
+
+	* modules.f90: added scalar_steps to general_vars module
+
+	* mass1.f90 (mass1): added local variables scalar_time and updated
+	  version to 0.82.  Added transport simulation sub-timestep loop.
+
+	* scalars_module.f90 (tvd_interp): created SUBROUTINE tvd_interp
+
+	* linear_interp.f90 (dlinear_interp): created a double precision
+	  version of the linear_interp function
+
+	* scalars_module.f90: added PRIVATE module variables vel, area,
+	  area_old, q, and q_old and public variable tvd_time; allocation
+	  of these PRIVATE variables in performed in allocate_species.  
+		  
+
+1999-03-22  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* profile_output.f90: added another decimal place on distance in
+	  the profile output 
+
+1999-03-19  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* scalars_module.f90: reformated SUBROUTINE tvd_transport so I
+	  could read it.  
+
+1999-03-05  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* gage_output.f90: increased the dimensions of gage_link and
+	  gage_point to 50
+
+Thu Feb 11 13:06:53 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* gage_output.f90 (gage_output): added a '#' to the output header
+		  lines so gnuplot will skip the lines
+
+	* profile_output.f90 (profile_output): added a '#' to the output
+		  header lines, so gnuplot will skip the lines
+
+	* modules.f90: beta returned to 0.5 from 1.0
+
+Wed Feb 10 12:14:09 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* initial_cond.f90: initialize species(i)%conc and
+		  species(i)%concold instead of c(i) and temp(i)
+
+Mon Feb  8 16:14:58 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* makefile.sun: created
+
+	* scalars_module.f90 (tvd_transport): changed a constant 0.0 to
+		  0.0d0 to satisfy the Absoft compiler on Linux and two
+		  constant 1.e-40 to 1.d-40 to satify the DEC compiler.
+
+Mon Jan 18 07:28:38 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* met_data_module.f90: added start_entry index to table_bc_struct
+		  TYPE. 
+
+		  added code to use start_entry to initialize table search
+
+	* table_interp.f90: (table_interp): each table search now starts
+		  with the index used in the previous step
+
+	* array_alloc.f90 (array_alloc): add code to allocate and
+		  initialize initial BC table search index
+
+	* modules.f90 (module linkbc_vars): add arrays to hold initial
+		  search index: linkbc_start, transbc_start, tempbc_start,
+		  latflowbc_start 
+	
+		  also added version ID string
+
+Wed Jan 13 10:55:25 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* table_interp.f90: added a debug print message used when
+		  interpolating the tempbc array
+
+Thu Jan  7 15:22:24 1999  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* mass1.f90: modified call to read_met_data
+
+	* met_data_module.f90 (read_met_data): made met_data() ALLOCATABLE
+		  which required modification to the interface of read_met_data.
+
+Mon Dec 21 09:49:14 1998  William A. Perkins  <wa_perkins@pnl.gov>
+
+	* profile_output.f90: num_profiles needed to be 'SAVE'd
+
+	* gage_output.f90: num_gages, gage_link and gage_point needed to
+		  be 'SAVE'd 
+
+	* profile_output.f90: count incremented too many times in READ loop
+
+	* gage_output.f90: count incremented too many times in READ loop
+
+	* write_restart.f90: FORM='binary' changed to FORM='unformatted'
+		  in OPEN statement
+
+	* decimal_to_date.f90: removed reference to NUMERICAL_LIBRARIES
+	 	module, and used JULIAN module instead
+
+	* table_interp.f90: >132 column lines shortened
+
+	* section_table.f90: Removed reference to IMSL libraries
+
+	         >132 column lines shortened
+
+	* section_data.f90: Commented $DEBUG
+
+	* read_hotstart.f90: FORM='binary' changed to FORM='unformatted'
+		  in OPEN statement
+
+	* profile_output.f90: Commented $DEBUG
+
+	* print_output.f90: Removed unnecessary commas in WRITE statements
+
+	* point_data.f90: >132 column lines shortened
+
+	* link_data.f90: >132 column lines shortened
+
+	* date_to_decimal.f90 (date_to_decimal): Parentheses necessary in
+ 		  FUNCTION statement.
+	  (date_to_decimal): removed reference to NUMERICAL_LIBRARIES
+ 		  module, and used JULIAN module instead
+
+	* gastrans.f90: Commented $DEBUG
+
+	* tdg_equation_coeff.f90: Use of intrisic function EOF changed to
+		  END= in READ
+
+	* met_data_module.f90: initialization of 'max_entries' in
+		  table_bc_struct TYPE declaration statement, initialized
+		  in 'read_met_data' instead
+		  
+		  >132 column lines shortened
+
+	* flow_sim.f90: Commented $DEBUG
+
+	* file_manager.f90: Use of intrisic function EOF changed to END=
+		  in READ
+
+	* modules.f90: >132 column lines shortened
+
+	* array_alloc.f90: Commented $DEBUG, >132 column lines shortened
+
+	* makefile: created
+
