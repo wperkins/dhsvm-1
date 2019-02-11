@@ -199,15 +199,15 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT *Options, MAPSIZE *Map,
   /* Determine whether a road/network is imposed on the model area */
   if (Options->Extent != POINT) {
     if (strncmp(StrEnv[flow_routing].VarStr, "NETWORK", 7) == 0) {
-#ifdef MASS1_CHANNEL
       Options->HasNetwork = TRUE;
       Options->UseMASS1 = FALSE;
+    } else if (strncmp(StrEnv[flow_routing].VarStr, "MASS1", 1) == 0) {
+#ifdef MASS1_CHANNEL
+      Options->HasNetwork = TRUE;
+      Options->UseMASS1 = TRUE;
 #else
       ReportError(StrEnv[flow_routing].KeyName, 72);
 #endif
-    } else if (strncmp(StrEnv[flow_routing].VarStr, "MASS1", 1) == 0) {
-      Options->HasNetwork = TRUE;
-      Options->UseMASS1 = TRUE;
     } else if (strncmp(StrEnv[flow_routing].VarStr, "UNIT", 4) == 0) {
       Options->HasNetwork = FALSE;
     } else {

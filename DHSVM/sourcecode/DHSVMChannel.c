@@ -45,7 +45,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "ROAD NETWORK FILE", "", "none"},
     {"ROUTING", "ROAD MAP FILE", "", "none"},
     {"ROUTING", "ROAD CLASS FILE", "", "none"},
-    {"ROUTING", "MASS1 CONFIGURATION", "", ""},
+    {"ROUTING", "MASS1 CONFIGURATION", "", "."},
     {NULL, NULL, "", NULL}
   };
   char mass1_config_path[BUFSIZE + 1];
@@ -106,14 +106,10 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    if (IsEmptyStr(StrEnv[mass1_config].VarStr)) {
-      strncpy(mass1_config_path, "./", 2);
-    } else {
-      strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
-    }
+    strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
     channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
                                           &(Time->Start), &(Time->End));
-                                          
+    
   }
 #endif
 
