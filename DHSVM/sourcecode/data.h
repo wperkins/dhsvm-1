@@ -204,6 +204,7 @@ typedef struct {
   int FileFormat;				/* File format indicator, BIN or HDF */
   int HasNetwork;				/* Flag to indicate whether roads and/or channels are imposed on the model area,
                            TRUE if NETWORK, FALSE if UNIT_HYDROGRAPH */
+  int UseMASS1;                                 /* Use MASS1 for channel routing (if available) */
   int CanopyRadAtt;			/* Radiation attenuation through the canopy, either FIXED (old method) or VARIABLE (based
                            on Nijssen and Lettenmaier) */
   int PrecipType;				/* Precipitation source indicator, either RADAR or STATION */

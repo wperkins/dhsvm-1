@@ -48,13 +48,15 @@ typedef struct {
   FILE *streamBeam;
   FILE *streamDiffuse;
   FILE *streamSkyView;
+  void *mass1_streams;
 } CHANNEL;
 
 /* -------------------------------------------------------------
    available functions
    ------------------------------------------------------------- */
 void InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
-		 SOILPIX **SoilMap, int *MaxStreamID, int *MaxRoadID, OPTIONSTRUCT *Options);
+		 SOILPIX **SoilMap, int *MaxStreamID, int *MaxRoadID,
+                 OPTIONSTRUCT *Options, TIMESTRUCT *Time);
 void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL *channel, char *DumpPath);
 double ChannelCulvertFlow(int y, int x, CHANNEL *ChannelData);
 void RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,

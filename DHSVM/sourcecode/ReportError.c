@@ -92,6 +92,7 @@ static char *ErrorMessage[] = {
   "No gridded met file is found within the basin boundary", /* 69 */
   "MPI/GA Error:",                                          /* 70 */
   "Unknown keyword: ",                                      /* 71 */
+  "MASS1 not included in build, not available",             /* 72 */
   NULL
 };
 

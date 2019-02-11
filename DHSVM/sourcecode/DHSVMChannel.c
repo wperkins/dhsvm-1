@@ -25,6 +25,7 @@
 #include "fileio.h"
 #include "ParallelDHSVM.h"
 #include "ParallelChannel.h"
+#include "mass1_channel.h"
 
 /* -----------------------------------------------------------------------------
    InitChannel
@@ -32,7 +33,8 @@
    -------------------------------------------------------------------------- */
 void
 InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
-	    SOILPIX ** SoilMap, int *MaxStreamID, int *MaxRoadID, OPTIONSTRUCT *Options)
+	    SOILPIX ** SoilMap, int *MaxStreamID, int *MaxRoadID,
+            OPTIONSTRUCT *Options, TIMESTRUCT *Time)
 {
   int i;
   STRINIENTRY StrEnv[] = {
@@ -43,8 +45,10 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "ROAD NETWORK FILE", "", "none"},
     {"ROUTING", "ROAD MAP FILE", "", "none"},
     {"ROUTING", "ROAD CLASS FILE", "", "none"},
+    {"ROUTING", "MASS1 CONFIGURATION", "", ""},
     {NULL, NULL, "", NULL}
   };
+  char mass1_config_path[BUFSIZE + 1];
 
   if (ParallelRank() == 0) 
     printf("\nInitializing Road/Stream Networks\n");
@@ -71,6 +75,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
   channel->roads = NULL;
   channel->stream_map = NULL;
   channel->road_map = NULL;
+  channel->mass1_streams = NULL;
 
   channel_init();
   channel_grid_init(Map->NX, Map->NY);
@@ -98,6 +103,19 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 		  "InitChannel: computing stream network routing coefficients");
     channel_routing_parameters(channel->streams, (double) deltat);
   }
+
+#ifdef MASS1_CHANNEL
+  if (Options->UseMASS1) {
+    if (IsEmptyStr(StrEnv[mass1_config].VarStr)) {
+      strncpy(mass1_config_path, "./", 2);
+    } else {
+      strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
+    }
+    channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
+                                          &(Time->Start), &(Time->End));
+                                          
+  }
+#endif
 
   if (Options->StreamTemp) {
     if (strncmp(StrEnv[riparian_veg].VarStr, "none", 4)) {
@@ -301,10 +319,19 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
     
     /* collect lateral inflow from all processes */
     ChannelGatherLateralInflow(ChannelData->streams, ChannelData->stream_state_ga);
-    
-    /* All processes route the stream network */
-    channel_route_network(ChannelData->streams, Time->Dt);
 
+    /* All proacesses route the stream network */
+
+#ifdef MASS1_CHANNEL
+    if (Options->UseMASS1) {
+      mass1_route_network(ChannelData->mass1_streams, ChannelData->streams, &(Time->Current));
+    } else {
+      channel_route_network(ChannelData->streams, Time->Dt);
+    }
+#else
+    channel_route_network(ChannelData->streams, Time->Dt);
+#endif
+    
     /* Only the root process saves the results */
     if (ParallelRank() == 0) {
       channel_save_outflow_text(buffer, ChannelData->streams,

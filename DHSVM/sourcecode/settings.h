@@ -166,7 +166,7 @@ enum KEYS {
   soiltype_file = 0, soildepth_file,
   /* DHSVM channel keys */
   stream_network = 0, stream_map, stream_class, riparian_veg,
-  road_network, road_map, road_class,
+  road_network, road_map, road_class, mass1_config,
   /* number of each type of output */
   output_path =
   0, initial_state_path, npixels, nstates, nmapvars, nimagevars, ngraphics, satextent,

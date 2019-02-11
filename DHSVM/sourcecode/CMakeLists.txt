@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-02-05 08:13:46 d3g096
+# Last Change: 2019-02-11 13:33:42 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -184,24 +184,23 @@ list(APPEND DHSVM_LIBS
   ${GA_LIBRARIES} 
   ${MPI_CXX_LIBRARIES}
   ${MATH_LIBRARY}
-)
-
-add_executable(DHSVM ${DHSVM_SRC})
-set_target_properties(DHSVM PROPERTIES LINKER_LANGUAGE CXX)
+  )
 
 if(DHSVM_USE_MASS1)
-  list(INSERT DHSVM_LIB 0 mass1lib)
+  add_executable(DHSVM ${DHSVM_SRC} mass1_channel.c)
+  target_link_libraries(DHSVM mass1lib gastemp ts ${DHSVM_LIBS})
   target_compile_definitions(DHSVM PUBLIC MASS1_CHANNEL=1)
+else(DHSVM_USE_MASS1)
+  add_executable(DHSVM ${DHSVM_SRC})
+  target_link_libraries(DHSVM ${DHSVM_LIBS})
 endif(DHSVM_USE_MASS1)
 
-target_link_libraries(DHSVM ${DHSVM_LIBS})
+set_target_properties(DHSVM PROPERTIES LINKER_LANGUAGE CXX)
 
 
 if(DHSVM_SNOW_ONLY)
   add_executable(DHSVM_SNOW ${DHSVM_SRC})
-  target_compile_definitions(DHSVM_SNOW
-    PUBLIC SNOW_ONLY=1
-    )
+  target_compile_definitions(DHSVM_SNOW PUBLIC SNOW_ONLY=1)
   target_link_libraries(DHSVM_SNOW ${DHSVM_LIBS})
   set_target_properties(DHSVM_SNOW PROPERTIES LINKER_LANGUAGE CXX)
 endif(DHSVM_SNOW_ONLY)

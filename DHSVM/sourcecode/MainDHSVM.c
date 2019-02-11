@@ -183,7 +183,8 @@ int main(int argc, char **argv)
   DomainSummary(&GMap, &Map);
 
   if (Options.HasNetwork)
-    InitChannel(Input, &Map, Time.Dt, &ChannelData, SoilMap, &MaxStreamID, &MaxRoadID, &Options);
+    InitChannel(Input, &Map, Time.Dt, &ChannelData, SoilMap,
+                &MaxStreamID, &MaxRoadID, &Options, &Time);
   else if (Options.Extent != POINT)
     InitUnitHydrograph(Input, &Map, TopoMap, &UnitHydrograph,
 		       &Hydrograph, &HydrographInfo);
