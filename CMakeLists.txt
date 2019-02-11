@@ -9,14 +9,14 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2018-11-30 13:53:39 d3g096
+# Last Change: 2019-02-05 09:19:12 d3g096
 
 # -------------------------------------------------------------
 # General set up
 # -------------------------------------------------------------
 
 cmake_minimum_required (VERSION 2.8.12)
-project (DHSVM)
+project (DHSVM CXX C)
 
 # this is where extra CMake functions can be found
 list (APPEND CMAKE_MODULE_PATH "${DHSVM_SOURCE_DIR}/cmake")
@@ -24,8 +24,6 @@ list (APPEND CMAKE_MODULE_PATH "${DHSVM_SOURCE_DIR}/cmake")
 # -------------------------------------------------------------
 # Configuration options
 # -------------------------------------------------------------
-
-enable_language(CXX)
 
 # Option to dump topography maps, for debugging
 option (DHSVM_DUMP_TOPO
@@ -61,6 +59,11 @@ set(DHSVM_TIMING_LEVEL "1" CACHE STRING "The level of timing to use (1-4)")
 if (NOT (DHSVM_TIMING_LEVEL MATCHES "^[1234]")) 
   message(ERROR "DHSVM_TIMING_LEVEL=\"${DHSVM_TIMING_LEVEL}\" not understood")
 endif()
+
+option (DHSVM_USE_MASS1 "Use MASS1 for channel network routing" OFF)
+if (DHSVM_USE_MASS1)
+  enable_language(Fortran)
+endif (DHSVM_USE_MASS1)
 
 # -------------------------------------------------------------
 # MPI is required
@@ -146,4 +149,6 @@ if (DHSVM_USE_RBM)
   add_subdirectory(RBM)
   add_subdirectory(Create)
 endif (DHSVM_USE_RBM)
-
+if (DHSVM_USE_MASS1)
+  add_subdirectory(MASS1)
+endif (DHSVM_USE_MASS1)
