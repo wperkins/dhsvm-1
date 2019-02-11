@@ -1,0 +1,526 @@
+% -------------------------------------------------------------
+% file: mass1_test.tex
+% -------------------------------------------------------------
+% -------------------------------------------------------------
+% Battelle Memorial Institute
+% Pacific Northwest Laboratory
+% -------------------------------------------------------------
+% -------------------------------------------------------------
+% Created December 13, 1999 by William A. Perkins
+% Last Change: Mon Jan  9 07:33:54 2006 by William A. Perkins <perk@McPerk.pnl.gov>
+% -------------------------------------------------------------
+\documentclass[12pt,dvips,letterpaper]{article}
+
+\usepackage[head=0.125in,margin=1.0in,top=0.5in,bottom=0.5in]{geometry}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage[round,authoryear]{natbib}
+\usepackage[hang]{caption}
+\usepackage{dcolumn}
+\usepackage[figuresright]{rotating}
+\usepackage{color}
+
+\title{MASS1 Validation Applications}
+
+\begin{document}
+
+
+\maketitle{}
+\tableofcontents{}
+% \appendix{}
+
+\vspace{0.5in}
+
+This document presents a series of simple tests that are used to check
+the operation of MASS1. All necessary boundary condition and
+configuration files are incorporated into the MASS1 source
+repository, and so are distributed with the source.  These tests
+check the basic function of  MASS1 hydrodynamics
+(Section~\ref{sec:hydro-tests}) and contaminant transport
+(Section~\ref{sec:transport-tests}).  
+
+\section{Hydrodynamics Tests}
+\label{sec:hydro-tests}
+
+
+\subsection{Uniform Flow in a Rectangular Channel}
+\label{sec:normal-flow}
+
+%% This test was used to verify that MASS1 was able simulate 
+%% uniform open channel flow and does so with multiple
+%% computational mesh blocks.  The model was configured to simulate a
+%% rectangular channel 3048~m (10,000~ft) long and 152.4~m (500~ft) wide
+%% (Figure~\ref{fig:normal-channel}).  A normal depth of 1.524~m
+%% (5.0~ft), an average velocity of 0.61~m/sec (2.0~ft/sec), and a Manning's
+%% roughness coefficient of 0.026 were chosen.  The slope of the channel
+%% required to produce these given conditions was predicted with
+%% Manning's equation \citep{Chow59}:
+%% \begin{displaymath}
+%%   S_{o} = \left[ { V n } \over { d^{2 \over 3} } \right]^{2} ~ 
+%%   = ~ 1.425 \times 10^{-4} ~ \textrm{m} \slash \textrm{m}
+%% \end{displaymath}
+%% Note that the bottom slope was computed using depth rather than
+%% wetted perimeter.  This is consistent with the representation of
+%% bottom friction in MASS2 (Section~\ref{sec:hydrodynamics-theory}),
+%% where sidewall friction is not included.  The normal depth was applied
+%% as the downstream boundary condition. A discharge of 141.6~m$^{3}$/sec
+%% (5000 cfs) was applied at the upstream boundary.
+
+
+This is a simple test in which MASS1 simulates normal flow conditions
+in a simple channel.  The configuration consists of a single channel
+link 3248~m (10656~ft) long having a rectangular cross section 30.48~m
+(100~ft) wide.  A flow depth of 1.524~m (5.0~ft), average velocity of
+0.609~m/s (2.0~ft/s), and a Manning's $n$ of 0.026 were chosen.  The
+slope of the channel required to produce these conditions is given by
+Manning's equation \citep{Chow59}:
+\begin{displaymath}
+  S_{o} = \left[ { V n } \over { d^{2 \over 3} } \right]^{2} ~ 
+  = ~ 1.672 \times 10^{-4} ~ \textrm{m} \slash \textrm{m}
+\end{displaymath}
+or a rise of 1.782 feet over the length of the channel.  A total of 75
+cross sections were used, spaced 144 feet apart. The simulation
+results are shown in Figure~\ref{fig:normal-flow-results}.  The
+initial elevation was set to 6.0 feet in the channel.  Boundary
+conditions were a flow of 1000 cfs upstream and a stage of 5.0 feet
+downstream. After a short time, a steady flow was established with a
+depth of 5.0 feet, the normal depth, everywhere.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \input{channel.pstex_t}
+    \caption{Channel configuration used for the uniform flow in a
+      rectangular channel test.}
+    \label{fig:normal-flow-channel}
+  \end{center}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=3.0in]{../flow/normal/plot-elev.eps}
+  \includegraphics[width=3.0in]{../flow/normal/plot.eps}
+  \caption{Results of the uniform flow in a rectangular channel test
+    showing the initial elevation (top) and depth and those for the
+    final steady state conditions.}
+  \label{fig:normal-flow-results}
+\end{figure}
+
+\subsection{Gradually Varied Flow in a Rectangular Channel}
+\label{sec:subcr-norm-flow}
+
+In this test, the channel used in Section~\ref{sec:normal-flow} was
+extended to double its length in two ways
+(Figure~\ref{fig:normal-slopebreak}).  In case 1, the extension was
+placed downstream of the original channel.  The slope of this
+extension was made steeper than the original channel, $S_{o} = 1.4208
+\times 10^{-3}$, so that the expected flow would be subcritical, with a
+depth of 0.762~m (2.5~ft), a velocity of 1.22~m/sec (4~ft/sec), and
+a channel discharge of 141.6~m$^{3}$/sec (5000 cfs).  In case 2, the
+steeper extension was placed upstream of the original channel.
+
+\begin{figure}[tbph]
+  \begin{center}
+    \begin{tabular}[c]{m{3.0in}m{3.0in}}
+    \multicolumn{1}{c}{Case 1} & \multicolumn{1}{c}{Case 2} \\
+    \input{channel1.pstex_t} &    
+    \input{channel2.pstex_t} \\
+    \end{tabular}
+    \caption{Dimensions of channel used for the gradually varying flow
+      in a channel tests.}
+    \label{fig:normal-slopebreak}
+  \end{center}
+\end{figure}
+
+In both cases, normal depth in the downstream reach was simulated as
+expected (Figure~\ref{fig:slopebreak-depth}).  In case~2, the expected
+normal depth was also simulated in the upper reach. In case~1,
+however, the upper reach was not long enough to obtain normal depth to
+become established.  Instead, a classic M2 profile \citep{Chow59} was
+simulated where depth was in transition to the shallower downstream
+depth.  
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tabular}[b]{cc}
+    Case 1 & Case 2 \\
+    \includegraphics[width=3.0in]{../flow/slopebreak1/plot.eps} & 
+    \includegraphics[width=3.0in]{../flow/slopebreak2/plot.eps} \\
+    \includegraphics[width=3.0in]{../flow/slopebreak1/plot-elev.eps} &
+    \includegraphics[width=3.0in]{../flow/slopebreak2/plot-elev.eps} \\
+  \end{tabular}
+  \caption{Simulated steady-state depths and water surface elevations
+    from the gradually varied flow in a rectangular channel test.}
+  \label{fig:slopebreak-depth}
+\end{figure}
+
+
+\subsection{Gradually Varied Flow in Prismatic Channels}
+\label{sec:macdonald-1}
+
+\cite{macdonald97:_analytic} presented analytic solutions to a set of
+gradually and rapidly open channel flow problems.  MASS1 was
+configured to simulate the two problems involving subcritical flow: problems
+1 and 3. 
+
+For test problem 1, MASS1 was configured to simulate a
+rectangular channel 1000~m (3281~ft) long and 10~m (3.281~ft) wide
+having a slope computed according to
+\begin{equation}
+  S_{o}\left( x \right) ~ = ~ \left[ 1 - \frac{4}{g d^{3}(x)} \right]
+  d'\left( x \right) 
+  + ~ 0.36 \frac{\left[ 2 d(x) + 10 \right]^{4 \slash 3}}{\left[10
+  d(x) \right]^{10 \slash 3}} \nonumber  
+\end{equation}
+where slope, $S_{o}$, and depth, $d$, are functions of distance along
+the channel, $x$, and $g$ is gravitational acceleration.  The depth
+and its derivative is given by
+\begin{equation}
+  \label{eq:macdonald-1-depth}
+  d \left( x \right) ~ = ~ \left( \frac{4}{g} \right)^{1 \slash 3} \left\{ 1 +
+  \frac{1}{2} \exp \left[ -16 \left( \frac{x}{1000} - \frac{1}{2}
+  \right)^{2} \right] \right\} 
+\end{equation}
+and 
+\begin{equation}
+  d' \left( x \right) ~ = ~ - \left( \frac{4}{g} \right)^{1 \slash
+  3} \frac{2}{125} \left(  \frac{x}{1000} - \frac{1}{2} \right) \exp
+  \left[ -16 \left( \frac{x}{1000} - \frac{1}{2} 
+  \right)^{2} \right] \nonumber
+\end{equation}
+A single link with 101 cross sections was used resulting in a cross
+section spacing of 10~m (3.281~ft).  MASS1 was started with stage of
+7.62~m (25~ft). A discharge of 20~m$^{3}$/sec (707.3~cfs) was imposed
+at the upstream boundary and a stage of 0.748~m (2.45~ft) was imposed
+at the downstream boundary. The simulated steady-state depth was very
+close to the expected, as shown in Figure~\ref{fig:macdonald-1}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=3.0in]{../flow/MacDonald-1/plot-elev.eps}
+  \includegraphics[width=3.0in]{../flow/MacDonald-1/plot-depth.eps}
+  \caption{Simulated water surface elevation and depth compared with the
+    analytic solution to problem~3 of \cite{macdonald97:_analytic}.}
+  \label{fig:macdonald-1}
+\end{figure}
+
+For test problem 3, MASS1 was configured to simulate a channel 5~km
+(3.1~miles) long having a Manning roughness coefficient of 0.030 and a
+trapezoidal section with a base width of 10~m (32.8~ft) and a 1:2 side
+slope.  The channel discharge was 20~m$^{3}$/sec (707.3~cfs) and the
+downstream depth was 1.125~m (3.69~ft).  The bottom slope was given by
+\begin{equation}
+  S_{o} ~ = ~ \left\{ 1 - { { 400 \left[ 10 + 4d(x) \right] } \over { g
+  \left[ 10 + 2d(x) \right]^{3} d(x)^{3} } } \right\} d'(x)
+  ~ + ~ 0.36 { { \left[ 10 + 2d(x)\sqrt{5} \right]^{4 \slash 3} } \over {
+  \left[ 10 + 2d(x) \right]^{10 \slash 3} d(x)^{10 \slash 3} } } \nonumber
+\end{equation}
+where 
+\begin{equation}
+  \label{eq:mac-3-d}
+  d(x) ~ = ~ \frac{9}{8} + \frac{1}{4} \sin \left(\frac{\pi x}{500}\right)
+\end{equation}
+and
+\begin{equation}
+  d'(x) ~ = ~ \frac{\pi}{2000} \cos \left(\frac{\pi x}{500}\right) \nonumber
+\end{equation}
+The solution to the problem is given by equation~\ref{eq:mac-3-d}.
+A single link with a cross section spacing of 25~m (82.0~ft) was
+used.  An initial stage of 
+
+Depths simulated by MASS1 were consistent with the analytic solution
+(Figure~\ref{fig:macdonald-3-results}).  
+
+\begin{figure}[hbtp]
+  \centering
+  \includegraphics[width=3.0in]{../flow/MacDonald-3/plot-elev.eps}
+  \includegraphics[width=3.0in]{../flow/MacDonald-3/plot-depth.eps}  
+  \caption{Simulated water surface elevation and depth compared with the
+    analytic solution to problem~3 of \cite{macdonald97:_analytic}.}
+  \label{fig:macdonald-3-results}
+\end{figure}
+
+\subsection{Lateral Inflow and Outflow}
+\label{sec:test-lateral}
+
+This is another simple test used to make sure lateral inflow is
+handled appropriately by MASS1.  The channel configuration in
+Section~\ref{sec:normal-flow} was used. A held flow of 1000 cfs was
+applied at the upstream boundary condition and a held stage of 5.0
+feet was applied downstream.  A constant lateral inflow of 500 cfs was
+applied over the entire length of the channel ($500 \slash 10656 = 4.692
+\times 10^{-2}$ cfs/ft).  In addition, a constant lateral
+\textit{outflow} of 500 cfs was applied as a separate case.  Profiles
+of simulated discharge for both the inflow and outflow cases are shown
+in Figure~\ref{fig:test-lateral}.  As expected, discharge linearly
+increased/decreased along the channel to the appropriate channel
+outflow: 1500 cfs in the inflow case, 500 cfs in the outflow case.
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=4.5in]{../flow/lateral/plot.eps}
+    \caption{Resulting simulated discharge in lateral inflow and
+      outflow tests.}  
+    \label{fig:test-lateral}
+  \end{center}
+\end{figure}
+
+\subsection{Channel Storage}
+\label{sec:test-storage}
+
+The channel storage test exercises the use of a downstream flow
+boundary condition by following total channel storage while the
+channel inflow and outflow changes.  The configuration in
+Section~\ref{sec:normal-flow} was brought to steady state, then the
+downstream boundary was switched to a flow condition, and a 1000 cfs
+flow applied.  
+
+After as short time, a 1-hour flow pulse of 400 cfs was applied
+upstream (see Figure~\ref{fig:test-storage-inflow}). After enough time
+for the channel to reach a steady condition, and outflow pulse, of the
+same magnitude as the inflow pulse, was applied downstream.  For each
+simulation time step, channel storage was computed by estimating the
+volume between each of the cross sections and summing.  
+
+This test was also performed using a lateral inflow pulse.  The pulse
+used was the same size, 400 cfs, but spread over the length of the
+entire channel ($400 \slash 10656 = 3.754 \times 10^{-2}$
+cfs/ft). Those results are shown in
+Figure~\ref{fig:test-storage-lateral}. 
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=4.5in]{../flow/storage/plot-flowbc.eps}
+    \caption{Results of channel storage test with varying upstream inflow.}
+    \label{fig:test-storage-inflow}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=4.5in]{../flow/storage/plot-lateral.eps}
+    \caption{Results of channel storage test with varying lateral inflow.}
+    \label{fig:test-storage-lateral}
+  \end{center}
+\end{figure}
+
+
+\section{Transport Tests}
+\label{sec:transport-tests}
+
+
+\subsection{Pure Advection}
+\label{sec:test-advection-1-link}
+
+This tests the transport of an arbitrary contaminant by advection
+only.  It exercises the scalar transport capabilities of MASS1 and
+highlights some benefits of the underlying transport algorithm.  
+
+The channel configuration shown in Section~\ref{sec:normal-flow} was
+used, but the cross section spacing was halved; a total of 149 cross
+sections were spaced at 72 feet.  As in Section~\ref{sec:normal-flow},
+a flow of 1000 cfs and downstream stage of 5.0 feet was imposed. A pulse
+of contaminant concentration, shown in
+Figure~\ref{fig:test-advection-bc}, was used as a boundary condition,
+which could be described as
+\begin{equation}
+  \label{eq:advection-bc-conc}
+  C_{o}(t) = \left\{ 
+    \begin{array}[c]{cl}
+      0 & \mathrm{for} ~ t \le 0, \\
+      C_{p} \left( 1 - { { t_{p} - t } \over { t_{p} } } \right) &
+      \mathrm{for} ~ 0 < t \le t_{p}, \\
+      C_{p} \left( 1 - { { t - t_{p} } \over { t_{p} } } \right) &
+      \mathrm{for} ~ t_{p} < t \le 2 t_{p}, \\
+      0 & \mathrm{for} ~ t > 2 t_{p}
+    \end{array} 
+  \right.   
+\end{equation}
+where $t$ is time measured from start of the pulse (06:00 in
+Figure~\ref{fig:test-advection-bc}), $t_{p}$ is the time to the peak
+(24 min), and $C_{p}$ is the peak concentration (10.0).  With pure
+advection, this pulse should be translated downstream without change in
+shape.  The translated concentration is
+\[
+  C(x, t) ~ = ~ C_{o}(t - x/v)
+\]
+where $x$ is the distance along the channel and $v$ is the flow
+velocity (2.0 ft/s in this case).  
+
+MASS1 should translate the contaminant pulse provided the courant
+number, $C_{n}$,
+\begin{equation}
+  \label{eq:courant-number}
+  C_{n} = { { v \Delta t } \over { \Delta x } }
+\end{equation}
+is equal to 1, where $\Delta t$ is the computational time step, and
+$\Delta x$ is the cross section spacing (72 feet). The transport time
+step for the simulation would need to be
+\[
+\Delta t = { { C_{n} \Delta x } \over v } ~ = ~ {{ 1.0 \times 72.0 ~
+    \mathrm{ft}} \over {2.0 ~ \mathrm{ft} \slash \mathrm{s} }} ~ = ~
+    36 ~\mathrm{s} ~ = ~ 0.01 ~ \mathrm{hr}
+\]
+The results of the simulation with this time step are shown in the
+upper graph of Figure~\ref{fig:test-advection-1-results}.  To examine
+the effect of a lower $C_{n}$, another simulation was performed with a
+transport time step of 0.001 hour, meaning a courant number of 0.1.
+The results of this simulation are shown in the lower graph of
+Figure~\ref{fig:test-advection-1-results}.  With a lower courant
+number, the pulse becomes smoothed due to numerical diffusion.  
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=3.0in]{../transport/advection-1-segment/bcplot.eps}
+    \caption{Upstream concentration boundary condition used for
+      advection tests.} 
+    \label{fig:test-advection-bc}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=3.0in]{../transport/advection-1-segment/plot-Cn=1.0.eps}
+    \includegraphics[width=3.0in]{../transport/advection-1-segment/plot-Cn=0.1.eps}
+    \caption{Results for the advection through a single link test;
+      simulated concentration is compared to translations of the
+      boundary condition.} 
+    \label{fig:test-advection-1-results}
+  \end{center}
+\end{figure}
+
+%% \begin{figure}[htbp]
+%%   \begin{center}
+%%     \includegraphics[width=3.0in]{../transport/advection-2-segment/plot-Cn=1.0.eps}
+%%     \includegraphics[width=3.0in]{../transport/advection-2-segment/plot-Cn=0.1.eps}
+%%     \caption{Results for the test of advection through multiple links;
+%%       simulated concentration is compared to translations of the upstream
+%%       boundary condition.}
+%%     \label{fig:test-advection-2-results}
+%%   \end{center}
+%% \end{figure}
+
+
+\subsection{Advective Diffusion}
+\label{sec:test-advection-diffusion-1-link}
+
+This test compares the MASS1 transport simulation to an analytic
+solution to the advection-diffusion equation \citep[][\S~2.4]{Fis79}.
+The analytic solution describes the transport of a sharp concentration
+front through a medium moving at a constant velocity and having an
+initial concentration of zero.  The concentration along the channel is
+described as
+\begin{equation}
+  \label{eq:2}
+  C(x,t) = { { C_{o} } \over 2 } \left[ { 1 - \mathrm{erf} \left( { { x - vt } 
+          \over { \sqrt{4 K_{T} t} } } \right) } \right]
+\end{equation}
+where $t$ is time, $x$ is the distance along the channel, $v$ is the
+flow velocity, $C_{o}$ is the height of the concentration front, and
+$K_{T}$ is the longitudinal dispersion coefficient.  
+
+The same channel configuration as
+Section~\ref{sec:test-advection-1-link} was used to simulate this
+situation, with a $K_{T}$ of 30.0.  The channel was given an initial
+concentration of zero, and a constant concentration of 10.0. Also, as
+in Section~\ref{sec:test-advection-1-link}, two transport time steps
+were used: one yielding a courant number of 1.0, the other 0.1.
+Figure~\ref{fig:test-advection-diffusion-1-results} shows the progress
+of the simulated concentration front down the channel at various
+times, and compares it to (\ref{eq:2}).
+
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=3.0in]{../transport/advection-diffusion-1-segment/plot-Cn=1.0.eps}
+    \includegraphics[width=3.0in]{../transport/advection-diffusion-1-segment/plot-Cn=0.1.eps}
+    \caption{Results for the test of advective diffusion through a single link;
+      simulated concentration is compared to an analytical solution.}
+    \label{fig:test-advection-diffusion-1-results}
+  \end{center}
+\end{figure}
+
+
+%% \begin{figure}[htbp]
+%%   \begin{center}
+%%     \includegraphics[width=3.0in]{../transport/advection-diffusion-2-segment/plot-Cn=1.0.eps}
+%%     \includegraphics[width=3.0in]{../transport/advection-diffusion-2-segment/plot-Cn=0.1.eps}
+%%     \caption{Results for the test of advective diffusion through multiple links;
+%%       simulated concentration is compared to an analytical solution.}
+%%     \label{fig:test-advection-diffusion-2-results}
+%%   \end{center}
+%% \end{figure}
+
+
+%% \subsection{Transport with Lateral Inflow/Outflow}
+%% \label{sec:test-transport-lateral}
+
+%% In the current MASS1 version, lateral inflow is considered to have the
+%% same gas concentration and temperature as the water in the main
+%% channel.  This will probably change, so that concentrations and
+%% temperatures of lateral inflow can be specified.  This test is used to
+%% verify that when there is lateral inflow/outflow, it does not affect
+%% the simulated channel concentrations.  
+
+%% Using the channel configuration of
+%% Section~\ref{sec:test-advection-1-link}, a lateral inflow of 500 cfs
+%% was applied along the entire length of channel ($4.692 \times 10^{-2}
+%% cfs/ft$), and a constant inflow concentration (10.0) was applied
+%% upstream.  This was allowed to come to steady state, with the
+%% expectation that the concentration would remain at 10.0 throughout the
+%% channel.  The results are shown in
+%% Figure~\ref{fig:test-tranport-lateral-inflow}, which show that the
+%% concentration did indeed remain constant. 
+
+%% A similar simulation was performed with a lateral \textit{outflow} of
+%% 500 cfs applied along the entire length of channel.  The results of
+%% this simulation are shown in
+%% Figure~\ref{fig:test-tranport-lateral-outflow}.
+
+%% \begin{figure}[htbp]
+%%   \begin{center}
+%%     \includegraphics[width=5in]{../transport/lateral-inflow/plot-inflow.eps}
+%%     \caption{Results for test of transport with lateral inflow;
+%%       concentration remains constant because the concentration of
+%%       lateral inflow is assumed to be that in the channel.} 
+%%     \label{fig:test-tranport-lateral-inflow}
+%%   \end{center}
+%% \end{figure}
+
+%% \begin{figure}[htbp]
+%%   \begin{center}
+%%     \includegraphics[width=4.5in]{../transport/lateral-inflow/plot-outflow.eps}
+%%     \caption{Results for test of transport with lateral outflow.} 
+%%     \label{fig:test-tranport-lateral-outflow}
+%%   \end{center}
+%% \end{figure}
+
+% \begin{figure}[htbp]
+%   \begin{center}
+%     \includegraphics[width=4.5in]{../transport/lateral-inflow/bcplot.eps}
+%     \caption{Total lateral inflow used to test transport with varying
+%       lateral contribution.} 
+%     \label{fig:test-transport-lateral-flow}
+%   \end{center}
+% \end{figure}
+
+% \begin{figure}[htbp]
+%   \begin{center}
+%     \includegraphics[width=4.5in]{../transport/lateral-inflow/plot-vary.eps}
+%     \caption{Results for test of transport with varying lateral
+%       contribution.}  
+%     \label{fig:test-tranport-lateral-vary}
+%   \end{center}
+% \end{figure}
+
+\bibliographystyle{pnnl}
+\bibliography{mass1test}
+
+
+\end{document}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

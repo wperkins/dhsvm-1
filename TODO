@@ -1,0 +1,44 @@
+-*- text -*-
+-------------------------------------------------------------
+file: TODO
+List of things to do to MASS1, time permitting
+-------------------------------------------------------------
+-------------------------------------------------------------
+Battelle Memorial Institute
+Pacific Northwest Laboratory
+-------------------------------------------------------------
+-------------------------------------------------------------
+Created November  1, 1999 by William A. Perkins
+Last Change: 2017-02-21 13:50:38 d3g096
+-------------------------------------------------------------
+
+$Id$
+
+Bugs:
+
+    * There is some problem with section interpolation when the depth
+      is smaller than the depth step. Negative areas are produced even
+      if the section is prismatic
+
+High Priority:
+
+    * Check transport at downstream boundary and at junctions under
+      reverse flow conditions.  
+
+Low Priority:
+
+    * use an formatted hotstart as with MASS2
+
+    * eliminate the use of link id's as array indices -- be able to
+      give links nonconsecutive, but unique id's, and generate array
+      indices internally
+
+    * when atmospheric exchange is on met data are repeatedly
+      reinterpolated; we need to recode it so that the met data is
+      interpolated once for each zone and time step
+
+    * Hydro bc tests
+
+    * dissolved gas tests 
+
+    * temperature test (cooling, e.g.)
