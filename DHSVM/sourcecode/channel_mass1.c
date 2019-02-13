@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-02-12 12:05:39 d3g096
+ * LAST CHANGE: 2019-02-13 12:15:09 d3g096
  * COMMENTS:
  */
 
@@ -69,6 +69,82 @@ channel_points(const float length, const float spacing)
   return npts;
 }
 
+/******************************************************************************/
+/*                           mass1_write_config                               */
+/******************************************************************************/
+void
+mass1_write_config(const char *outname)
+{
+  const char cfg[] =
+    "    MASS1 Configuration File - Version 0.83\n"
+    "0	/	Do Flow\n"
+    "0	/	Do lateral inflow\n"
+    "0	/	Do Gas\n"
+    "0	/	Do Temp\n"
+    "0	/	Do Printout\n"
+    "1	/	Do Gage Printout\n"
+    "0	/	Do Profile Printout\n"
+    "0	/	Do Gas Dispersion\n"
+    "0	/	Do Gas Air/Water Exchange\n"
+    "0	/	Do Temp Dispersion\n"
+    "0	/	Do Temp surface exchange\n"
+    "0	/	Do Hotstart read file\n"
+    "1	/	Do Restart write file\n"
+    "0	/	Do Print section geometry\n"
+    "0	/	Do write binary section geom\n"
+    "0	/	Do read binary section geom\n"
+    "1	/	units option\n"
+    "1	/	time option\n"
+    "2	/	time units\n"
+    "1	/	channel length units\n"
+    "0	/	downstream bc type\n"
+    "5	/	max links\n"
+    "400	/	max points on a link\n"
+    "28	/	max bc table\n"
+    "60000	/	max times in a bc table\n"
+    "1379	/	total number of x-sections\n"
+    "15  /   number of transport sub time steps\n"
+    "0 	/	debug print flag\n"
+    "\"%slink.dat\"         / link file name\n"
+    "\"%spoint.dat\"	/ point file name nonuniform manning n\n"
+    "\"%ssection.dat\"      / section file name\n"
+    "\"%sbc.dat\"	/ linkBC file name\n"
+    "\"%sinitial.dat\"      / initial file name\n"
+    "\"output.out\"            / output file name\n"
+    "\"none\"	/	gas transport file name\n"
+    "\"none\"	/	temperature input\n"
+    "\"none\"	/	weather data files for each met_zone input\n"
+    "\"none\" /	hydropower file name\n"
+    "\"none\" 	/	TDG Coeff file name\n"
+    "\"none\" 	/	hotstart-warmup-unix.dat /	read restart file name\n"
+    "\"hotstart.dat\"          / Write restart file name\n"
+    "\"%sgage.dat\"         / gage control file name\n"
+    "\"none\" 	 	/	profile file name\n"
+    "\"none\"     		/	lateral inflow bs file name\n"
+    "02-01-2000	/	date run begins\n"
+    "00:00:00	/	time run begins\n"
+    "01-10-2001	/	date run ends\n"
+    "00:00:00	/	time run ends\n"
+    "0.5	/	delta t in hours (0.5 for flow only; 0.02 for transport)\n"
+    "336	/	printout frequency\n";
+
+  static char outfile[] = "mass1.cfg";
+  FILE *out;
+  if ((out = fopen(outfile, "wt")) == NULL) {
+    error_handler(ERRHDL_ERROR, "cannot open configuration file \"%s\"",
+                  outfile);
+    return;
+  }
+
+  error_handler(ERRHDL_DEBUG, "writing MASS1 configuration to \"%s\"",
+                outfile);
+
+  fprintf(out, cfg,
+          outname, outname, outname, outname, outname, outname);
+  fclose(out);
+}
+  
+  
 
 /******************************************************************************/
 /*                           mass1_write_sections                             */
@@ -226,6 +302,7 @@ mass1_write_initial(const char *outname, Channel *network, const int dodry)
   char outfile[MAXPATHLEN];
   FILE *out;
   Channel *current;
+  float wsel;
   
   sprintf(outfile, "%sinitial.dat", outname);
   if ((out = fopen(outfile, "wt")) == NULL) {
@@ -237,9 +314,16 @@ mass1_write_initial(const char *outname, Channel *network, const int dodry)
   error_handler(ERRHDL_DEBUG, "writing MASS1 initial state information to \"%s\"",
                 outfile);
 
+  
+
   for (current = network; current != NULL; current = current->next) {
+
+    /* set the water surface elevation to bank_height at the
+       upstream end of the segment */
+    
+    wsel = current->inlet_elevation + current->class2->bank_height;
     fprintf(out, "%8d %10.1f %10.1f %10.1f %10.1f /\n", current->id,
-            0.0, current->class2->bank_height, 0.0, 10.0);
+            1.0, wsel, 0.0, 10.0);
   }
   fclose(out);
 }
@@ -330,6 +414,7 @@ main(int argc, char **argv)
 
   channel_compute_elevation(network, elev0);
 
+  mass1_write_config(outname);
   mass1_write_sections(outname, classes);
   mass1_write_links(outname, network, spacing);
   mass1_write_points(outname, network, spacing);
