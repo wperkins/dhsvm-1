@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2017-06-14 07:41:06 d3g096
+ * LAST CHANGE: 2019-02-12 12:05:39 d3g096
  * COMMENTS:
  */
 
@@ -57,6 +57,18 @@ channel_compute_elevation(Channel *network, float elev0)
     }
   }
 }
+
+/******************************************************************************/
+/*                             channel_points                                 */
+/******************************************************************************/
+static int
+channel_points(const float length, const float spacing)
+{
+  int npts = (int)truncf(length/spacing + 1.0);
+  if (npts < 2) npts = 2;
+  return npts;
+}
+
 
 /******************************************************************************/
 /*                           mass1_write_sections                             */
@@ -108,12 +120,13 @@ mass1_write_links(const char *outname, Channel *network, const float spacing)
 
   for (current = network; current != NULL; current = current->next) {
     int npts;
-    npts = (int)truncf(current->length/spacing + 0.5);
-    if (npts < 2) npts = 2;
+    npts = channel_points(current->length, spacing);
+
     fprintf(out, "%5d", current->id); 
     fprintf(out, " %5d", 2);              /* input option */
     fprintf(out, " %5d", npts);           /* number of points */
     fprintf(out, " %5d", current->order); /* link order (unused) */
+    fprintf(out, " %5d", 60);             /* link type */
     fprintf(out, " %5d", 0);              /* upstream links (unused) */
 
                                           /* upstream BC */
@@ -129,20 +142,21 @@ mass1_write_links(const char *outname, Channel *network, const float spacing)
       fprintf(out, " %5d", 0);
     }
     
+    fprintf(out, " %5d", 0);              /* TDG BC */
     fprintf(out, " %5d", 0);              /* temperature BC */
     fprintf(out, " %5d", current->id);    /* met zone */
                                           /* lateral inflow, TDG, temp BC */
-    fprintf(out, " %5d %5d %5d", current->id, 0, current->id);
+    fprintf(out, " %5d %5d %5d", 0, 0, 0);
     fprintf(out, " %5.1f", 3.5);          /* LPI coefficient */
 
     fprintf(out, " /\n");
 
     if (current->outlet == NULL) {
-      fprintf(out, " %5d", 0);
+      fprintf(out, "%5d", 0);
     } else {
       fprintf(out, "%5d", current->outlet->id); 
     }
-    fprintf(out, "%72.72s /\n", " ");
+    fprintf(out, "%78.78s /\n", " ");
   }
   fclose(out);
 }
@@ -169,8 +183,7 @@ mass1_write_points(const char *outname, Channel *network, const float spacing)
 
   for (current = network; current != NULL; current = current->next) {
     int npts;
-    npts = (int)truncf(current->length/spacing + 0.5);
-    if (npts < 2) npts = 2;
+    npts = channel_points(current->length, spacing);
 
     fprintf(out, "%5d", current->id);                   /* link id */
     fprintf(out, " %10.2f", current->length);           /* link length */
@@ -186,10 +199,10 @@ mass1_write_points(const char *outname, Channel *network, const float spacing)
 }
 
 /******************************************************************************/
-/*                          mass1_write_bclists                               */
+/*                            mass1_write_bcs                                 */
 /******************************************************************************/
 void
-mass1_write_bclists(const char *outname, Channel *network)
+mass1_write_bcs(const char *outname, Channel *network)
 {
   char outfile[MAXPATHLEN];
   FILE *out;
@@ -202,12 +215,31 @@ mass1_write_bclists(const char *outname, Channel *network)
     return;
   }
   fclose(out);
+}
 
-  sprintf(outfile, "%lateral.dat", outname);
+/******************************************************************************/
+/*                         mass1_write_initial                                */
+/******************************************************************************/
+void
+mass1_write_initial(const char *outname, Channel *network, const int dodry)
+{
+  char outfile[MAXPATHLEN];
+  FILE *out;
+  Channel *current;
+  
+  sprintf(outfile, "%sinitial.dat", outname);
   if ((out = fopen(outfile, "wt")) == NULL) {
-    error_handler(ERRHDL_ERROR, "cannot open lateral inflow file \"%s\"",
+    error_handler(ERRHDL_ERROR, "cannot open point file \"%s\"",
                   outfile);
     return;
+  }
+
+  error_handler(ERRHDL_DEBUG, "writing MASS1 initial state information to \"%s\"",
+                outfile);
+
+  for (current = network; current != NULL; current = current->next) {
+    fprintf(out, "%8d %10.1f %10.1f %10.1f %10.1f /\n", current->id,
+            0.0, current->class2->bank_height, 0.0, 10.0);
   }
   fclose(out);
 }
@@ -230,7 +262,7 @@ main(int argc, char **argv)
   float spacing;
   float elev0;
 
-  const char usage[] = "usage: [-v] [-s spacing] [-n roughness] [-o basename] %s class.dat network.dat";
+  const char usage[] = "usage: %s [-v] [-s spacing] [-o basename] class.dat network.dat";
 
   program = basename(argv[0]);
 
@@ -301,6 +333,7 @@ main(int argc, char **argv)
   mass1_write_sections(outname, classes);
   mass1_write_links(outname, network, spacing);
   mass1_write_points(outname, network, spacing);
+  mass1_write_initial(outname, network, 0);
 
   channel_free_network(network);
   channel_free_classes(classes);
