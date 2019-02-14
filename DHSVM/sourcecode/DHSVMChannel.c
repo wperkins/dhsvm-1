@@ -320,7 +320,8 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
 
 #ifdef MASS1_CHANNEL
     if (Options->UseMASS1) {
-      mass1_route_network(ChannelData->mass1_streams, ChannelData->streams, &(Time->Current));
+      mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
+                          &(Time->Current), Time->Dt);
     } else {
       channel_route_network(ChannelData->streams, Time->Dt);
     }

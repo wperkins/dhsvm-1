@@ -8,7 +8,7 @@
    ------------------------------------------------------------- */
 /* -------------------------------------------------------------
    Created February  8, 2019 by William A. Perkins
-   Last Change: 2019-02-11 09:49:42 d3g096
+   Last Change: 2019-02-14 14:40:19 d3g096
    ------------------------------------------------------------- */
 
 #ifndef _mass1_channel_h_
@@ -34,7 +34,7 @@ extern void mass1_destroy(void *net);
    DHSVM routines for dealing with a MASS1 network
    ------------------------------------------------------------- */
 
-extern void mass1_route_network(void *net, Channel *streams, DATE *todate);
+extern void mass1_route_network(void *net, Channel *streams, DATE *todate, int delatt);
 
 
 #endif
