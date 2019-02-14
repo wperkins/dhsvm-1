@@ -423,5 +423,10 @@ DestroyChannel(OPTIONSTRUCT *Options, MAPSIZE *Map, CHANNEL *channel)
       if (channel->roadflowout != NULL) fclose(channel->roadflowout);
     }    
   }
+#ifdef MASS1_CHANNEL
+  if (Options->UseMASS1) {
+    mass1_destroy(channel->mass1_streams);
+  }
+#endif
 
 }
