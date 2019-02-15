@@ -25,7 +25,10 @@
 #include "fileio.h"
 #include "ParallelDHSVM.h"
 #include "ParallelChannel.h"
+
+#ifdef MASS1_CHANNEL
 #include "mass1_channel.h"
+#endif
 
 /* -----------------------------------------------------------------------------
    InitChannel
