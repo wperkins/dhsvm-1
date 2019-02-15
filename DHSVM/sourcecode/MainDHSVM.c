@@ -239,9 +239,17 @@ int main(int argc, char **argv)
 #ifndef SNOW_ONLY
   if (Options.HasNetwork == TRUE) {
     InitChannelDump(&Options, &ChannelData, Dump.Path);
+#ifdef MASS1_CHANNEL
+    if (Options.UseMASS1) {
+      ReadMASS1ChannelState(Dump.InitStatePath, &(Time.Start), ChannelData.mass1_streams);
+    } else {
+      ReadChannelState(Dump.InitStatePath, &(Time.Start), ChannelData.streams);
+    }
+#else
     ReadChannelState(Dump.InitStatePath, &(Time.Start), ChannelData.streams);
-	if (Options.StreamTemp && Options.CanopyShading)
-	  InitChannelRVeg(&Time, ChannelData.streams);
+#endif
+    if (Options.StreamTemp && Options.CanopyShading)
+      InitChannelRVeg(&Time, ChannelData.streams);
   }
 #endif
 

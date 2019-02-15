@@ -64,8 +64,17 @@ void ExecDump(MAPSIZE *GMap, MAPSIZE *Map, DATE *Current, DATE *Start, OPTIONSTR
       StoreModelState(Dump->Path, Current, GMap, Map, Options, TopoMap, PrecipMap,
                       SnowMap, MetMap, VegMap, Veg, SoilMap, Soil,
                       Network, HydrographInfo, Hydrograph, ChannelData);
-      if (Options->HasNetwork)
+      if (Options->HasNetwork) {
+#ifdef MASS1_CHANNEL
+        if (Options->UseMASS1) {
+          StoreMASS1ChannelState(Dump->Path, Current, ChannelData->mass1_streams);
+        } else {
+          StoreChannelState(Dump->Path, Current, ChannelData->streams);
+        }
+#else
         StoreChannelState(Dump->Path, Current, ChannelData->streams);
+#endif
+      }
     }
     else {
       for (i = 0; i < Dump->NStates; i++) {
@@ -74,8 +83,17 @@ void ExecDump(MAPSIZE *GMap, MAPSIZE *Map, DATE *Current, DATE *Start, OPTIONSTR
                           PrecipMap, SnowMap, MetMap, VegMap, Veg,
                           SoilMap, Soil, Network, HydrographInfo, Hydrograph,
                           ChannelData);
-          if (Options->HasNetwork)
+          if (Options->HasNetwork) {
+#ifdef MASS1_CHANNEL
+            if (Options->UseMASS1) {
+              StoreMASS1ChannelState(Dump->Path, Current, ChannelData->mass1_streams);
+            } else {
+              StoreChannelState(Dump->Path, Current, ChannelData->streams);
+            }
+#else
             StoreChannelState(Dump->Path, Current, ChannelData->streams);
+#endif
+          }
         }
       }
     }

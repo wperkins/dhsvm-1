@@ -180,7 +180,33 @@ int CompareRecordID(const void *key, const void *record)
 /******************************************************************************/
 /*                            ReadMASS1ChannelState                           */
 /******************************************************************************/
+void
+ReadMASS1ChannelState(char *Path, DATE *Now, void *net)
+{
+  char OutFileName[PATH_MAX];
+  char Str[PATH_MAX];
+  char RealPath[PATH_MAX];
+  FILE *OutFile = NULL;
 
+  /* only the root process needs to store the state */
+
+  if (ParallelRank() == 0) {
+    printf("storing channel state \n");
+    /* Create storage file */
+    sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
+            Now->Year, Now->Hour, Now->Min, Now->Sec);
+    sprintf(OutFileName, "%sMASS1.State.%s", Path, Str);
+
+    /* MASS1's default in to write relative to the configuration
+       directory. Just give MASS1 a full path, so there's no
+       confusion */
+
+    realpath(OutFileName, RealPath);
+    printf("Reading MASS1 hotstart from %s\n", RealPath);
+    mass1_read_hotstart(net, RealPath);
+  }
+  ParallelBarrier();
+}
 
 /******************************************************************************/
 /*                          StoreMASS1ChannelState                            */
@@ -196,17 +222,17 @@ StoreMASS1ChannelState(char *Path, DATE *Now, void *net)
   /* only the root process needs to store the state */
 
   if (ParallelRank() == 0) {
-    printf("storing channel state \n");
     /* Create storage file */
     sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
             Now->Year, Now->Hour, Now->Min, Now->Sec);
-    sprintf(OutFileName, "%sChannel.State.%s", Path, Str);
+    sprintf(OutFileName, "%sMASS1.State.%s", Path, Str);
 
     /* MASS1's default in to write relative to the configuration
        directory. Just give MASS1 a full path, so there's no
        confusion */
 
     realpath(OutFileName, RealPath);
+    printf("Writing MASS1 hotstart to %s\n", RealPath);
     mass1_write_hotstart(net, RealPath);
   }
   ParallelBarrier();
