@@ -111,7 +111,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
   if (Options->UseMASS1) {
     strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
     channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
-                                          &(Time->Start), &(Time->End));
+                                          &(Time->Start), &(Time->End),
+                                          ParallelRank(), Options->StreamTemp);
     
   }
 #endif

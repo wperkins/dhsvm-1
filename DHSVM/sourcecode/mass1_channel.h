@@ -8,7 +8,7 @@
    ------------------------------------------------------------- */
 /* -------------------------------------------------------------
    Created February  8, 2019 by William A. Perkins
-   Last Change: 2019-02-14 14:40:19 d3g096
+   Last Change: 2019-02-15 13:53:02 d3g096
    ------------------------------------------------------------- */
 
 #ifndef _mass1_channel_h_
@@ -22,7 +22,9 @@
    C API for Fortran routines in MASS1/mass1_dhsvm_api.f90
    ------------------------------------------------------------- */
 
-extern void *mass1_create(char *cfgdir, char *outdir, DATE *start, DATE *end);
+extern void *mass1_create(char *cfgdir, char *outdir,
+                          DATE *start, DATE *end,
+                          int pid, int dotemp);
 
 extern void mass1_write_hotstart(void *net, char *fname);
 
