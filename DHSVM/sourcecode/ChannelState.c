@@ -20,10 +20,11 @@
  * $Id: ChannelState.c,v 1.5 2006/10/03 22:50:22 nathalie Exp $     
  */
 
+#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h> 
+#include <errno.h>
 #include "settings.h"
 #include "data.h"
 #include "DHSVMerror.h"
@@ -33,6 +34,10 @@
 #include "sizeofnt.h"
 #include "channel.h"
 #include "ParallelDHSVM.h"
+
+#ifdef MASS1_CHANNEL
+#include "mass1_channel.h"
+#endif
 
 typedef struct _RECORDSTRUCT {
   SegmentID id;
@@ -112,24 +117,28 @@ void StoreChannelState(char *Path, DATE * Now, Channel * Head)
   Channel *Current = NULL;
   FILE *OutFile = NULL;
 
-  if (ParallelRank() == 0) 
+  /* only the the root process needs to save the state */
+  
+  if (ParallelRank() == 0) {
     printf("storing channel state \n");
-  /* Create storage file */
-  sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
-	  Now->Year, Now->Hour, Now->Min, Now->Sec);
-  sprintf(OutFileName, "%sChannel.State.%s", Path, Str);
-  OpenFile(&OutFile, OutFileName, "w", TRUE);
-
-  /* Store data */
-  Current = Head;
-  while (Current) {
-    fprintf(OutFile, "%12hu ", Current->id);
-    fprintf(OutFile, "%12g\n", Current->storage);
-    Current = Current->next;
+    /* Create storage file */
+    sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
+            Now->Year, Now->Hour, Now->Min, Now->Sec);
+    sprintf(OutFileName, "%sChannel.State.%s", Path, Str);
+    OpenFile(&OutFile, OutFileName, "w", TRUE);
+    
+    /* Store data */
+    Current = Head;
+    while (Current) {
+      fprintf(OutFile, "%12hu ", Current->id);
+      fprintf(OutFile, "%12g\n", Current->storage);
+      Current = Current->next;
+    }
+    
+    /* Close file */
+    fclose(OutFile);
   }
-
-  /* Close file */
-  fclose(OutFile);
+  ParallelBarrier();
 }
 
 /*****************************************************************************
@@ -164,3 +173,42 @@ int CompareRecordID(const void *key, const void *record)
 
   return (int) (*x - y->id);
 }
+
+
+#ifdef MASS1_CHANNEL
+
+/******************************************************************************/
+/*                            ReadMASS1ChannelState                           */
+/******************************************************************************/
+
+
+/******************************************************************************/
+/*                          StoreMASS1ChannelState                            */
+/******************************************************************************/
+void
+StoreMASS1ChannelState(char *Path, DATE *Now, void *net)
+{
+  char OutFileName[PATH_MAX];
+  char Str[PATH_MAX];
+  char RealPath[PATH_MAX];
+  FILE *OutFile = NULL;
+
+  /* only the root process needs to store the state */
+
+  if (ParallelRank() == 0) {
+    printf("storing channel state \n");
+    /* Create storage file */
+    sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
+            Now->Year, Now->Hour, Now->Min, Now->Sec);
+    sprintf(OutFileName, "%sChannel.State.%s", Path, Str);
+
+    /* MASS1's default in to write relative to the configuration
+       directory. Just give MASS1 a full path, so there's no
+       confusion */
+
+    realpath(OutFileName, RealPath);
+    mass1_write_hotstart(net, RealPath);
+  }
+  ParallelBarrier();
+}
+#endif
