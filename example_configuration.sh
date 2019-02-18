@@ -10,7 +10,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-02-05 07:28:58 d3g096
+# Last Change: 2019-02-15 07:56:25 d3g096
 
 set -xue
 
@@ -83,7 +83,8 @@ if [ $host == "flophouse" ]; then
 
     CC=/usr/bin/gcc
     CXX=/usr/bin/g++
-    export CC
+    FC=/usr/bin/gfortran
+    export CC CXX FC
 
     # For GPTL (not working)
     # CFLAGS="-finstrument-functions"
@@ -108,7 +109,8 @@ elif [ $host == "tlaloc" ]; then
 
     CC=/usr/bin/gcc
     CXX=/usr/bin/g++
-    export CC
+    FC=/usr/bin/gfortran
+    export CC CXX FC
 
     prefix="/file0/perksoft"
     cmake $options \
@@ -133,7 +135,8 @@ elif [ $host == "WE32673" ]; then
     prefix="/opt/local"
     CC="$prefix/bin/clang-mp-6.0"
     CXX="$prefix/bin/clang++-mp-6.0"
-    export CC CXX
+    FC="$prefix/bin/gfortran"
+    export CC CXX FC
 
     cmake $options \
         -D MPI_C_COMPILER:STRING="$prefix/bin/mpicc-mpich-clang60" \
