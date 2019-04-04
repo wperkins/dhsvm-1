@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-02-11 13:33:42 d3g096
+# Last Change: 2019-04-04 12:40:02 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -124,6 +124,7 @@ set(DHSVM_SRC
   InitModelState.c
   InitNetwork.c
   InitNewMonth.c
+  InitParameterMaps.c
   InitSnowMap.c
   InitTables.c
   InitTerrainMaps.c
