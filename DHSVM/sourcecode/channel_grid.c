@@ -841,7 +841,7 @@ void channel_grid_avg(Channel *net, int ga)
       current->VP  /= current->Ncells;
       current->WND /= current->Ncells;
       current->ATP /= current->Ncells;
-      Channel->RH /= Channel->Ncells;
+      current->RH /= current->Ncells;
 
       current->skyview /= current->Ncells;
     }
