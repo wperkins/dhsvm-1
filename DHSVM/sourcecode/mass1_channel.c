@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-02-14 14:43:47 d3g096
+ * LAST CHANGE: 2019-04-08 14:38:45 d3g096
  * COMMENTS:
  */
 
@@ -22,9 +22,33 @@
 
 extern void mass1_route(void *net, DATE *ddate);
 extern void mass1_update_latq(void *net, int id, float latq, DATE *ddate);
+extern void mass1_update_latt(void *net, int id, float latt, DATE *ddate);
+extern void mass1_update_met(void *net, int id,
+                             float airtemp, float rh,
+                             float windspeed, float swradiation,
+                             DATE *ddate);
+extern void mass1_update_met_coeff(void *net, int id,
+                                   float a, float b, float Ccond, float brunt);
 extern double mass1_link_outflow(void *net, int id);
 extern double mass1_link_inflow(void *net, int id);
 
+
+/* -------------------------------------------------------------
+   mass1_set_coeffients
+   ------------------------------------------------------------- */
+void
+mass1_set_coeffients(void *net, Channel *streams)
+{
+  ChannelPtr current;
+
+  for (current = streams; current != NULL; current = current->next) {
+    mass1_update_met_coeff(net, current->id,
+                           current->wind_function_a,
+                           current->wind_function_b,
+                           current->conduction,
+                           current->brunt);
+  }
+}
 
 /* -------------------------------------------------------------
    mass1_route_network
@@ -38,9 +62,10 @@ extern double mass1_link_inflow(void *net, int id);
  * @param todate Date/time to which the MASS1 simulation time is to be
  *      advanced (current DHSVM simulation time)
  * @param deltat DHSVM simulation time step (seconds)
+ * @param dotemp Is temperature simulation enabled?
  */
 void
-mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat)
+mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int dotemp)
 {
   Channel *current;
   int id;
@@ -55,6 +80,18 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat)
     q = current->lateral_inflow/deltat;
     /* FIXME: make sure q dimensions are correct */
     mass1_update_latq(net, id, q, todate);
+
+    if (dotemp) {
+      /* update lateral inflow temperatures */
+      mass1_update_latt(net, id, current->inflow_temp, todate);
+
+      /* update met */
+
+      mass1_update_met(net, id,
+                       current->ATP, current->RH/100.0,
+                       current->WND, current->NSW,
+                       todate);
+    }
   }
 
   /* route the network */

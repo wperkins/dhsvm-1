@@ -95,6 +95,14 @@ struct _channel_rec_ {
   float skyview;
   int Ncells;	        /* Number of grid cells crossed by the segment*/
 
+  /* Added for MASS1 */
+  float inflow_temp;
+  float wind_function_a;
+  float wind_function_b;
+  float conduction;
+  float brunt;
+  float RH;             /* relative humidity, a little easier for MASS1 */
+
   CHANRVEG rveg;        /* riparian veg sub-structure */
 
   struct _channel_rec_ *outlet;	/* NULL if does not drain to another segment */

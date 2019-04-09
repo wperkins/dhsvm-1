@@ -794,24 +794,25 @@ void channel_grid_inc_other(ChannelMapPtr ** map, int col, int row, PIXRAD * Loc
   float len = channel_grid_cell_length(map, col, row);
 
   while (cell != NULL ) {
-	/* ISW is the total incoming shortwave radiation (VIC outputs) */
-	cell->channel->ISW += LocalRad->ObsShortIn;
+    /* ISW is the total incoming shortwave radiation (VIC outputs) */
+    cell->channel->ISW += LocalRad->ObsShortIn;
 	
-	cell->channel->NSW += LocalRad->RBMNetShort;
-	cell->channel->Beam += LocalRad->PixelBeam;
-	cell->channel->Diffuse += LocalRad->PixelDiffuse;
+    cell->channel->NSW += LocalRad->RBMNetShort;
+    cell->channel->Beam += LocalRad->PixelBeam;
+    cell->channel->Diffuse += LocalRad->PixelDiffuse;
 
     cell->channel->ILW += LocalRad->PixelLongIn;
-	cell->channel->NLW += LocalRad->RBMNetLong;
+    cell->channel->NLW += LocalRad->RBMNetLong;
 
     cell->channel->VP += LocalMet->Eact;
     cell->channel->WND += LocalMet->Wind;
     cell->channel->ATP += LocalMet->Tair;
+    cell->channel->RH += LocalMet->Rh;
 
-	cell->channel->azimuth += 
-		cell->azimuth*cell->length /cell->channel->length;
+    cell->channel->azimuth += 
+      cell->azimuth*cell->length /cell->channel->length;
 
-	cell->channel->skyview += skyview;
+    cell->channel->skyview += skyview;
 
     cell = cell->next;
   }
@@ -835,6 +836,7 @@ void channel_grid_avg(Channel *Channel)
       Channel->VP  /= Channel->Ncells;
       Channel->WND /= Channel->Ncells;
 	  Channel->ATP /= Channel->Ncells;
+	  Channel->RH /= Channel->Ncells;
 
 	  Channel->skyview /= Channel->Ncells;
     }

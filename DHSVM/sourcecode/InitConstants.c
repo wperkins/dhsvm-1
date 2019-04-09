@@ -197,7 +197,7 @@ void InitConstants(LISTPTR Input, OPTIONSTRUCT *Options, MAPSIZE *Map,
     if (strncmp(StrEnv[flow_routing].VarStr, "NETWORK", 7) == 0) {
       Options->HasNetwork = TRUE;
       Options->UseMASS1 = FALSE;
-    } else if (strncmp(StrEnv[flow_routing].VarStr, "MASS1", 1) == 0) {
+    } else if (strncmp(StrEnv[flow_routing].VarStr, "MASS1", 5) == 0) {
 #ifdef MASS1_CHANNEL
       Options->HasNetwork = TRUE;
       Options->UseMASS1 = TRUE;
