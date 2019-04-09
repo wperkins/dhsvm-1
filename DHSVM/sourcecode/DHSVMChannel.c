@@ -218,7 +218,7 @@ void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL * channel,
       sprintf(buffer, "%sStreamflow.Only", DumpPath);
       OpenFile(&(channel->streamflowout), buffer, "w", TRUE);
       /* output files for John's RBM model */
-      if (Options->StreamTemp) {
+      if (Options->StreamTemp && !Options->UseMASS1) {
         //inflow to segment
         sprintf(buffer, "%sInflow.Only", DumpPath);
         OpenFile(&(channel->streaminflow), buffer, "w", TRUE);
@@ -380,7 +380,7 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
                                 ChannelData->streamout,
                                 ChannelData->streamflowout, flag);
       /* save parameters for John's RBM model */
-      if (Options->StreamTemp)
+      if (Options->StreamTemp && !Options->UseMASS1)
         channel_save_outflow_text_cplmt(Time, buffer,ChannelData->streams,ChannelData, flag);
     }
   }
