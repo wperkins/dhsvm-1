@@ -85,9 +85,13 @@ int main(int argc, char **argv)
     {0, 0, 0.0, 0.0, 0.0, NULL },                                               /* VEGPIX */
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0l, 0.0, 0.0
   };
-  CHANNEL ChannelData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL};
+  CHANNEL ChannelData = {
+     NULL, NULL, NULL, NULL, NULL, NULL, 
+     0, 0,
+     NULL, NULL, NULL, NULL,
+     NULL, NULL, NULL, NULL, NULL, NULL,
+     NULL, NULL, NULL, NULL, NULL, NULL
+    };
   DUMPSTRUCT Dump;
   EVAPPIX **EvapMap = NULL;
   INPUTFILES InFiles;
@@ -294,8 +298,10 @@ int main(int argc, char **argv)
   Mass.OldWaterStorage = Mass.StartWaterStorage;
 
   /* computes the number of grid cell contributing to one segment */
-  if (Options.StreamTemp) 
-	Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX, ChannelData.streams);
+  if (Options.StreamTemp) {
+    Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX,
+                       ChannelData.streams, ChannelData.stream_state_ga);
+  }
 
   TIMING_TASK_END("startup", 1);
   
@@ -400,7 +406,7 @@ int main(int argc, char **argv)
 
     /* Average all RBM inputs over each segment */
     if (Options.StreamTemp) {
-      channel_grid_avg(ChannelData.streams);
+      channel_grid_avg(ChannelData.streams, ChannelData.stream_state_ga);
       if (Options.CanopyShading)
         CalcCanopyShading(&Time, ChannelData.streams, &SolarGeo);
     }
