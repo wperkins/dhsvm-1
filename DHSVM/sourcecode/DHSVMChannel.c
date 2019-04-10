@@ -144,7 +144,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       /* initialize met coefficients for each segment */
       for (current = channel->streams; current != NULL;
            current = current->next) {
-        current->inflow_temp = mass1_temp;
+        current->lateral_temp = mass1_temp;
         current->wind_function_a = mass1_coeff_a;
         current->wind_function_b = mass1_coeff_b;
         current->conduction = mass1_coeff_cond;

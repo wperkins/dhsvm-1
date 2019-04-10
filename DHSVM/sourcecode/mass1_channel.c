@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-04-08 14:38:45 d3g096
+ * LAST CHANGE: 2019-04-10 09:16:37 d3g096
  * COMMENTS:
  */
 
@@ -31,6 +31,9 @@ extern void mass1_update_met_coeff(void *net, int id,
                                    float a, float b, float Ccond, float brunt);
 extern double mass1_link_outflow(void *net, int id);
 extern double mass1_link_inflow(void *net, int id);
+
+extern double mass1_link_inflow_temp(void *net, int id);
+extern double mass1_link_outflow_temp(void *net, int id);
 
 
 /* -------------------------------------------------------------
@@ -87,10 +90,12 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
 
       /* update met */
 
+      /* 
       mass1_update_met(net, id,
                        current->ATP, current->RH/100.0,
                        current->WND, current->NSW,
                        todate);
+      */
     }
   }
 
@@ -104,5 +109,9 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
     id = current->id;
     current->inflow = mass1_link_inflow(net, id)*deltat;
     current->outflow = mass1_link_outflow(net, id)*deltat;
+    if (dotemp) {
+      current->inflow_temp = mass1_link_inflow_temp(net, id);
+      current->outflow_temp = mass1_link_outflow_temp(net, id);
+    }
   }
 }

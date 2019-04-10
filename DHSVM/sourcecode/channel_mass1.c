@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-02-13 12:15:09 d3g096
+ * LAST CHANGE: 2019-04-10 07:51:35 d3g096
  * COMMENTS:
  */
 
@@ -103,7 +103,7 @@ mass1_write_config(const char *outname)
     "28	/	max bc table\n"
     "60000	/	max times in a bc table\n"
     "1379	/	total number of x-sections\n"
-    "15  /   number of transport sub time steps\n"
+    "0          /   number of transport sub time steps\n"
     "0 	/	debug print flag\n"
     "\"%slink.dat\"         / link file name\n"
     "\"%spoint.dat\"	/ point file name nonuniform manning n\n"
