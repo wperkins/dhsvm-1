@@ -6,11 +6,12 @@
  * ORG:          Pacific NW National Laboratory
  * E-MAIL:       william.perkins@pnnl.gov
  * ORIG-DATE:    June 2017
- * DESCRIPTION:  Reads a DHSVM stream network and makes a MASS1 network. 
+ * DESCRIPTION:  Reads a DHSVM stream network and makes an equivalent
+ *               MASS1 network and configuration.
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-04-10 07:51:35 d3g096
+ * LAST CHANGE: 2019-05-29 11:56:30 d3g096
  * COMMENTS:
  */
 
@@ -66,6 +67,7 @@ channel_points(const float length, const float spacing)
 {
   int npts = (int)truncf(length/spacing + 1.0);
   if (npts < 2) npts = 2;
+  npts = 2;                     /* hydrologic links can (now) only have 2 points */
   return npts;
 }
 
@@ -99,21 +101,21 @@ mass1_write_config(const char *outname)
     "1	/	channel length units\n"
     "0	/	downstream bc type\n"
     "5	/	max links\n"
-    "400	/	max points on a link\n"
+    "400	/ max points on a link\n"
     "28	/	max bc table\n"
     "60000	/	max times in a bc table\n"
     "1379	/	total number of x-sections\n"
     "0          /   number of transport sub time steps\n"
     "0 	/	debug print flag\n"
-    "\"%slink.dat\"         / link file name\n"
-    "\"%spoint.dat\"	/ point file name nonuniform manning n\n"
-    "\"%ssection.dat\"      / section file name\n"
+    "\"%slink.dat\" / link file name\n"
+    "\"%spoint.dat\" / point file name nonuniform manning n\n"
+    "\"%ssection.dat\" / section file name\n"
     "\"%sbc.dat\"	/ linkBC file name\n"
     "\"%sinitial.dat\"      / initial file name\n"
     "\"output.out\"            / output file name\n"
-    "\"none\"	/	gas transport file name\n"
-    "\"none\"	/	temperature input\n"
-    "\"none\"	/	weather data files for each met_zone input\n"
+    "\"none\"	/ gas transport file name\n"
+    "\"none\"   / temperature input\n"
+    "\"none\" / weather data files for each met_zone input\n"
     "\"none\" /	hydropower file name\n"
     "\"none\" 	/	TDG Coeff file name\n"
     "\"none\" 	/	hotstart-warmup-unix.dat /	read restart file name\n"
@@ -284,12 +286,27 @@ mass1_write_bcs(const char *outname, Channel *network)
   FILE *out;
   Channel *current;
 
-  sprintf(outfile, "%linkbc.dat", outname);
+  static char zerofile[] = "zero.dat";
+  static char zerobc[] =
+    "#\n"
+    "01-01-1900 00:00:00 0.0 /\n"
+    "01-01-2900 00:00:00 0.0 /\n";
+
+  if ((out = fopen(zerofile, "wt")) == NULL) {
+    error_handler(ERRHDL_ERROR, "cannot open BC file \"%s\"",
+                  outfile);
+    return;
+  }
+  fprintf(out, zerobc);
+  fclose(out);
+
+  sprintf(outfile, "%sbc.dat", outname);
   if ((out = fopen(outfile, "wt")) == NULL) {
     error_handler(ERRHDL_ERROR, "cannot open link BC file \"%s\"",
                   outfile);
     return;
   }
+  fprintf(out, "1 \"%s\" /\n", zerofile);
   fclose(out);
 }
 

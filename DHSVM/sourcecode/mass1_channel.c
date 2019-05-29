@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-04-10 09:16:37 d3g096
+ * LAST CHANGE: 2019-04-10 14:45:04 d3g096
  * COMMENTS:
  */
 
@@ -86,7 +86,7 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
 
     if (dotemp) {
       /* update lateral inflow temperatures */
-      mass1_update_latt(net, id, current->inflow_temp, todate);
+      mass1_update_latt(net, id, current->lateral_temp, todate);
 
       /* update met */
 

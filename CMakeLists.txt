@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-02-05 09:19:12 d3g096
+# Last Change: 2019-04-10 14:09:45 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -29,12 +29,6 @@ list (APPEND CMAKE_MODULE_PATH "${DHSVM_SOURCE_DIR}/cmake")
 option (DHSVM_DUMP_TOPO
   "Make DHSVM dump input topography maps (in a non-standard way) for debugging"
 )
-
-# Build RBM if desired
-option (DHSVM_USE_RBM "Build RBM and related programs" OFF)
-if (DHSVM_USE_RBM)
-  enable_language(Fortran)
-endif (DHSVM_USE_RBM)
 
 # Require NetCDF File I/O
 option (DHSVM_USE_NETCDF "Look for NetCDF library and require its use" ON)
@@ -60,9 +54,20 @@ if (NOT (DHSVM_TIMING_LEVEL MATCHES "^[1234]"))
   message(ERROR "DHSVM_TIMING_LEVEL=\"${DHSVM_TIMING_LEVEL}\" not understood")
 endif()
 
+# Build RBM if desired
+option (DHSVM_USE_RBM "Build RBM and related programs" OFF)
 option (DHSVM_USE_MASS1 "Use MASS1 for channel network routing" OFF)
-if (DHSVM_USE_MASS1)
+if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
   enable_language(Fortran)
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    # trap floating point exceptions and use preprocessor
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffpe-trap=invalid,zero,overflow -cpp -fbacktrace")
+  elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+    # w/ Intel, build static binaries that trap floating point exceptions
+    # and turn on the preprocessor for all files
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp")
+  endif()
+
 endif (DHSVM_USE_MASS1)
 
 # -------------------------------------------------------------
