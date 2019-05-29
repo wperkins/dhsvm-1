@@ -49,9 +49,19 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "ROAD MAP FILE", "", "none"},
     {"ROUTING", "ROAD CLASS FILE", "", "none"},
     {"ROUTING", "MASS1 CONFIGURATION", "", "."},
+    {"ROUTING", "MASS1 INFLOW TEMPERATURE", "", "12.0"},
+    {"ROUTING", "MASS1 WIND FUNCTION A", "", "0.46"},
+    {"ROUTING", "MASS1 WIND FUNCTION B", "", "9.2"},
+    {"ROUTING", "MASS1 CONDUCTION COEFFICIENT", "", "0.47"},
+    {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
+    /* {"ROTUING", "MASS1_MET COEFFICIENT FILE", "", ""}, */
     {NULL, NULL, "", NULL}
   };
+#ifdef MASS1_CHANNEL
   char mass1_config_path[BUFSIZE + 1];
+  float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond, mass1_coeff_brunt;
+  ChannelPtr current;
+#endif
 
   if (ParallelRank() == 0) 
     printf("\nInitializing Road/Stream Networks\n");
@@ -113,7 +123,38 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
                                           &(Time->Start), &(Time->End),
                                           ParallelRank(), Options->StreamTemp);
-    
+
+    if (Options->StreamTemp) {
+      if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
+        ReportError(StrEnv[extreme_west].KeyName, 51);
+      }
+      if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
+        ReportError(StrEnv[extreme_west].KeyName, 51);
+      }
+      if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
+        ReportError(StrEnv[extreme_west].KeyName, 51);
+      }
+      if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
+        ReportError(StrEnv[extreme_west].KeyName, 51);
+      }
+      if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
+        ReportError(StrEnv[extreme_west].KeyName, 51);
+      }
+
+      /* initialize met coefficients for each segment */
+      for (current = channel->streams; current != NULL;
+           current = current->next) {
+        current->lateral_temp = mass1_temp;
+        current->wind_function_a = mass1_coeff_a;
+        current->wind_function_b = mass1_coeff_b;
+        current->conduction = mass1_coeff_cond;
+        current->brunt = mass1_coeff_brunt;
+      }
+
+      /* read and set met coefficients from a file, if called for */
+
+      /* update the MASS1 met zone coefficients */
+    }
   }
 #endif
 
@@ -177,7 +218,7 @@ void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL * channel,
       sprintf(buffer, "%sStreamflow.Only", DumpPath);
       OpenFile(&(channel->streamflowout), buffer, "w", TRUE);
       /* output files for John's RBM model */
-      if (Options->StreamTemp) {
+      if (Options->StreamTemp && !Options->UseMASS1) {
         //inflow to segment
         sprintf(buffer, "%sInflow.Only", DumpPath);
         OpenFile(&(channel->streaminflow), buffer, "w", TRUE);
@@ -325,7 +366,7 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
 #ifdef MASS1_CHANNEL
     if (Options->UseMASS1) {
       mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
-                          &(Time->Current), Time->Dt);
+                          &(Time->Current), Time->Dt, Options->StreamTemp);
     } else {
       channel_route_network(ChannelData->streams, Time->Dt);
     }
@@ -339,7 +380,7 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
                                 ChannelData->streamout,
                                 ChannelData->streamflowout, flag);
       /* save parameters for John's RBM model */
-      if (Options->StreamTemp)
+      if (Options->StreamTemp && !Options->UseMASS1)
         channel_save_outflow_text_cplmt(Time, buffer,ChannelData->streams,ChannelData, flag);
     }
   }

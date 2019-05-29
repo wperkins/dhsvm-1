@@ -76,18 +76,22 @@ int main(int argc, char **argv)
     {0.0, NULL, NULL, NULL, NULL, 0.0},												/* EVAPPIX */
     {0.0, 0.0, 0.0, 0.0, 0.0, NULL, NULL, 0.0, 0, 0.0},								/* PRECIPPIX */
     {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}, 0.0, {0.0, 0.0}, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-                                                                                    /* PIXRAD */
-    {0.0, 0.0, 0, NULL, NULL, 0.0, 0, 0.0, 0.0, 0.0, 0.0, NULL, NULL},				/* ROADSTRUCT*/
-    {0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },		                                            /* SNOWPIX */
+                                                                                /* PIXRAD */
+    {0.0, 0.0, 0, NULL, NULL, 0.0, 0, 0.0, 0.0, 0.0, 0.0, NULL, NULL},				  /* ROADSTRUCT*/
+	  {0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},     /* SNOWPIX */ 
     {0, 0.0, NULL, NULL, NULL, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},			                /* SOILPIX */
-    {0, 0, 0.0, 0.0, 0.0, NULL },                                                    /* VEGPIX */
+    {0, 0, 0.0, 0.0, 0.0, NULL },                                               /* VEGPIX */
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0l, 0.0, 0.0
   };
-  CHANNEL ChannelData = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL};
+  CHANNEL ChannelData = {
+     NULL, NULL, NULL, NULL, NULL, NULL, 
+     0, 0,
+     NULL, NULL, NULL, NULL,
+     NULL, NULL, NULL, NULL, NULL, NULL,
+     NULL, NULL, NULL, NULL, NULL, NULL
+    };
   DUMPSTRUCT Dump;
   EVAPPIX **EvapMap = NULL;
   INPUTFILES InFiles;
@@ -108,7 +112,6 @@ int main(int argc, char **argv)
   ROADSTRUCT **Network	= NULL;	/* 2D Array with channel information for each pixel */
   SNOWPIX **SnowMap		= NULL;
   MET_MAP_PIX **MetMap	= NULL;
-  SNOWTABLE *SnowAlbedo = NULL;
   SOILPIX **SoilMap		= NULL;
   SOILTABLE *SType	    = NULL;
   SOLARGEOMETRY SolarGeo;		/* Geometry of Sun-Earth system (needed for INLINE radiation calculations */
@@ -169,14 +172,19 @@ int main(int argc, char **argv)
   /* Start recording time */
   start = clock();
 
+  /* initiate input/output format */
+
   ReadInitFile(InFiles.Const, &Input);
   InitConstants(Input, &Options, &GMap, &SolarGeo, &Time);
 
   InitFileIO(Options.FileFormat);
-  InitTables(Time.NDaySteps, Input, &Options, &SType, &Soil, &VType, &Veg,
-	     &SnowAlbedo);
+  InitTables(Time.NDaySteps, Input, &Options, &Map, &SType, &Soil, &VType, &Veg); 
 
   InitTerrainMaps(Input, &Options, &GMap, &Map, &Soil, &Veg, &TopoMap, SType, &SoilMap, VType, &VegMap);
+
+  InitSnowMap(&Map, &SnowMap, &Time);
+
+  InitMappedConstants(Input, &Options, &Map, &SnowMap);
 
   CheckOut(&Options, Veg, Soil, VType, SType, &Map, TopoMap, VegMap, SoilMap);
 
@@ -253,12 +261,11 @@ int main(int argc, char **argv)
   }
 #endif
 
-  InitSnowMap(&Map, &SnowMap);
   InitAggregated(&Options, Veg.MaxLayers, Soil.MaxLayers, &Total);
 
-  InitModelState(&(Time.Start), &Map, &Options, PrecipMap, SnowMap, SoilMap,
+  InitModelState(&(Time.Start), Time.NDaySteps, &Map, &Options, PrecipMap, SnowMap, SoilMap,
 		 Soil, SType, VegMap, Veg, VType, Dump.InitStatePath,
-		 SnowAlbedo, TopoMap, Network, &HydrographInfo, Hydrograph);
+		 TopoMap, Network, &HydrographInfo, Hydrograph);
 
   InitNewMonth(&Time, &Options, &Map, TopoMap, PrismMap, ShadowMap,
 	       &InFiles, Veg.NTypes, VType, NStats, Stat, Dump.InitStatePath);
@@ -291,8 +298,10 @@ int main(int argc, char **argv)
   Mass.OldWaterStorage = Mass.StartWaterStorage;
 
   /* computes the number of grid cell contributing to one segment */
-  if (Options.StreamTemp) 
-	Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX, ChannelData.streams);
+  if (Options.StreamTemp) {
+    Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX,
+                       ChannelData.streams, ChannelData.stream_state_ga);
+  }
 
   TIMING_TASK_END("startup", 1);
   
@@ -339,27 +348,26 @@ int main(int argc, char **argv)
 
     for (y = 0; y < Map.NY; y++) {
       for (x = 0; x < Map.NX; x++) {
-        if (INBASIN(TopoMap[y][x].Mask)) {
-
-          if (Options.Shading)
-            LocalMet =
-              MakeLocalMetData(y, x, &Map, Time.DayStep, &Options, NStats,
+	    if (INBASIN(TopoMap[y][x].Mask)) {
+		  if (Options.Shading)
+	        LocalMet =
+	        MakeLocalMetData(y, x, &Map, Time.DayStep, Time.NDaySteps, &Options, NStats,
 			       Stat, MetWeights[y][x], TopoMap[y][x].Dem,
 			       &(RadiationMap[y][x]), &(PrecipMap[y][x]), &Radar,
 			       RadarMap, PrismMap, &(SnowMap[y][x]),
-			       SnowAlbedo, &(VegMap[y][x].Type), &(VegMap[y][x]), 
-                               MM5Input, WindModel, PrecipLapseMap,
+			       &(VegMap[y][x].Type), &(VegMap[y][x]), 
+             MM5Input, WindModel, PrecipLapseMap,
 			       &MetMap, PptMultiplierMap[y][x], NGraphics, Time.Current.Month,
 			       SkyViewMap[y][x], ShadowMap[Time.DayStep][y][x],
 			       SolarGeo.SunMax, SolarGeo.SineSolarAltitude);
-          else
-            LocalMet =
-              MakeLocalMetData(y, x, &Map, Time.DayStep, &Options, NStats,
+		  else
+	        LocalMet =
+	        MakeLocalMetData(y, x, &Map, Time.DayStep, Time.NDaySteps, &Options, NStats,
 			       Stat, MetWeights[y][x], TopoMap[y][x].Dem,
 			       &(RadiationMap[y][x]), &(PrecipMap[y][x]), &Radar,
 			       RadarMap, PrismMap, &(SnowMap[y][x]),
-			       SnowAlbedo, &(VegMap[y][x].Type), &(VegMap[y][x]), 
-                               MM5Input, WindModel, PrecipLapseMap,
+			       &(VegMap[y][x].Type), &(VegMap[y][x]), 
+             MM5Input, WindModel, PrecipLapseMap,
 			       &MetMap, PptMultiplierMap[y][x],NGraphics, Time.Current.Month, 0.0,
 			       0.0, SolarGeo.SunMax,
 			       SolarGeo.SineSolarAltitude);
@@ -398,7 +406,7 @@ int main(int argc, char **argv)
 
     /* Average all RBM inputs over each segment */
     if (Options.StreamTemp) {
-      channel_grid_avg(ChannelData.streams);
+      channel_grid_avg(ChannelData.streams, ChannelData.stream_state_ga);
       if (Options.CanopyShading)
         CalcCanopyShading(&Time, ChannelData.streams, &SolarGeo);
     }
