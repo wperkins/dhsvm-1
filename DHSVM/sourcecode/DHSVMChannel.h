@@ -48,6 +48,8 @@ typedef struct {
   FILE *streamBeam;
   FILE *streamDiffuse;
   FILE *streamSkyView;
+  /* for MASS1 stream network */
+  FILE *streamtempout;
   void *mass1_streams;
 } CHANNEL;
 

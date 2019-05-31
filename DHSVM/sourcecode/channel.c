@@ -698,6 +698,33 @@ void channel_free_network(Channel * net)
 }
 
 /* -------------------------------------------------------------
+   channel_save_temperature_text
+   ------------------------------------------------------------- */
+int
+channel_save_temperature_text(char *tstring, Channel *net, FILE *out, int flag)
+{
+  ChannelPtr s;
+  
+  if (flag == 1) {
+    fprintf(out, "DATE ");
+    for (s = net; s != NULL; s = s->next) {
+      if (s->record) {
+        fprintf(out, "%s ", s->record_name);
+      }
+    }
+    fprintf(out, "\n");
+  }
+
+  fprintf(out, "%15s ", tstring);
+  for (s = net; s != NULL; s = s->next) {
+    if (s->record) {
+      fprintf(out, "%12.5g ", s->outflow_temp);
+    }
+  }
+  fprintf(out, "\n");
+}
+
+/* -------------------------------------------------------------
 channel_init
 ------------------------------------------------------------- */
 void channel_init(void)

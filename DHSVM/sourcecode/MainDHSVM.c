@@ -533,6 +533,8 @@ void cleanup(DUMPSTRUCT *Dump, CHANNEL *ChannelData, OPTIONSTRUCT *Options,
 	  fclose(Dump->FinalBalance.FilePtr);
 	if (ChannelData->streamflowout != NULL)
 	  fclose(ChannelData->streamflowout);
+        if (ChannelData->streamtempout != NULL)
+	  fclose(ChannelData->streamtempout);
 	if (ChannelData->streamout != NULL)
 	  fclose(ChannelData->streamout);
 	if (ChannelData->roadflowout != NULL)

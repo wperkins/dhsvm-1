@@ -256,6 +256,11 @@ void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL * channel,
         sprintf(buffer, "%sSkyview.Only", DumpPath);
         OpenFile(&(channel->streamSkyView), buffer, "w", TRUE);
       }
+      /* Output stream temperature simulated by MASS1, if any */
+      if (Options->StreamTemp && Options->UseMASS1) {
+        sprintf(buffer, "%sStreamtemp.Only", DumpPath);
+        OpenFile(&(channel->streamtempout), buffer, "w", TRUE);
+      }
     }
     if (channel->roads != NULL) {
       sprintf(buffer, "%sRoad.Flow", DumpPath);
@@ -382,6 +387,12 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
       /* save parameters for John's RBM model */
       if (Options->StreamTemp && !Options->UseMASS1)
         channel_save_outflow_text_cplmt(Time, buffer,ChannelData->streams,ChannelData, flag);
+      if (Options->StreamTemp && Options->UseMASS1) {
+        channel_save_temperature_text(buffer, 
+                                      ChannelData->streams,
+                                      ChannelData->streamtempout,
+                                      flag);
+      }
     }
   }
   ParallelBarrier();
@@ -457,6 +468,7 @@ DestroyChannel(OPTIONSTRUCT *Options, MAPSIZE *Map, CHANNEL *channel)
     if (ParallelRank() == 0) {
       if (channel->streamout != NULL) fclose(channel->streamout);
       if (channel->streamflowout != NULL) fclose(channel->streamflowout);
+      if (channel->streamtempout != NULL) fclose(channel->streamtempout);
     }    
   }
   if (channel->roads != NULL) {
