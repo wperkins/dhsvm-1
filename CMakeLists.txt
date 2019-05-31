@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-04-10 14:09:45 d3g096
+# Last Change: 2019-05-31 06:37:01 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -68,7 +68,7 @@ if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp")
   endif()
 
-endif (DHSVM_USE_MASS1)
+endif (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
 
 # -------------------------------------------------------------
 # MPI is required

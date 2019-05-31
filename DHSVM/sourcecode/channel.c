@@ -270,6 +270,7 @@ static Channel *alloc_channel_segment(void)
   seg->VP = 0.;     /* actual vapor pressure */
   seg->WND = 0.;
   seg->ATP = 0.;
+  seg->RH = 0.;
   seg->Ncells = 0; /* not used for now */
   seg->azimuth = 0;
   seg->skyview = 0;
@@ -577,6 +578,7 @@ int channel_step_initialize_network(Channel *net)
     current->VP = 0.;              /* actual vapor pressure */
     current->WND = 0.;
     current->ATP = 0.;
+    current->RH = 0.;
     current->azimuth = 0;
     current->skyview = 0;
     //current->Ncells = 0; /* not used for now */
