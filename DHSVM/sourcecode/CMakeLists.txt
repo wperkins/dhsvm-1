@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-04-04 12:40:02 d3g096
+# Last Change: 2019-05-31 12:40:08 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -189,6 +189,7 @@ list(APPEND DHSVM_LIBS
 
 if(DHSVM_USE_MASS1)
   add_executable(DHSVM ${DHSVM_SRC} mass1_channel.c)
+  set_property(TARGET DHSVM PROPERTY LINKER_LANGUAGE Fortran)
   target_link_libraries(DHSVM mass1lib gastemp ts ${DHSVM_LIBS})
   target_compile_definitions(DHSVM PUBLIC MASS1_CHANNEL=1)
 else(DHSVM_USE_MASS1)
@@ -201,6 +202,7 @@ set_target_properties(DHSVM PROPERTIES LINKER_LANGUAGE CXX)
 
 if(DHSVM_SNOW_ONLY)
   add_executable(DHSVM_SNOW ${DHSVM_SRC})
+  set_property(TARGET DHSVM_SNOW PROPERTY LINKER_LANGUAGE Fortran)
   target_compile_definitions(DHSVM_SNOW PUBLIC SNOW_ONLY=1)
   target_link_libraries(DHSVM_SNOW ${DHSVM_LIBS})
   set_target_properties(DHSVM_SNOW PROPERTIES LINKER_LANGUAGE CXX)
