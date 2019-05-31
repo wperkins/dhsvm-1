@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-05-31 06:37:01 d3g096
+# Last Change: 2019-05-31 13:15:41 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -59,6 +59,9 @@ option (DHSVM_USE_RBM "Build RBM and related programs" OFF)
 option (DHSVM_USE_MASS1 "Use MASS1 for channel network routing" OFF)
 if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
   enable_language(Fortran)
+  if (DHSVM_USE_MASS1)
+    include(FortranCInterface)
+  endif (DHSVM_USE_MASS1)
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     # trap floating point exceptions and use preprocessor
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -ffpe-trap=invalid,zero,overflow -cpp -fbacktrace")
