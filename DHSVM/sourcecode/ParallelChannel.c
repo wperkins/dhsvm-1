@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-04-09 11:09:36 d3g096
+ * LAST CHANGE: 2019-05-30 14:35:33 d3g096
  * COMMENTS:
  *
  *    All processes have a copy of the channel network.  All processes
@@ -46,6 +46,7 @@ enum _channel_state_slot {
   ILW,
   NLW,
   VP,
+  RH,
   WND,
   Azimuth,
   SkyView,
@@ -204,6 +205,7 @@ ChannelGatherHeatBudget(ChannelPtr net, int ga)
     tmp[f++][idx] = current->ILW;
     tmp[f++][idx] = current->NLW;
     tmp[f++][idx] = current->VP;
+    tmp[f++][idx] = current->RH;
     tmp[f++][idx] = current->WND;
     tmp[f++][idx] = current->azimuth;
     tmp[f++][idx] = current->skyview;
@@ -233,6 +235,7 @@ ChannelGatherHeatBudget(ChannelPtr net, int ga)
     current->ILW      = tmp[f++][idx];
     current->NLW      = tmp[f++][idx];
     current->VP       = tmp[f++][idx];
+    current->RH       = tmp[f++][idx];
     current->WND      = tmp[f++][idx];
     current->azimuth  = tmp[f++][idx];
     current->skyview  = tmp[f++][idx];
