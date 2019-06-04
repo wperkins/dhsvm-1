@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-03 09:16:07 d3g096
+ * LAST CHANGE: 2019-06-04 08:45:42 d3g096
  * COMMENTS:
  */
 
@@ -89,7 +89,7 @@ mass1_write_config(const char *outname)
     "0	/	Do Gas Dispersion\n"
     "0	/	Do Gas Air/Water Exchange\n"
     "0	/	Do Temp Dispersion\n"
-    "0	/	Do Temp surface exchange\n"
+    "1	/	Do Temp surface exchange\n"
     "0	/	Do Hotstart read file\n"
     "1	/	Do Restart write file\n"
     "0	/	Do Print section geometry\n"
@@ -125,10 +125,10 @@ mass1_write_config(const char *outname)
     "\"none\"     		/	lateral inflow bs file name\n"
     "02-01-2000	/	date run begins\n"
     "00:00:00	/	time run begins\n"
-    "01-10-2001	/	date run ends\n"
+    "02-02-2000	/	date run ends\n"
     "00:00:00	/	time run ends\n"
     "0.5	/	delta t in hours (0.5 for flow only; 0.02 for transport)\n"
-    "336	/	printout frequency\n";
+    "2  	/	printout frequency\n";
 
   static char outfile[] = "mass1.cfg";
   FILE *out;
@@ -347,6 +347,43 @@ mass1_write_initial(const char *outname, Channel *network, const int dodry)
   fclose(out);
 }
 
+/******************************************************************************/
+/*                      mass1_write_gage                                      */
+/******************************************************************************/
+void
+mass1_write_gage(const char *outname, Channel *network)
+{
+  char outfile[MAXPATHLEN];
+  FILE *out;
+  Channel *current;
+  char *c;
+  char buf[256];
+
+  sprintf(outfile, "%sgage.dat", outname);
+  if ((out = fopen(outfile, "wt")) == NULL) {
+    error_handler(ERRHDL_ERROR, "cannot open gage control file \"%s\"",
+                  outfile);
+    return;
+  }
+
+  error_handler(ERRHDL_DEBUG, "writing MASS1 gage control to \"%s\"",
+                outfile);
+
+  for (current = network; current != NULL; current = current->next) {
+    if (current->record) {
+      /* replace any spaces or tabs with an underscore */
+      strncpy(buf, current->record_name, 256);
+      for (c = &buf[0]; *c != NULL && c - &buf[0] < 256 - 1; ++c) {
+        if (isspace(*c)){
+          *c = '_';
+        }
+      }
+      fprintf(out, "%d %d \"%s\" /\n", current->id, 2, buf);
+    }
+  }
+  fclose(out);
+}
+
 
 /******************************************************************************/
 /*                            Main Program                                    */
@@ -439,6 +476,7 @@ main(int argc, char **argv)
   mass1_write_points(outname, network, spacing);
   mass1_write_initial(outname, network, 0);
   mass1_write_bcs(outname, network);
+  mass1_write_gage(outname, network);
 
   channel_free_network(network);
   channel_free_classes(classes);
