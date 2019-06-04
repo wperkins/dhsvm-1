@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-05-29 11:56:30 d3g096
+ * LAST CHANGE: 2019-06-03 09:16:07 d3g096
  * COMMENTS:
  */
 
@@ -301,6 +301,8 @@ mass1_write_bcs(const char *outname, Channel *network)
   fclose(out);
 
   sprintf(outfile, "%sbc.dat", outname);
+  error_handler(ERRHDL_DEBUG, "writing MASS1 initial state information to \"%s\"",
+                outfile);
   if ((out = fopen(outfile, "wt")) == NULL) {
     error_handler(ERRHDL_ERROR, "cannot open link BC file \"%s\"",
                   outfile);
@@ -340,7 +342,7 @@ mass1_write_initial(const char *outname, Channel *network, const int dodry)
     
     wsel = current->inlet_elevation + current->class2->bank_height;
     fprintf(out, "%8d %10.1f %10.1f %10.1f %10.1f /\n", current->id,
-            1.0, wsel, 0.0, 10.0);
+            0.0, wsel, 0.0, 10.0);
   }
   fclose(out);
 }
@@ -436,6 +438,7 @@ main(int argc, char **argv)
   mass1_write_links(outname, network, spacing);
   mass1_write_points(outname, network, spacing);
   mass1_write_initial(outname, network, 0);
+  mass1_write_bcs(outname, network);
 
   channel_free_network(network);
   channel_free_classes(classes);
