@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-05-31 13:31:45 d3g096
+# Last Change: 2019-06-05 07:24:46 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -420,7 +420,7 @@ target_link_libraries(channel_mass1
 # -------------------------------------------------------------
 # Installation
 # -------------------------------------------------------------
-install(TARGETS DHSVM
+install(TARGETS DHSVM channel_mass1
   DESTINATION bin
 )
 
@@ -440,3 +440,4 @@ if(DHSVM_SNOW_ONLY)
      )
   endif(GPTL_FOUND)
 endif(DHSVM_SNOW_ONLY)
+
