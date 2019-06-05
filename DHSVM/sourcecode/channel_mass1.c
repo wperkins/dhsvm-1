@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-04 08:45:42 d3g096
+ * LAST CHANGE: 2019-06-04 11:48:36 d3g096
  * COMMENTS:
  */
 
@@ -79,7 +79,7 @@ mass1_write_config(const char *outname)
 {
   const char cfg[] =
     "    MASS1 Configuration File - Version 0.83\n"
-    "0	/	Do Flow\n"
+    "1	/	Do Flow\n"
     "0	/	Do lateral inflow\n"
     "0	/	Do Gas\n"
     "0	/	Do Temp\n"
@@ -264,9 +264,9 @@ mass1_write_points(const char *outname, Channel *network, const float spacing)
     npts = channel_points(current->length, spacing);
 
     fprintf(out, "%5d", current->id);                   /* link id */
-    fprintf(out, " %10.2f", current->length);           /* link length */
-    fprintf(out, " %10.2f", current->inlet_elevation);  /* upstream elevation */
-    fprintf(out, " %10.2f", current->outlet_elevation); /* downstream elevation */
+    fprintf(out, " %12.2f", current->length);           /* link length */
+    fprintf(out, " %12.4f", current->inlet_elevation);  /* upstream elevation */
+    fprintf(out, " %12.4f", current->outlet_elevation); /* downstream elevation */
     fprintf(out, " %5d", current->class2->id);          /* section id */
     fprintf(out, " %10.4f", current->class2->friction); /* Manning's n */
     fprintf(out, " %10.1f", 300.0);                     /* longitudinal dispersion */
