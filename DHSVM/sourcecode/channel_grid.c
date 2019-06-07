@@ -873,11 +873,13 @@ void Init_segment_ncell(TOPOPIX **TopoMap, ChannelMapPtr ** map, int NY,
 
   ChannelGatherCellCount(net, ga);
 
-  for (; net != NULL; net = net->next) {
-    if (net->Ncells == 0 ) {
-      error_handler(ERRHDL_ERROR,
-                    "Init_segment_ncells: segment %d: crosses no cells",
-                    net->id);
+  if (ParallelRank() == 0) {
+    for (; net != NULL; net = net->next) {
+      if (net->Ncells == 0 ) {
+        error_handler(ERRHDL_ERROR,
+                      "Init_segment_ncells: segment %d: crosses no cells",
+                      net->id);
+      }
     }
   }
 }
