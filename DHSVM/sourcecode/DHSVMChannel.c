@@ -153,7 +153,12 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 
       /* read and set met coefficients from a file, if called for */
 
+      /* FIXME */
+
       /* update the MASS1 met zone coefficients */
+      
+      mass1_set_coefficients(channel->mass1_streams,
+                             channel->streams);
     }
   }
 #endif
