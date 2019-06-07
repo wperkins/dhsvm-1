@@ -223,4 +223,10 @@ void InitNetwork(MAPSIZE *Map, TOPOPIX **TopoMap,
     }
     fclose(inputfile);
   }
+
+  /* Ncells in not always needed, but it's not hard to compute. */
+
+  Init_segment_ncell(TopoMap, ChannelData->stream_map, Map->NY, Map->NX,
+                     ChannelData->streams, ChannelData->stream_state_ga);
+
 }
