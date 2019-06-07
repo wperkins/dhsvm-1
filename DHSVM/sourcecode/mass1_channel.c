@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-05-30 13:09:13 d3g096
+ * LAST CHANGE: 2019-06-06 13:19:28 d3g096
  * COMMENTS:
  */
 
@@ -37,19 +37,21 @@ extern double mass1_link_outflow_temp(void *net, int id);
 
 
 /* -------------------------------------------------------------
-   mass1_set_coeffients
+   mass1_set_coefficients
    ------------------------------------------------------------- */
 void
-mass1_set_coeffients(void *net, Channel *streams)
+mass1_set_coefficients(void *net, Channel *streams)
 {
   ChannelPtr current;
 
   for (current = streams; current != NULL; current = current->next) {
-    mass1_update_met_coeff(net, current->id,
-                           current->wind_function_a,
-                           current->wind_function_b,
-                           current->conduction,
-                           current->brunt);
+    if (current->Ncells > 0) {
+      mass1_update_met_coeff(net, current->id,
+                             current->wind_function_a,
+                             current->wind_function_b,
+                             current->conduction,
+                             current->brunt);
+    }
   }
 }
 
@@ -85,15 +87,17 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
     mass1_update_latq(net, id, q, todate);
 
     if (dotemp) {
-      /* update lateral inflow temperatures */
-      mass1_update_latt(net, id, current->lateral_temp, todate);
+      if (current->Ncells > 0) {
+        /* update lateral inflow temperatures */
+        mass1_update_latt(net, id, current->lateral_temp, todate);
 
-      /* update met */
+        /* update met */
 
-      mass1_update_met(net, id,
-                       current->ATP, current->RH/100.0,
-                       current->WND, current->NSW,
-                       todate);
+        mass1_update_met(net, id,
+                         current->ATP, current->RH/100.0,
+                         current->WND, current->NSW,
+                         todate);
+      }
     }
   }
 
