@@ -297,12 +297,6 @@ int main(int argc, char **argv)
     Total.Soil.SatFlow;
   Mass.OldWaterStorage = Mass.StartWaterStorage;
 
-  /* computes the number of grid cell contributing to one segment */
-  if (Options.StreamTemp) {
-    Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX,
-                       ChannelData.streams, ChannelData.stream_state_ga);
-  }
-
   TIMING_TASK_END("startup", 1);
   
 /*****************************************************************************
