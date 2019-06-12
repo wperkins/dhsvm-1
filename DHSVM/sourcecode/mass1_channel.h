@@ -8,7 +8,7 @@
    ------------------------------------------------------------- */
 /* -------------------------------------------------------------
    Created February  8, 2019 by William A. Perkins
-   Last Change: 2019-06-06 13:19:28 d3g096
+   Last Change: 2019-06-07 11:25:20 d3g096
    ------------------------------------------------------------- */
 
 #ifndef _mass1_channel_h_
@@ -25,6 +25,8 @@
 extern void *mass1_create(char *cfgdir, char *outdir,
                           DATE *start, DATE *end,
                           int pid, int dotemp);
+
+extern void mass1_prepare_network(void *net, Channel *streams);
 
 extern void mass1_write_hotstart(void *net, char *fname);
 

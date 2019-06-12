@@ -197,6 +197,11 @@ int main(int argc, char **argv)
     InitUnitHydrograph(Input, &Map, TopoMap, &UnitHydrograph,
 		       &Hydrograph, &HydrographInfo);
  
+  /* Stream channel Ncells is not always needed, but it's not hard to compute. */
+
+  Init_segment_ncell(TopoMap, ChannelData.stream_map, Map.NY, Map.NX,
+                     ChannelData.streams, ChannelData.stream_state_ga);
+
   InitNetwork(&Map, TopoMap, SoilMap, 
 	      VegMap, VType, &Network, &ChannelData, Veg, &Options);
 
