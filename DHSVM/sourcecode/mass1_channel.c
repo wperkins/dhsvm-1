@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-06 13:19:28 d3g096
+ * LAST CHANGE: 2019-06-07 11:43:45 d3g096
  * COMMENTS:
  */
 
@@ -20,6 +20,7 @@
    routines in mass1lib that are only used here
    ------------------------------------------------------------- */
 
+extern void mass1_prepare_segment(void *cnet, int id);
 extern void mass1_route(void *net, DATE *ddate);
 extern void mass1_update_latq(void *net, int id, float latq, DATE *ddate);
 extern void mass1_update_latt(void *net, int id, float latt, DATE *ddate);
@@ -34,6 +35,20 @@ extern double mass1_link_inflow(void *net, int id);
 
 extern double mass1_link_inflow_temp(void *net, int id);
 extern double mass1_link_outflow_temp(void *net, int id);
+
+/* -------------------------------------------------------------
+   mass1_prepare_network
+   ------------------------------------------------------------- */
+void
+mass1_prepare_network(void *net, Channel *streams)
+{
+  ChannelPtr current;
+  for (current = streams; current != NULL; current = current->next) {
+    if (current->Ncells > 0) {
+      mass1_prepare_segment(net, current->id);
+    }
+  }
+}
 
 
 /* -------------------------------------------------------------
@@ -80,19 +95,19 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
 
   for (current = streams; current != NULL; current = current->next) {
     id = current->id;
-    /* at this point lateral_inflow is a volume, make it a rate by
-       dividing by the time step */
-    q = current->lateral_inflow/deltat;
-    /* FIXME: make sure q dimensions are correct */
-    mass1_update_latq(net, id, q, todate);
+    if (current->Ncells > 0) {
 
-    if (dotemp) {
-      if (current->Ncells > 0) {
+      /* at this point lateral_inflow is a volume, make it a rate by
+         dividing by the time step */
+      q = current->lateral_inflow/deltat;
+
+      mass1_update_latq(net, id, q, todate);
+      if (dotemp) {
         /* update lateral inflow temperatures */
         mass1_update_latt(net, id, current->lateral_temp, todate);
 
         /* update met */
-
+        
         mass1_update_met(net, id,
                          current->ATP, current->RH/100.0,
                          current->WND, current->NSW,
