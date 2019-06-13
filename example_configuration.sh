@@ -10,7 +10,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-02-15 07:56:25 d3g096
+# Last Change: 2019-06-13 08:01:08 d3g096
 
 set -xue
 
@@ -107,9 +107,21 @@ if [ $host == "flophouse" ]; then
 
 elif [ $host == "tlaloc" ]; then
 
-    CC=/usr/bin/gcc
-    CXX=/usr/bin/g++
-    FC=/usr/bin/gfortran
+    # This is a RHEL6 system.  This uses the devtoolset 8 package,
+    # which allows access to newer GNU compilers (8.3 here). Using
+    # devtoolset 8 is not necessary.  DHSVM can be built with the
+    # default compilers, but this makes debugging Fortran much easier.
+    # It also uses the OpenMPI package.  Before running
+    #
+    #  module load openmpi-1.10-x86_64
+    #  scl enable devtoolset-8 $SHELL
+    #
+    # Of course, necessary packages need to be installed and GA needs
+    # to be built with OpenMPI.  
+
+    CC=/opt/rh/devtoolset-8/root/usr/bin/gcc
+    CXX=/opt/rh/devtoolset-8/root/usr/bin/g++
+    FC=/opt/rh/devtoolset-8/root/usr/bin/gfortran
     export CC CXX FC
 
     prefix="/file0/perksoft"
@@ -121,7 +133,7 @@ elif [ $host == "tlaloc" ]; then
 	-D GA_EXTRA_LIBS:STRING="-lm" \
         -D DHSVM_TIMING_LEVEL:STRING="1" \
         -D GPTL_DIR:PATH="$prefix/gptl-v5.5.3-2-gbb58395" \
-        -D DHSVM_USE_NETCDF:BOOL=ON \
+        -D DHSVM_USE_NETCDF:BOOL=OFF \
         -D CMAKE_INSTALL_PREFIX:PATH="$prefix/dhsvm" \
         $common_flags \
         ..
