@@ -278,16 +278,21 @@ elif [ $host = "constance" ]; then
     CXX=icpc
     export CC CXX PATH
 
+    installdir="$prefix/dhsvm-intel"
+    if [ "$mass1"x == "ON"x ]; then
+	installdir="$prefix/dhsvm-mass1-intel"
+    fi
+
     cmake $options \
         -D MPI_C_COMPILER:STRING="mpicc" \
         -D MPIEXEC:STRING="mpiexec" \
         -D GA_DIR:STRING="$prefix/dhsvm-intel" \
 	-D GA_EXTRA_LIBS:STRING="-libverbs -lm" \
-        -D GPTL_DIR:PATH="$prefix" \
+        -D GPTL_DIR:PATH="$prefix/dhsvm-intel" \
         -D DHSVM_USE_X11:BOOL=OFF \
         -D DHSVM_USE_NETCDF:BOOL=ON \
 	-D NetCDF_DIR:PATH="$prefix/netcdf-intel" \
-        -D CMAKE_INSTALL_PREFIX:PATH="$prefix/dhsvm-intel" \
+        -D CMAKE_INSTALL_PREFIX:PATH="$installdir" \
         $common_flags \
         ..
 
