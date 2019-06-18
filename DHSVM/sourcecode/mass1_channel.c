@@ -10,11 +10,14 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-07 11:43:45 d3g096
+ * LAST CHANGE: 2019-06-17 12:48:38 d3g096
  * COMMENTS:
  */
 
 #include "mass1_channel.h"
+
+#include "tableio.h"
+#include "fileio.h"
 
 /* -------------------------------------------------------------
    routines in mass1lib that are only used here
@@ -132,3 +135,4 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
     }
   }
 }
+         

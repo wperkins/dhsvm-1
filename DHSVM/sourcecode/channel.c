@@ -742,6 +742,58 @@ void channel_done(void)
   return;
 }
 
+/* -------------------------------------------------------------
+   channel_network_index_create
+
+   Allocates and builds an array of pointers so channel segments can
+   be located easily by their ID.
+   ------------------------------------------------------------- */
+ChannelIndex *
+channel_network_index_create(ChannelPtr net)
+{
+  ChannelIndex *index;
+  ChannelPtr current;
+  int maxid, i;
+
+  index = (ChannelIndex *)malloc(sizeof(ChannelIndex));
+  if (index == NULL) {
+    error_handler(ERRHDL_ERROR, "channel_network_index_create: malloc failed: %s",
+      strerror(errno));
+    return NULL;
+  }
+
+  for (maxid = -999, current = net; current != NULL; current = current->next) {
+    if (current->id > maxid) maxid = current->id;
+  }
+
+  index->maxid = maxid;
+  index->idmap = (Channel **) malloc((maxid+1)*sizeof(Channel *));
+  if (index->idmap == NULL) {
+    error_handler(ERRHDL_ERROR, "channel_network_index_create: calloc failed: %s",
+      strerror(errno));
+    return NULL;
+  }
+
+  for (i = 0; i <= index->maxid; ++i) index->idmap[i] = NULL;
+
+  for (current = net; current != NULL; current = current->next) {
+    i = current->id;
+    index->idmap[i] = current;
+  }
+  return index;
+}
+
+/* -------------------------------------------------------------
+   channel_network_index_destroy
+   ------------------------------------------------------------- */
+void
+channel_network_index_destroy(ChannelIndex *index)
+{
+  free(index->idmap);
+  free(index);
+}
+  
+
 #if TEST_MAIN
 
 /* -------------------------------------------------------------
@@ -1091,3 +1143,97 @@ int channel_read_rveg_param(Channel *head, const char *file, int *MaxID)
 
   return (err);
 }
+
+
+#ifdef MASS1_CHANNEL
+/* -------------------------------------------------------------
+   channel_read_mass1_coeff
+   ------------------------------------------------------------- */
+void
+channel_read_mass1_coeff(Channel *net, char *file)
+{
+  Channel *current = NULL;
+  ChannelIndex *cindex;
+  int done, rec;
+  int err = 0;
+  static const int fields = 6;
+  static TableField chan_fields[6] =
+    {
+     {"ID", TABLE_INTEGER, TRUE, FALSE, {0}, "", NULL},
+     {"MASS1 Wind Function A", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+     {"MASS1 Wind Function B", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+     {"MASS1 Conduction", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+     {"MASS1 Brunt", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+     {"MASS1 Inflow Temperature", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+    };
+
+  error_handler(ERRHDL_STATUS,
+    "channel_read_mass1_coeff: reading file \"%s\"", file);
+
+  if (table_open(file) != 0) {
+    error_handler(ERRHDL_ERROR,
+      "channel_read_network: unable to open file \"%s\": %s",
+      file, strerror(errno));
+    return NULL;
+  }
+
+  cindex = channel_network_index_create(net);
+
+  done = FALSE;
+  rec = 0;
+  while (!done) {
+    int i, id;
+
+    done = (table_get_fields(fields, chan_fields) < 0);
+
+    if (done) continue;
+
+    rec++;
+
+    id = chan_fields[0].value.integer;
+
+    if (id <= 0 || id > cindex->maxid) {
+      error_handler(ERRHDL_ERROR,
+                    "%s, record %d: segment %d: channel id invalid",
+                    file, rec, current->id);
+      err++;
+      continue;
+    }
+
+    current = cindex->idmap[id];
+
+    if (current == NULL) {
+      error_handler(ERRHDL_ERROR,
+                    "%s, record %d: segment %d: channel id invalid",
+                    file, rec, id);
+      err++;
+      continue;
+    }
+
+    i = 1;
+    current->wind_function_a = chan_fields[i++].value.real;
+    current->wind_function_b = chan_fields[i++].value.real;
+    current->conduction = chan_fields[i++].value.real;
+    current->brunt = chan_fields[i++].value.real;
+    current->lateral_temp = chan_fields[i++].value.real;
+  }
+
+  channel_network_index_destroy(cindex);
+
+  error_handler(ERRHDL_STATUS,
+    "%s: %d errors, %d warnings",
+    file, table_errors, table_warnings);
+
+  table_close();
+
+  error_handler(ERRHDL_STATUS,
+                "channel_read_mass1_coeff: done reading file \"%s\", %d records",
+                file, rec);
+
+  if (table_errors) {
+    error_handler(ERRHDL_ERROR,
+      "channel_read_mass1_coeff: %s: too many errors", file);
+  }
+}
+
+#endif
