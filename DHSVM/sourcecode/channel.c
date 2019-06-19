@@ -1174,6 +1174,7 @@ channel_read_mass1_coeff(Channel *net, char *file)
     error_handler(ERRHDL_ERROR,
       "channel_read_network: unable to open file \"%s\": %s",
       file, strerror(errno));
+    return;
   }
 
   cindex = channel_network_index_create(net);
