@@ -30,6 +30,38 @@
 #include "mass1_channel.h"
 #endif
 
+#ifdef MASS1_CHANNEL
+
+
+/* -------------------------------------------------------------
+   set_or_read_mass1_met_coeff
+   ------------------------------------------------------------- */
+static void
+set_or_read_mass1_met_coeff(ChannelPtr net, float ltemp,
+                            float winda, float windb, float cond,
+                            float brunt, char *coeff_file)
+{
+  ChannelPtr current, cindex;
+
+  /* all segments get the "default" inflow temperature and met
+     coefficients */
+  for (current = net; current != NULL;
+       current = current->next) {
+    current->lateral_temp = ltemp;
+    current->wind_function_a = winda;
+    current->wind_function_b = windb;
+    current->conduction = cond;
+    current->brunt = brunt;
+  }
+
+  /* if a file is specified, read it and set inflow temperature and
+     coefficienst only for the segments listed */
+  if (coeff_file != NULL) {
+    channel_read_mass1_coeff(net, coeff_file);
+  }
+}
+#endif
+
 /* -----------------------------------------------------------------------------
    InitChannel
    Reads stream and road files and builds the networks.
@@ -54,12 +86,13 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 WIND FUNCTION B", "", "9.2"},
     {"ROUTING", "MASS1 CONDUCTION COEFFICIENT", "", "0.47"},
     {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
-    /* {"ROTUING", "MASS1_MET COEFFICIENT FILE", "", ""}, */
+    {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {NULL, NULL, "", NULL}
   };
 #ifdef MASS1_CHANNEL
   char mass1_config_path[BUFSIZE + 1];
   float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond, mass1_coeff_brunt;
+  char *coeff_file;
   ChannelPtr current;
 #endif
 
@@ -141,20 +174,17 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
         ReportError(StrEnv[extreme_west].KeyName, 51);
       }
 
-      /* initialize met coefficients for each segment */
-      for (current = channel->streams; current != NULL;
-           current = current->next) {
-        current->lateral_temp = mass1_temp;
-        current->wind_function_a = mass1_coeff_a;
-        current->wind_function_b = mass1_coeff_b;
-        current->conduction = mass1_coeff_cond;
-        current->brunt = mass1_coeff_brunt;
+      if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
+        coeff_file = StrEnv[mass1_coeff_file].VarStr;
+      } else {
+        coeff_file = NULL;
       }
-
-      /* read and set met coefficients from a file, if called for */
-
-      /* FIXME */
-
+        
+      /* set met coefficients and read from a file, if called for */
+      set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
+                                  mass1_coeff_a, mass1_coeff_b,
+                                  mass1_conduction, mass1_coeff_brunt,
+                                  coeff_file);
     }
   }
 #endif

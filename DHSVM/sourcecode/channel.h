@@ -114,6 +114,16 @@ struct _channel_rec_ {
 typedef struct _channel_rec_ Channel, *ChannelPtr;
 
 /* -------------------------------------------------------------
+   struct ChannelIndex
+   A thing to hold an index into the channel network
+   ------------------------------------------------------------- */
+struct _channel_index_ {
+  int maxid;
+  Channel **idmap;
+};
+typedef struct _channel_index_ ChannelIndex;
+
+/* -------------------------------------------------------------
    externally available routines
    ------------------------------------------------------------- */
 
@@ -136,6 +146,9 @@ int channel_save_outflow_text(char *tstring, Channel *net, FILE *out,
 			      FILE *out2, int flag);
 int channel_save_temperature_text(char *tstring, Channel *net, FILE *out, int flag);
 void channel_free_network(Channel *net);
+
+ChannelIndex *channel_network_index_create(ChannelPtr net);
+void channel_network_index_destroy(ChannelIndex *index);
 
 				/* Module */
 

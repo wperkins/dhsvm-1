@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-04 11:48:36 d3g096
+ * LAST CHANGE: 2019-06-14 10:48:17 d3g096
  * COMMENTS:
  */
 
@@ -80,7 +80,7 @@ mass1_write_config(const char *outname)
   const char cfg[] =
     "    MASS1 Configuration File - Version 0.83\n"
     "1	/	Do Flow\n"
-    "0	/	Do lateral inflow\n"
+    "1	/	Do lateral inflow\n"
     "0	/	Do Gas\n"
     "0	/	Do Temp\n"
     "0	/	Do Printout\n"
