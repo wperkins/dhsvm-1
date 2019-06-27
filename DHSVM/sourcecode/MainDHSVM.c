@@ -90,7 +90,7 @@ int main(int argc, char **argv)
      0, 0,
      NULL, NULL, NULL, NULL,
      NULL, NULL, NULL, NULL, NULL, NULL,
-     NULL, NULL, NULL, NULL, NULL, NULL
+     NULL
     };
   DUMPSTRUCT Dump;
   EVAPPIX **EvapMap = NULL;
@@ -432,6 +432,7 @@ int main(int argc, char **argv)
         &Dump, VegMap, VType, &ChannelData);
     TIMING_TASK_END("Surface routing", 1);
 
+
 #endif
 
     TIMING_TASK_START("Output", 1);
@@ -546,12 +547,8 @@ void cleanup(DUMPSTRUCT *Dump, CHANNEL *ChannelData, OPTIONSTRUCT *Options,
 		fclose(ChannelData->streaminflow);
 	  if (ChannelData->streamoutflow != NULL) 
         fclose(ChannelData->streamoutflow);
-	  if (ChannelData->streamISW != NULL) 
-		fclose(ChannelData->streamISW);
 	  if (ChannelData->streamNSW != NULL) 
         fclose(ChannelData->streamNSW);
-	  if (ChannelData->streamILW != NULL) 
-        fclose(ChannelData->streamILW);
 	  if (ChannelData->streamNLW!= NULL) 
         fclose(ChannelData->streamNLW);								  
 	  if (ChannelData->streamVP!= NULL) 
@@ -560,11 +557,5 @@ void cleanup(DUMPSTRUCT *Dump, CHANNEL *ChannelData, OPTIONSTRUCT *Options,
 		fclose(ChannelData->streamWND);	
 	  if (ChannelData->streamATP!= NULL) 
 		fclose(ChannelData->streamATP);
-	  if (ChannelData->streamBeam != NULL)
-		fclose(ChannelData->streamBeam);
-	  if (ChannelData->streamDiffuse != NULL)
-		fclose(ChannelData->streamDiffuse);
-	  if (ChannelData->streamSkyView != NULL)
-		fclose(ChannelData->streamSkyView);
 	}
 }
