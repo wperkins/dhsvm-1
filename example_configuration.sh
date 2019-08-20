@@ -276,7 +276,8 @@ elif [ $host = "constance" ]; then
     PATH="$prefix/netcdf-intel:$PATH"
     CC=icc
     CXX=icpc
-    export CC CXX PATH
+    FC=ifort
+    export CC CXX PATH FC
 
     installdir="$prefix/dhsvm-intel"
     if [ "$mass1"x == "ON"x ]; then
