@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-06-05 07:24:46 d3g096
+# Last Change: 2019-09-03 12:55:54 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -160,6 +160,7 @@ set(DHSVM_SRC
   SnowInterception.c
   SnowMelt.c
   SnowPackEnergyBalance.c
+  SnowStats.c
   SoilEvaporation.c
   StabilityCorrection.c
   StoreModelState.c
