@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-05-30 14:35:33 d3g096
+ * LAST CHANGE: 2019-09-06 11:21:22 d3g096
  * COMMENTS:
  *
  *    All processes have a copy of the channel network.  All processes
@@ -38,6 +38,8 @@ enum _channel_state_slot {
   Inflow,
   Outflow,
   Storage,
+  InflowTemp,
+  OutflowTemp,
   ATP,
   ISW,
   Beam,
@@ -246,7 +248,6 @@ ChannelGatherHeatBudget(ChannelPtr net, int ga)
 
 /******************************************************************************/
 /*                            ChannelDistributeState                          */
-/* Currently Unused                                                           */
 /******************************************************************************/
 void
 ChannelDistributeState(Channel *net, int ga)
@@ -269,11 +270,13 @@ ChannelDistributeState(Channel *net, int ga)
       lo[0] = idx;
       lo[1] = LateralInflow;
       hi[0] = idx;
-      hi[1] = Storage;
+      hi[1] = OutflowTemp;
       value[LateralInflow] = current->lateral_inflow;
       value[Inflow] = current->inflow;
       value[Outflow] = current->outflow;
       value[Storage] = current->storage;
+      value[InflowTemp] = current->inflow_temp;
+      value[OutflowTemp] = current->outflow_temp;
       NGA_Put(ga, lo, hi, &value[0], ld);
     }
   }
@@ -293,6 +296,8 @@ ChannelDistributeState(Channel *net, int ga)
     current->inflow = value[Inflow];
     current->outflow = value[Outflow];
     current->storage = value[Storage];
+    current->inflow_temp = value[InflowTemp];
+    current->outflow_temp= value[OutflowTemp];
   }
   ParallelBarrier();
 

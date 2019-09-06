@@ -525,6 +525,10 @@ static int channel_route_segment(Channel * segment, int deltat)
   if (segment->outlet != NULL)
     segment->outlet->inflow += segment->outflow;
 
+  /* just make sure these are not garbage */
+  segment->inflow_temp = 0.0;
+  segment->outflow_temp = 0.0;
+
   return (err);
 }
 

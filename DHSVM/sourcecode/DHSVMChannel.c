@@ -347,14 +347,16 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
     /* collect lateral inflow from all processes */
     ChannelGatherLateralInflow(ChannelData->roads, ChannelData->road_state_ga);
 
-    /* All processes route the road network */
-    channel_route_network(ChannelData->roads, Time->Dt);
-
-    /* Only the root process saves the results */
+    /* Just the root process routes the road network and saves the results */
     if (ParallelRank() == 0) {
+      channel_route_network(ChannelData->roads, Time->Dt);
+
       channel_save_outflow_text(buffer, ChannelData->roads,
                                 ChannelData->roadout, ChannelData->roadflowout, flag);
     }
+
+    /* all processes get a copy of the routing results */
+    ChannelDistributeState(ChannelData->roads, ChannelData->road_state_ga);
   }
     
   /* add culvert outflow to surface water */
@@ -392,21 +394,21 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
     /* collect lateral inflow from all processes */
     ChannelGatherLateralInflow(ChannelData->streams, ChannelData->stream_state_ga);
 
-    /* All proacesses route the stream network */
+    /* Only the root process routes the stream network and saves the results */
+
+    if (ParallelRank() == 0) {
 
 #ifdef MASS1_CHANNEL
-    if (Options->UseMASS1) {
-      mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
-                          &(Time->Current), Time->Dt, Options->StreamTemp);
-    } else {
-      channel_route_network(ChannelData->streams, Time->Dt);
-    }
+      if (Options->UseMASS1) {
+        mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
+                            &(Time->Current), Time->Dt, Options->StreamTemp);
+      } else {
+        channel_route_network(ChannelData->streams, Time->Dt);
+      }
 #else
-    channel_route_network(ChannelData->streams, Time->Dt);
+      channel_route_network(ChannelData->streams, Time->Dt);
 #endif
     
-    /* Only the root process saves the results */
-    if (ParallelRank() == 0) {
       channel_save_outflow_text(buffer, ChannelData->streams,
                                 ChannelData->streamout,
                                 ChannelData->streamflowout, flag);
@@ -420,6 +422,9 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
                                       flag);
       }
     }
+
+    ChannelDistributeState(ChannelData->mass1_streams, ChannelData->stream_state_ga);
+    
   }
   ParallelBarrier();
 }
