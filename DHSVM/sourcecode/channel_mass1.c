@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-09-09 13:28:17 d3g096
+ * LAST CHANGE: 2019-09-09 13:41:05 d3g096
  * COMMENTS:
  */
 
@@ -321,7 +321,7 @@ mass1_write_bcs(const char *outname, Channel *network)
     return;
   }
   fprintf(out, "\n");
-  fcloase(out);
+  fclose(out);
 }
 
 /******************************************************************************/
