@@ -152,41 +152,47 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
-    channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
-                                          &(Time->Start), &(Time->End),
-                                          ParallelRank(), Options->StreamTemp);
 
-    if (Options->StreamTemp) {
-      if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
+    /* only the root process creates and uses a MASS1 network */
+    
+    if (ParallelRank() == 0) {
+      strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
+      channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
+                                            &(Time->Start), &(Time->End),
+                                            ParallelRank(), Options->StreamTemp);
 
-      if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
-        coeff_file = StrEnv[mass1_coeff_file].VarStr;
-      } else {
-        coeff_file = NULL;
-      }
+      if (Options->StreamTemp) {
+        if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
         
-      /* set met coefficients and read from a file, if called for */
-      set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
-                                  mass1_coeff_a, mass1_coeff_b,
-                                  mass1_conduction, mass1_coeff_brunt,
-                                  coeff_file);
+        if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
+          coeff_file = StrEnv[mass1_coeff_file].VarStr;
+        } else {
+          coeff_file = NULL;
+        }
+        
+        /* set met coefficients and read from a file, if called for */
+        set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
+                                    mass1_coeff_a, mass1_coeff_b,
+                                    mass1_conduction, mass1_coeff_brunt,
+                                    coeff_file);
+      }
     }
   }
+  ParallelBarrier();
 #endif
 
   if (Options->StreamTemp) {
@@ -423,7 +429,7 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
       }
     }
 
-    ChannelDistributeState(ChannelData->mass1_streams, ChannelData->stream_state_ga);
+    ChannelDistributeState(ChannelData->streams, ChannelData->stream_state_ga);
     
   }
   ParallelBarrier();
@@ -514,7 +520,9 @@ DestroyChannel(OPTIONSTRUCT *Options, MAPSIZE *Map, CHANNEL *channel)
   }
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    mass1_destroy(channel->mass1_streams);
+    if (ParallelRank() == 0) {
+      mass1_destroy(channel->mass1_streams);
+    }
   }
 #endif
 

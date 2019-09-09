@@ -230,9 +230,11 @@ void InitNetwork(MAPSIZE *Map, TOPOPIX **TopoMap,
 
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    mass1_prepare_network(ChannelData->mass1_streams, ChannelData->streams);
-    if (Options->StreamTemp) {
-      mass1_set_coefficients(ChannelData->mass1_streams, ChannelData->streams);
+    if (ParallelRank() == 0) {
+      mass1_prepare_network(ChannelData->mass1_streams, ChannelData->streams);
+      if (Options->StreamTemp) {
+        mass1_set_coefficients(ChannelData->mass1_streams, ChannelData->streams);
+      }
     }
   }
 #endif
