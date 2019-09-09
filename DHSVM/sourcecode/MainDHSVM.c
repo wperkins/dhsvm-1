@@ -427,7 +427,8 @@ int main(int argc, char **argv)
     if (Options.HasNetwork)
       RouteChannel(&ChannelData, &Time, &Map, TopoMap, SoilMap, &Total, 
 		   &Options, Network, SType, PrecipMap, LocalMet.Tair, LocalMet.Rh, SnowMap);
-
+    TIMING_TASK_END("Channel routing", 1);
+    
     TIMING_TASK_START("Surface routing", 1);
     if (Options.Extent == BASIN)
       RouteSurface(&Map, &Time, TopoMap, SoilMap, &Options,
