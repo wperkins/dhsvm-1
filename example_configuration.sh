@@ -292,6 +292,7 @@ elif [ $host = "constance" ]; then
     installdir="$prefix/dhsvm-intel"
     if [ "$mass1"x == "ON"x ]; then
 	installdir="$prefix/dhsvm-mass1-intel"
+        common_flags="$common_flags -D DHSVM_ENABLE_OPENMP:BOOL=ON"
     fi
 
     cmake $options \
