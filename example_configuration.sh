@@ -227,6 +227,8 @@ elif [ $host = "briareus" ]; then
 
     CC="icc"
     export CC
+    FC="ifort"
+    export FC
 
     cmake $options \
         -D DHSVM_USE_NETCDF:BOOL=ON \
