@@ -119,6 +119,7 @@ typedef struct {
   char MM5Precipitation[BUFSIZE + 1]; /* File with MM5 precipitation (m/timestep) */
   void *MM5PrecipitationMap;    /* 2D Map file instance for precipitation */
   char **MM5SoilTemp;		/* Files with MM5 soil temperatures (C) */
+  MM5FREQ MM5LapseFreq;         /* Frequency of MM5 temperature lapse maps */
   MM5FREQ MM5PrecipDistFreq;    /* Frequency of MM5 precip distribution maps */
   int MM5LastPrecipDistStep;    /* The precip distribution previously read */
   void *MM5PrecipDistMap;       /* 2D Map file instance for precip distribution */
@@ -240,6 +241,7 @@ typedef struct {
   int CanopyGapping;            /* if canopy gapping is on */
   int SnowSlide;                /* if snow sliding option is true */
   int PrecipSepr;               /* if TRUE use separate input of rain and snow */
+  int SnowStats;               /* if TRUE dumps snow statistics for each water year */
   char PrismDataPath[BUFSIZE + 1];
   char PrismDataExt[BUFSIZE + 1];
   char ShadingDataPath[BUFSIZE + 1];
@@ -365,6 +367,11 @@ typedef struct {
 
   float Freeze;			/* albedo when surface temperature below 0 C */
   float Thaw;			/* albedo when surface temperature above 0 C */
+
+  // SWE stats 
+  float MaxSwe;         /*Peak SWE of the water year*/
+  unint MaxSweDate;       /*Peak SWE date/timestep of the water year*/
+  unint MeltOutDate;    /* Last day of SWE of the water year */
 } SNOWPIX;
 
 typedef struct {
@@ -395,6 +402,9 @@ typedef struct {
   float DetentionStorage;        /* amount of water kept in detention storage when impervious fraction > 0 */
   float DetentionIn;			 /* detention storage change in current time step */
   float DetentionOut;            /* water flow out of detention storage */
+  
+  float KsLat;      /* Soil Lateral Conductivity */
+  float *Porosity;          /* Soil Porosity */
 } SOILPIX;
 
 typedef struct {
@@ -506,6 +516,11 @@ typedef struct {
                                    to the atmosphere (m/timestep) */
   float MeltEnergy;			    /* Energy used to melt snow and change of cold content
                                 of snow pack */
+  float *Fract;                  /* Fractional Coverage*/
+  float *LAI;                  /* LAI of the month*/
+  float **LAIMonthly;                  /* LAI of all months*/ 
+  float *MaxInt;                  /* Max Interception*/   
+  float Vf;                       /* spatial - Canopy view factor (0 - 1); Vf = VfAdjust*Fract */   
   CanopyGapStruct *Type;        /* canopy structure */
 } VEGPIX;
 

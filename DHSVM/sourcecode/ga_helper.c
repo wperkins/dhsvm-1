@@ -10,13 +10,15 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2018-11-06 09:21:58 d3g096
+ * LAST CHANGE: 2019-09-10 10:03:36 d3g096
  * COMMENTS:
  */
 
 #include <stdlib.h>
 #include "sizeofnt.h"
+#include "mpi.h"
 #include "ga_helper.h"
+
 
 const int gaXdim = 1;
 const int gaYdim = 0;
@@ -27,8 +29,20 @@ const int gaYdim = 0;
 void
 ParallelInitialize(int *argc, char ***argv)
 {
-  int ierr;
+  int ierr, provided;
   ierr = 0;
+
+#if defined(_OPENMP)
+  
+  /* if using OpenMP, we need to make sure MPI can handle it,
+     otherwise, just let GA start MPI however it wants */
+  
+  if (MPI_Init_thread(argc, argv, MPI_THREAD_FUNNELED, &provided) != MPI_SUCCESS) {
+    ReportError("ParallelInitialize: MPI_Init_thread: ", 70);
+    ierr += 1;
+  }
+#endif
+  
   GA_Initialize_args(argc, argv);
   if (!MA_init(MT_C_DBL, 500000, 500000)) {
     ReportError("ParallelInitialize: MA_init: ", 70);
@@ -75,7 +89,7 @@ ParallelFinalize(void)
   GA_Terminate();
   ierr = MPI_Finalize();
   if (ierr != 0) {
-    ReportError("ParallelInitialize: MA_init: ", 70);
+    ReportError("ParallelInitialize: MPI_Finalize: ", 70);
   }
 }
 

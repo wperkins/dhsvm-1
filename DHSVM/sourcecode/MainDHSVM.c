@@ -81,12 +81,12 @@ int main(int argc, char **argv)
 	  {0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},     /* SNOWPIX */ 
     {0, 0.0, NULL, NULL, NULL, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},			                /* SOILPIX */
-    {0, 0, 0.0, 0.0, 0.0, NULL },                                               /* VEGPIX */
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, NULL},			                /* SOILPIX */
+    {0, 0, 0.0, 0.0, 0.0, NULL, NULL, NULL, NULL, 0.0},                             /* VEGPIX */
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0l, 0.0, 0.0
   };
   CHANNEL ChannelData = {
-     NULL, NULL, NULL, NULL, NULL, NULL, 
+     NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
      0, 0,
      NULL, NULL, NULL, NULL,
      NULL, NULL, NULL, NULL, NULL, NULL,
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
 		 TopoMap, Network, &HydrographInfo, Hydrograph);
 
   InitNewMonth(&Time, &Options, &Map, TopoMap, PrismMap, ShadowMap,
-	       &InFiles, Veg.NTypes, VType, NStats, Stat, Dump.InitStatePath);
+	       &InFiles, Veg.NTypes, VType, NStats, Stat, Dump.InitStatePath, &VegMap);
 
   InitNewDay(Time.Current.JDay, &SolarGeo);
 
@@ -319,10 +319,13 @@ int main(int argc, char **argv)
     /* redistribute snow based on snow surface slope etc */
     if (Options.SnowSlide)
 	    Avalanche(&Map, TopoMap, &Time, &Options, SnowMap);
+    
+    if (IsNewWaterYear(&(Time.Current)))
+      InitNewWaterYear(&Time, &Options, &Map, TopoMap, SnowMap);
 
     if (IsNewMonth(&(Time.Current), Time.Dt))
       InitNewMonth(&Time, &Options, &Map, TopoMap, PrismMap, ShadowMap,
-		   &InFiles, Veg.NTypes, VType, NStats, Stat, Dump.InitStatePath);
+		   &InFiles, Veg.NTypes, VType, NStats, Stat, Dump.InitStatePath, &VegMap);
 
     if (IsNewDay(Time.DayStep)) {
       InitNewDay(Time.Current.JDay, &SolarGeo);
@@ -422,10 +425,10 @@ int main(int argc, char **argv)
 
     TIMING_TASK_START("Channel routing", 1);
     if (Options.HasNetwork)
-      RouteChannel(&ChannelData, &Time, &Map, TopoMap, SoilMap, &Total,
-        	   &Options, Network, SType, PrecipMap, LocalMet.Tair, LocalMet.Rh);
+      RouteChannel(&ChannelData, &Time, &Map, TopoMap, SoilMap, &Total, 
+		   &Options, Network, SType, PrecipMap, LocalMet.Tair, LocalMet.Rh, SnowMap);
     TIMING_TASK_END("Channel routing", 1);
-
+    
     TIMING_TASK_START("Surface routing", 1);
     if (Options.Extent == BASIN)
       RouteSurface(&Map, &Time, TopoMap, SoilMap, &Options,
@@ -449,6 +452,9 @@ int main(int argc, char **argv)
     
     Aggregate(&Map, &Options, TopoMap, &Soil, &Veg, VegMap, EvapMap, PrecipMap,
 	      RadiationMap, SnowMap, SoilMap, &Total, VType, Network, &ChannelData, &roadarea, Time.Dt);
+    
+    if (Options.SnowStats)
+      SnowStats(&(Time.Current), &Map, &Options, TopoMap, SnowMap, Time.Dt);
     
     MassBalance(&(Time.Current), &(Time.Start), &(Dump.Balance), &Total, &Mass);
 
@@ -545,18 +551,20 @@ void cleanup(DUMPSTRUCT *Dump, CHANNEL *ChannelData, OPTIONSTRUCT *Options,
 
 	if (Options->StreamTemp) {
 	  if (ChannelData->streaminflow != NULL) 
-		fclose(ChannelData->streaminflow);
+      fclose(ChannelData->streaminflow);
 	  if (ChannelData->streamoutflow != NULL) 
-        fclose(ChannelData->streamoutflow);
+      fclose(ChannelData->streamoutflow);
+    if (ChannelData->streamMelt != NULL)
+      fclose(ChannelData->streamMelt);                                    
 	  if (ChannelData->streamNSW != NULL) 
-        fclose(ChannelData->streamNSW);
+      fclose(ChannelData->streamNSW);
 	  if (ChannelData->streamNLW!= NULL) 
-        fclose(ChannelData->streamNLW);								  
+      fclose(ChannelData->streamNLW);								  
 	  if (ChannelData->streamVP!= NULL) 
-		fclose(ChannelData->streamVP);	
+      fclose(ChannelData->streamVP);	
 	  if (ChannelData->streamWND!= NULL) 
-		fclose(ChannelData->streamWND);	
+      fclose(ChannelData->streamWND);	
 	  if (ChannelData->streamATP!= NULL) 
-		fclose(ChannelData->streamATP);
+      fclose(ChannelData->streamATP);
 	}
 }

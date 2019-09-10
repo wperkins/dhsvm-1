@@ -152,41 +152,47 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
-    channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
-                                          &(Time->Start), &(Time->End),
-                                          ParallelRank(), Options->StreamTemp);
 
-    if (Options->StreamTemp) {
-      if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
-      if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
-        ReportError(StrEnv[extreme_west].KeyName, 51);
-      }
+    /* only the root process creates and uses a MASS1 network */
+    
+    if (ParallelRank() == 0) {
+      strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
+      channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
+                                            &(Time->Start), &(Time->End),
+                                            ParallelRank(), Options->StreamTemp);
 
-      if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
-        coeff_file = StrEnv[mass1_coeff_file].VarStr;
-      } else {
-        coeff_file = NULL;
-      }
+      if (Options->StreamTemp) {
+        if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
+        if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
+          ReportError(StrEnv[extreme_west].KeyName, 51);
+        }
         
-      /* set met coefficients and read from a file, if called for */
-      set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
-                                  mass1_coeff_a, mass1_coeff_b,
-                                  mass1_conduction, mass1_coeff_brunt,
-                                  coeff_file);
+        if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
+          coeff_file = StrEnv[mass1_coeff_file].VarStr;
+        } else {
+          coeff_file = NULL;
+        }
+        
+        /* set met coefficients and read from a file, if called for */
+        set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
+                                    mass1_coeff_a, mass1_coeff_b,
+                                    mass1_conduction, mass1_coeff_brunt,
+                                    coeff_file);
+      }
     }
   }
+  ParallelBarrier();
 #endif
 
   if (Options->StreamTemp) {
@@ -270,6 +276,9 @@ void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL * channel,
         //air temperature
         sprintf(buffer, "%sATP.Only", DumpPath);
         OpenFile(&(channel->streamATP), buffer, "w", TRUE);
+        //melt water in flow
+        sprintf(buffer, "%sMelt.Only", DumpPath);
+        OpenFile(&(channel->streamMelt), buffer, "w", TRUE);                      
       }
       /* Output stream temperature simulated by MASS1, if any */
       if (Options->StreamTemp && Options->UseMASS1) {
@@ -311,13 +320,14 @@ void
 RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
              TOPOPIX **TopoMap, SOILPIX **SoilMap, AGGREGATED *Total, 
 	     OPTIONSTRUCT *Options, ROADSTRUCT **Network, SOILTABLE *SType, 
-             PRECIPPIX **PrecipMap, float Tair, float Rh)
+             PRECIPPIX **PrecipMap, float Tair, float Rh, SNOWPIX **SnowMap)
 {
   int x, y;
   int flag;
   char buffer[32];
   float CulvertFlow;
-
+  float temp;
+  
   /* set flag to true if it's time to output channel network results */
   SPrintDate(&(Time->Current), buffer);
   flag = IsEqualTime(&(Time->Current), &(Time->Start));
@@ -343,14 +353,16 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
     /* collect lateral inflow from all processes */
     ChannelGatherLateralInflow(ChannelData->roads, ChannelData->road_state_ga);
 
-    /* All processes route the road network */
-    channel_route_network(ChannelData->roads, Time->Dt);
-
-    /* Only the root process saves the results */
+    /* Just the root process routes the road network and saves the results */
     if (ParallelRank() == 0) {
+      channel_route_network(ChannelData->roads, Time->Dt);
+
       channel_save_outflow_text(buffer, ChannelData->roads,
                                 ChannelData->roadout, ChannelData->roadflowout, flag);
     }
+
+    /* all processes get a copy of the routing results */
+    ChannelDistributeState(ChannelData->roads, ChannelData->road_state_ga);
   }
     
   /* add culvert outflow to surface water */
@@ -365,6 +377,11 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
         if (channel_grid_has_channel(ChannelData->stream_map, x, y)) {
           channel_grid_inc_inflow(ChannelData->stream_map, x, y,
                                   (SoilMap[y][x].IExcess + CulvertFlow) * Map->DX * Map->DY);
+          if (SnowMap[y][x].Outflow > SoilMap[y][x].IExcess)
+            temp = SoilMap[y][x].IExcess;
+          else
+            temp = SnowMap[y][x].Outflow;
+          channel_grid_inc_melt(ChannelData->stream_map, x, y, temp * Map->DX * Map->DY);                                                                                  
           SoilMap[y][x].ChannelInt += SoilMap[y][x].IExcess;
           Total->CulvertToChannel += CulvertFlow;
           SoilMap[y][x].IExcess = 0.0f;
@@ -383,21 +400,21 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
     /* collect lateral inflow from all processes */
     ChannelGatherLateralInflow(ChannelData->streams, ChannelData->stream_state_ga);
 
-    /* All proacesses route the stream network */
+    /* Only the root process routes the stream network and saves the results */
+
+    if (ParallelRank() == 0) {
 
 #ifdef MASS1_CHANNEL
-    if (Options->UseMASS1) {
-      mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
-                          &(Time->Current), Time->Dt, Options->StreamTemp);
-    } else {
-      channel_route_network(ChannelData->streams, Time->Dt);
-    }
+      if (Options->UseMASS1) {
+        mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
+                            &(Time->Current), Time->Dt, Options->StreamTemp);
+      } else {
+        channel_route_network(ChannelData->streams, Time->Dt);
+      }
 #else
-    channel_route_network(ChannelData->streams, Time->Dt);
+      channel_route_network(ChannelData->streams, Time->Dt);
 #endif
     
-    /* Only the root process saves the results */
-    if (ParallelRank() == 0) {
       channel_save_outflow_text(buffer, ChannelData->streams,
                                 ChannelData->streamout,
                                 ChannelData->streamflowout, flag);
@@ -411,6 +428,9 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
                                       flag);
       }
     }
+
+    ChannelDistributeState(ChannelData->streams, ChannelData->stream_state_ga);
+    
   }
   ParallelBarrier();
 }
@@ -500,7 +520,9 @@ DestroyChannel(OPTIONSTRUCT *Options, MAPSIZE *Map, CHANNEL *channel)
   }
 #ifdef MASS1_CHANNEL
   if (Options->UseMASS1) {
-    mass1_destroy(channel->mass1_streams);
+    if (ParallelRank() == 0) {
+      mass1_destroy(channel->mass1_streams);
+    }
   }
 #endif
 

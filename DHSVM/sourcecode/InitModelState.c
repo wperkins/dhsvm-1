@@ -426,7 +426,7 @@ void InitModelState(DATE *Start, int StepsPerDay, MAPSIZE *Map, OPTIONSTRUCT *Op
       if (INBASIN(TopoMap[y][x].Mask)) {
         if ((SoilMap[y][x].TableDepth =
           WaterTableDepth((Soil.NLayers[SoilMap[y][x].Soil - 1]), SoilMap[y][x].Depth,
-            VType[VegMap[y][x].Veg - 1].RootDepth, SType[SoilMap[y][x].Soil - 1].Porosity,
+            VType[VegMap[y][x].Veg - 1].RootDepth, SoilMap[y][x].Porosity,
             SType[SoilMap[y][x].Soil - 1].FCap, Network[y][x].Adjust, SoilMap[y][x].Moist)) < 0.0)
           /* ReportError((char *) Routine, 35); */ {
             remove -= SoilMap[y][x].TableDepth * Map->DX * Map->DY;
@@ -489,7 +489,7 @@ void InitModelState(DATE *Start, int StepsPerDay, MAPSIZE *Map, OPTIONSTRUCT *Op
 			VegMap[y][x].Type[Opening].GapView =
 			  CalcGapView(0.5 * VegMap[y][x].Gapping,
 				VType[VegMap[y][x].Veg - 1].Height[0],
-				VType[VegMap[y][x].Veg - 1].Vf);
+				VegMap[y][x].Vf);
 		  }
 		}
 	  }

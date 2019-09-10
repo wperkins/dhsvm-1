@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-14 10:48:17 d3g096
+ * LAST CHANGE: 2019-09-09 13:41:05 d3g096
  * COMMENTS:
  */
 
@@ -127,7 +127,7 @@ mass1_write_config(const char *outname)
     "00:00:00	/	time run begins\n"
     "02-02-2000	/	date run ends\n"
     "00:00:00	/	time run ends\n"
-    "0.5	/	delta t in hours (0.5 for flow only; 0.02 for transport)\n"
+    "1.0	/	delta t in hours (0.5 for flow only; 0.02 for transport)\n"
     "2  	/	printout frequency\n";
 
   static char outfile[] = "mass1.cfg";
@@ -309,6 +309,18 @@ mass1_write_bcs(const char *outname, Channel *network)
     return;
   }
   fprintf(out, "1 \"%s\" /\n", zerofile);
+  fclose(out);
+
+  /* create an empty file that serves for temperature BCs and met
+     zones, in case they are needed */
+  
+  sprintf(outfile, "none", outname);
+  if ((out = fopen(outfile, "wt")) == NULL) {
+    error_handler(ERRHDL_ERROR, "cannot open empty file \"%s\"",
+                  outfile);
+    return;
+  }
+  fprintf(out, "\n");
   fclose(out);
 }
 

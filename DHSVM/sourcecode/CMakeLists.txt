@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-06-05 07:24:46 d3g096
+# Last Change: 2019-09-09 11:54:31 d3g096
 
 # -------------------------------------------------------------
 # Set up for this subdirectory
@@ -160,6 +160,7 @@ set(DHSVM_SRC
   SnowInterception.c
   SnowMelt.c
   SnowPackEnergyBalance.c
+  SnowStats.c
   SoilEvaporation.c
   StabilityCorrection.c
   StoreModelState.c
@@ -187,22 +188,26 @@ list(APPEND DHSVM_LIBS
   ${MATH_LIBRARY}
   )
 
+set(DHSVM_SNOW_SRC ${DHSVM_SRC})
+set(DHSVM_SNOW_LIBS ${DHSVM_LIBS})
+
 if(DHSVM_USE_MASS1)
-  add_executable(DHSVM ${DHSVM_SRC} mass1_channel.c bogus.f90)
-  target_link_libraries(DHSVM mass1lib gastemp ts ${DHSVM_LIBS})
-  target_compile_definitions(DHSVM PUBLIC MASS1_CHANNEL=1)
-else(DHSVM_USE_MASS1)
-  add_executable(DHSVM ${DHSVM_SRC})
-  target_link_libraries(DHSVM ${DHSVM_LIBS})
+  list(APPEND DHSVM_SRC mass1_channel.c bogus.f90 )
+  list(INSERT DHSVM_LIBS 0 mass1lib gastemp ts)
 endif(DHSVM_USE_MASS1)
 
+add_executable(DHSVM ${DHSVM_SRC})
+target_link_libraries(DHSVM ${DHSVM_LIBS})
 set_target_properties(DHSVM PROPERTIES LINKER_LANGUAGE CXX)
 
+if (DHSVM_USE_MASS1)
+  target_compile_definitions(DHSVM PUBLIC MASS1_CHANNEL=1)
+endif (DHSVM_USE_MASS1)
 
 if(DHSVM_SNOW_ONLY)
-  add_executable(DHSVM_SNOW ${DHSVM_SRC})
+  add_executable(DHSVM_SNOW ${DHSVM_SNOW_SRC})
   target_compile_definitions(DHSVM_SNOW PUBLIC SNOW_ONLY=1)
-  target_link_libraries(DHSVM_SNOW ${DHSVM_LIBS})
+  target_link_libraries(DHSVM_SNOW ${DHSVM_SNOW_LIBS})
   set_target_properties(DHSVM_SNOW PROPERTIES LINKER_LANGUAGE CXX)
 endif(DHSVM_SNOW_ONLY)
 
@@ -211,21 +216,22 @@ endif(DHSVM_SNOW_ONLY)
 if (GPTL_FOUND)
   include_directories(AFTER ${GPTL_INCLUDE_DIRS})
   add_definitions(-DTIMING_MAX_LEVEL=${DHSVM_TIMING_LEVEL})
-  list(APPEND DHSVM_LIBS ${GPTL_LIBRARIES})
   
   add_executable(DHSVM_timed ${DHSVM_SRC})
-    target_compile_definitions(DHSVM_timed
-      PUBLIC GPTL_TIMING=1
-      )
+  target_link_libraries(DHSVM_timed ${GPTL_LIBRARIES} ${DHSVM_LIBS})
+  target_compile_definitions(DHSVM_timed PUBLIC GPTL_TIMING=1)
   set_target_properties(DHSVM_timed PROPERTIES LINKER_LANGUAGE CXX)
-  target_link_libraries(DHSVM_timed ${DHSVM_LIBS})
 
-  if(DHSVM_SNOW_ONLY)
-    add_executable(DHSVM_SNOW_timed ${DHSVM_SRC})
+  if (DHSVM_USE_MASS1)
+    target_compile_definitions(DHSVM_timed PUBLIC MASS1_CHANNEL=1)
+  endif (DHSVM_USE_MASS1)
+
+if(DHSVM_SNOW_ONLY)
+    add_executable(DHSVM_SNOW_timed ${DHSVM_SNOW_SRC})
     target_compile_definitions(DHSVM_SNOW_timed
       PUBLIC SNOW_ONLY=1 GPTL_TIMING=1
       )
-    target_link_libraries(DHSVM_SNOW_timed ${DHSVM_LIBS})
+    target_link_libraries(DHSVM_SNOW_timed ${GPTL_LIBRARIES} ${DHSVM_SNOW_LIBS})
     set_target_properties(DHSVM_SNOW_timed PROPERTIES LINKER_LANGUAGE CXX)
   endif(DHSVM_SNOW_ONLY)
 

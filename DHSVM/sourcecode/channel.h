@@ -93,6 +93,7 @@ struct _channel_rec_ {
   float WND;	        /* Wind (m/s) */
   float azimuth;        /* segment azimuth (degrees) */
   float skyview;
+  float melt;           /* melt water (cubic meters) */                                                       
   int Ncells;	        /* Number of grid cells crossed by the segment*/
 
   /* Added for MASS1 */
@@ -127,13 +128,11 @@ typedef struct _channel_index_ ChannelIndex;
    externally available routines
    ------------------------------------------------------------- */
 
-				/* ChannelClass */
-
+/* ChannelClass */
 ChannelClass *channel_read_classes(const char *file, int ChanType);
 void channel_free_classes(ChannelClass *head);
 
-				/* Channel */
-
+/* Channel */
 Channel *channel_read_network(const char *file, ChannelClass * class_list, int *MaxID);
 int channel_read_rveg_param(Channel *net, const char *file, int *MaxID);
 void channel_routing_parameters(Channel *net, int deltat);

@@ -43,8 +43,8 @@ void InitTerrainMaps(LISTPTR Input, OPTIONSTRUCT *Options, MAPSIZE * GMap, MAPSI
   if (ParallelRank() == 0) printf("\nInitializing terrain maps\n");
 
   InitTopoMap(Input, Options, GMap, Map, TopoMap);
-  InitSoilMap(Input, Options, Map, Soil, *TopoMap, SoilMap);
-  InitVegMap(Options, Input, Map, VegMap);
+  InitSoilMap(Input, Options, Map, Soil, *TopoMap, SoilMap, SType);
+  InitVegMap(Options, Input, Map, VegMap, VType);
   if (Options->CanopyGapping)
     InitCanopyGapMap(Options, Input, Map, Soil, Veg, VType, VegMap, SType, SoilMap);
 }
@@ -223,7 +223,7 @@ void InitTopoMap(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * GMap, MAPSIZE 
   InitSoilMap()
 *****************************************************************************/
 void InitSoilMap(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
-  LAYER * Soil, TOPOPIX ** TopoMap, SOILPIX *** SoilMap)
+  LAYER * Soil, TOPOPIX ** TopoMap, SOILPIX *** SoilMap, SOILTABLE * SType)
 {
   const char *Routine = "InitSoilMap";
   char VarName[BUFSIZE + 1];	/* Variable name */
@@ -233,10 +233,17 @@ void InitSoilMap(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
   int NumberType;		/* number type */
   unsigned char *Type;		/* Soil type */
   float *Depth;			/* Soil depth */
+  float *KsLat = NULL;		/* Soil Lateral Conductivity */
+  float *Porosity = NULL;		/* Soil Porosity */
   int flag;
+  int NSet;
+  int sidx;
+  
   STRINIENTRY StrEnv[] = {
     {"SOILS", "SOIL MAP FILE", "", ""},
     {"SOILS", "SOIL DEPTH FILE", "", ""},
+    {"SOILS", "SOIL CONDUCTIVITY MAP FILE", "", "none"},
+    {"SOILS", "SOIL POROSITY MAP FILE", "", "none"},
     {NULL, NULL, "", NULL}
   };
 
@@ -289,6 +296,118 @@ void InitSoilMap(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
     }
   }
 
+  /******************************************************************/
+  /* Under Construction*/
+
+  /* Read the spatial Lateral Conductivity map */
+  GetVarName(012, 0, VarName);
+  GetVarNumberType(012, &NumberType);
+
+  if (strncmp(StrEnv[kslat_file].VarStr, "none", 4)) {
+    if (ParallelRank() == 0) {
+      printf("Spatial lateral conductivity map provided, reading map\n");
+    }
+    if (!(KsLat = (float *)calloc(Map->NX * Map->NY,
+                                  SizeOfNumberType(NumberType))))
+      ReportError((char *)Routine, 1);
+    flag = Read2DMatrix(StrEnv[kslat_file].VarStr, KsLat, NumberType, 
+                        Map, 0, VarName, 0);
+    
+    for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+        if (KsLat[i] > 0.0)
+          (*SoilMap)[y][x].KsLat = KsLat[i];
+        else
+          (*SoilMap)[y][x].KsLat = SType[(*SoilMap)[y][x].Soil - 1].KsLat;
+      }
+    }
+    free(KsLat);
+    KsLat = NULL;
+  } else {
+    if (ParallelRank() == 0) {
+      printf("Spatial lateral conductivity map not provided, generating map\n");
+    }
+    for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+          (*SoilMap)[y][x].KsLat = SType[(*SoilMap)[y][x].Soil - 1].KsLat;
+      }
+    }
+  }
+
+  /* Read the spatial porosity map */
+
+  GetVarNumberType(013, &NumberType);
+
+  /*Allocate memory for porosity*/  
+  for (y = 0; y < Map->NY; y++) {
+    for (x = 0; x < Map->NX; x++) {
+      if (!((*SoilMap)[y][x].Porosity =
+            (float *)calloc(Soil->MaxLayers, sizeof(float *))))
+        ReportError((char *)Routine, 1);
+    }
+  }
+
+   /******************************************************************/
+  /* Under Construction*/
+  /******************************************************************/
+  
+  /*Creating spatial layered porosity*/
+  if (strncmp(StrEnv[porosity_file].VarStr, "none", 4)) {
+    if (ParallelRank() == 0) {
+      printf("Spatial soil porosity map provided, reading map\n");
+    }
+    /*Read data monthy by month*/
+    for (NSet = 0; NSet < Soil->MaxLayers; NSet++) {
+      GetVarName(013, NSet, VarName);
+      if (!(Porosity = (float *)calloc(Map->NX * Map->NY,
+                                       SizeOfNumberType(NumberType))))
+        ReportError((char *)Routine, 1);
+      flag = Read2DMatrix(StrEnv[porosity_file].VarStr, Porosity, NumberType, Map, NSet, VarName, 0);
+
+      for (y = 0, i = 0; y < Map->NY; y++) {
+        for (x = 0; x < Map->NX; x++, i++) {
+          if (INBASIN((TopoMap)[y][x].Mask)) {
+            sidx = (*SoilMap)[y][x].Soil - 1;
+            if (NSet < Soil->NLayers[sidx]) {
+              if (Porosity[i] > 0.0)
+                (*SoilMap)[y][x].Porosity[NSet] = Porosity[i];
+              else
+                (*SoilMap)[y][x].Porosity[NSet] = SType[sidx].Porosity[NSet];
+              /*Make sure porosity larger than FCap and WP*/
+              if (((*SoilMap)[y][x].Porosity[NSet] < SType[sidx].FCap[NSet])
+                  || ((*SoilMap)[y][x].Porosity[NSet] < SType[sidx].WP[NSet]))
+                ReportError(SType[sidx].Desc, 11);
+            }
+          }            
+        }
+      }
+    }
+    free(Porosity);
+    Porosity = NULL;
+  } else {
+    if (ParallelRank() == 0) {
+      printf("Spatial soil porosity map not provided, generating map\n");
+    }
+    for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+        if (INBASIN((TopoMap)[y][x].Mask)) {
+          /* FIXME: this assumes a valid soil type index */
+          sidx = (*SoilMap)[y][x].Soil - 1;
+          for (NSet = 0; NSet < Soil->NLayers[sidx]; NSet++) {
+            (*SoilMap)[y][x].Porosity[NSet] = SType[sidx].Porosity[NSet];
+            /*Make sure porosity larger than FCap and WP*/
+            if (((*SoilMap)[y][x].Porosity[NSet] < SType[sidx].FCap[NSet])
+                || ((*SoilMap)[y][x].Porosity[NSet] <SType[sidx].WP[NSet]))
+              ReportError(SType[sidx].Desc, 11);
+          }
+        } 
+      }
+    }
+  }
+    
+   /******************************************************************/
+   /******************************************************************/
+
   for (y = 0, i = 0; y < Map->NY; y++) {
     for (x = 0; x < Map->NX; x++, i++) {
       if (Options->Infiltration == DYNAMIC)
@@ -322,31 +441,30 @@ void InitSoilMap(LISTPTR Input, OPTIONSTRUCT * Options, MAPSIZE * Map,
 /*****************************************************************************
   InitVegMap()
 *****************************************************************************/
-void InitVegMap(OPTIONSTRUCT * Options, LISTPTR Input, MAPSIZE * Map, VEGPIX *** VegMap)
+void InitVegMap(OPTIONSTRUCT * Options, LISTPTR Input, MAPSIZE * Map, VEGPIX *** VegMap,
+                VEGTABLE *VType)
 {
   const char *Routine = "InitVegMap";
   char VarName[BUFSIZE + 1];
-  char VegMapFileName[BUFSIZE + 1];
+  //char VegMapFileName[BUFSIZE + 1];
   int i;			/* counter */
   int x;			/* counter */
   int y;			/* counter */
+  int j;			/* counter */
   int flag;
   int NumberType;		/* number type */
   unsigned char *Type;		/* Vegetation type */
+  float *FC = NULL;		/* Vegetation Fractional Coverage */
+  float *LAIMonthly= NULL; /* Vegetation Leaf Area Index, monthly */
+  int NSet; /*Counter for LAI map month*/
 
   /* Get the map filename from the [VEGETATION] section */
-  GetInitString("VEGETATION", "VEGETATION MAP FILE", "", VegMapFileName,
-    (unsigned long)BUFSIZE, Input);
-  if (!VegMapFileName)
-    ReportError("VEGETATION MAP FILE", 51);
-
-  /* Read the vegetation type */
-  GetVarName(005, 0, VarName);
-  GetVarNumberType(005, &NumberType);
-  if (!(Type = (unsigned char *)calloc(Map->NX * Map->NY,
-    SizeOfNumberType(NumberType))))
-    ReportError((char *)Routine, 1);
-  flag = Read2DMatrix(VegMapFileName, Type, NumberType, Map, 0, VarName, 0);
+  STRINIENTRY StrEnv[] = {
+    {"VEGETATION", "VEGETATION MAP FILE", "", ""},
+    {"VEGETATION", "VEGETATION FC MAP FILE", "", "none"},
+    {"VEGETATION", "VEGETATION LAI MAP FILE", "", "none"},
+    {NULL, NULL, "", NULL}
+  };
 
   /* Assign the attributes to the correct map pixel */
   if (!(*VegMap = (VEGPIX **)calloc(Map->NY, sizeof(VEGPIX *))))
@@ -356,6 +474,22 @@ void InitVegMap(OPTIONSTRUCT * Options, LISTPTR Input, MAPSIZE * Map, VEGPIX ***
       ReportError((char *)Routine, 1);
   }
 
+  /* Read the key-entry pairs from the input file */
+  for (i = 0; StrEnv[i].SectionName; i++) {
+    GetInitString(StrEnv[i].SectionName, StrEnv[i].KeyName, StrEnv[i].Default,
+      StrEnv[i].VarStr, (unsigned long)BUFSIZE, Input);
+    if (IsEmptyStr(StrEnv[i].VarStr))
+      ReportError(StrEnv[i].KeyName, 51);
+  }
+  
+  /* Read the vegetation type */
+  GetVarName(005, 0, VarName);
+  GetVarNumberType(005, &NumberType);
+  if (!(Type = (unsigned char *)calloc(Map->NX * Map->NY,
+                                       SizeOfNumberType(NumberType))))
+    ReportError((char *)Routine, 1);
+  flag = Read2DMatrix(StrEnv[vegtype_file].VarStr, Type, NumberType, Map, 0, VarName, 0);
+  
   for (y = 0, i = 0; y < Map->NY; y++) {
     for (x = 0; x < Map->NX; x++, i++) {
       (*VegMap)[y][x].Veg = Type[i];
@@ -364,6 +498,175 @@ void InitVegMap(OPTIONSTRUCT * Options, LISTPTR Input, MAPSIZE * Map, VEGPIX ***
   }
 
   free(Type);
+
+  /* Read the vegetation fractional coverage map */
+  GetVarName(010, 0, VarName);
+  GetVarNumberType(010, &NumberType);
+
+  if (strncmp(StrEnv[vegfc_file].VarStr, "none", 4)) {
+    if (ParallelRank() == 0) {
+      printf("Spatial fractional cover map provided, reading FC from map\n");
+    }
+    if (!(FC = (float *)calloc(Map->NX * Map->NY,
+                               SizeOfNumberType(NumberType))))
+      ReportError((char *)Routine, 1);
+    flag = Read2DMatrix(StrEnv[vegfc_file].VarStr, FC, NumberType, Map, 0, VarName, 0);
+
+    for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+        /*Allocate Memory*/
+        if (!((*VegMap)[y][x].Fract = (float *)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers, sizeof(float))))
+          ReportError((char *)Routine, 1);
+        if ( VType[(*VegMap)[y][x].Veg - 1].OverStory == TRUE) {
+          if (FC[i] > 0.0)
+            (*VegMap)[y][x].Fract[0] = FC[i];
+          else
+            (*VegMap)[y][x].Fract[0] = VType[(*VegMap)[y][x].Veg - 1].Fract[0];
+          /*If understory exists, set default understory FC=1.0*/
+          if (VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE)
+            (*VegMap)[y][x].Fract[1] = 1.0;
+        }
+        else{
+          if (VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE)
+            (*VegMap)[y][x].Fract[0] = 1.0;
+        }
+        
+      }
+    }
+    free(FC);
+  } else {
+    if (ParallelRank() == 0) {
+      printf("Vegetation fractional coverage created from vegetation table\n");
+    }
+    for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+        /*Allocate Memory*/
+        if (!((*VegMap)[y][x].Fract = (float *)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers, sizeof(float))))
+          ReportError((char *)Routine, 1);
+        
+        if ( VType[(*VegMap)[y][x].Veg - 1].OverStory == TRUE) {
+          (*VegMap)[y][x].Fract[0] = VType[(*VegMap)[y][x].Veg - 1].Fract[0];
+          /*If understory exists, set default understory FC=1.0*/
+          if (VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE)
+            (*VegMap)[y][x].Fract[1] = 1.0;
+        }
+        else{
+          if (VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE)
+            (*VegMap)[y][x].Fract[0] = 1.0;
+        }
+      }
+    }
+  }
+  
+  /*Calculate Vf */
+  for (y = 0, i = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++, i++) {
+        if ( VType[(*VegMap)[y][x].Veg - 1].NVegLayers >0) 
+          (*VegMap)[y][x].Vf = (*VegMap)[y][x].Fract[0] * VType[(*VegMap)[y][x].Veg - 1].VfAdjust;
+      }
+  }
+
+  /* Read the vegetation LAI map */
+  /*Instead of reading LAI data by month, read data all together as Bill suggested*/
+    
+  GetVarName(011, 0, VarName);
+  GetVarNumberType(011, &NumberType);
+ 
+  if (strncmp(StrEnv[veglai_file].VarStr, "none", 4)) {
+    if (ParallelRank() == 0) {
+      printf("Spatial LAI provided, reading LAI from map\n");
+    }
+    /*Allocate Memory: if FC file avaiable, assume max 2 layers of vegtation*/  
+    for (y = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++) {
+        
+        if (!((*VegMap)[y][x].LAIMonthly = (float **)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers , sizeof(float *))))
+          ReportError((char *)Routine, 1);
+        for (j = 0; j < VType[(*VegMap)[y][x].Veg - 1].NVegLayers; j++) {
+          if (!((*VegMap)[y][x].LAIMonthly[j] = (float *)calloc(12, sizeof(float))))
+            ReportError((char *)Routine, 1);
+        }
+      }
+    }
+    
+    /*Read data monthy by month*/
+    for (NSet = 0; NSet < 12; NSet++) {
+      if (!(LAIMonthly = (float *)calloc(Map->NX * Map->NY,
+                                         SizeOfNumberType(NumberType))))
+        ReportError((char *)Routine, 1);
+      flag = Read2DMatrix(StrEnv[veglai_file].VarStr, LAIMonthly, NumberType, Map, NSet, VarName, 0);
+    
+      if (ParallelRank() == 0) {
+        printf("begining month %d\n",NSet);
+      }
+    
+      for (y = 0, i = 0; y < Map->NY; y++) {
+        for (x = 0; x < Map->NX; x++, i++) {
+          if ( VType[(*VegMap)[y][x].Veg - 1].OverStory == TRUE) {
+            if (LAIMonthly[i] > 0.0)
+              (*VegMap)[y][x].LAIMonthly[0][NSet] = LAIMonthly[i];
+            else
+              (*VegMap)[y][x].LAIMonthly[0][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[0][NSet];
+          
+            if ( VType[(*VegMap)[y][x].Veg - 1].UnderStory  == TRUE )
+              (*VegMap)[y][x].LAIMonthly[1][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[1][NSet];
+          }
+          else{
+            if ( VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE)
+              (*VegMap)[y][x].LAIMonthly[0][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[0][NSet];
+          }
+        }
+      }
+    
+      free(LAIMonthly);
+    }
+  } else {
+    if (ParallelRank() == 0) {
+      printf("No spatial LAI provided, generating from vegetation table\n");
+    }
+
+    for (y = 0; y < Map->NY; y++) {
+      for (x = 0; x < Map->NX; x++) {
+        
+        if (!((*VegMap)[y][x].LAIMonthly = (float **)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers , sizeof(float *))))
+          ReportError((char *)Routine, 1);
+        for (j = 0; j < VType[(*VegMap)[y][x].Veg - 1].NVegLayers; j++) {
+          if (!((*VegMap)[y][x].LAIMonthly[j] = (float *)calloc(12, sizeof(float))))
+            ReportError((char *)Routine, 1);
+        }
+      }
+    }
+    
+    for (NSet = 0; NSet < 12; NSet++) {
+      for (y = 0, i = 0; y < Map->NY; y++) {
+        for (x = 0; x < Map->NX; x++, i++) {
+          
+          if ( VType[(*VegMap)[y][x].Veg - 1].OverStory == TRUE) {        
+            (*VegMap)[y][x].LAIMonthly[0][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[0][NSet];
+            if ( VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE ){
+              (*VegMap)[y][x].LAIMonthly[1][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[1][NSet]; 
+            }
+          }
+          else{
+            if ( VType[(*VegMap)[y][x].Veg - 1].UnderStory == TRUE){
+              (*VegMap)[y][x].LAIMonthly[0][NSet] = VType[(*VegMap)[y][x].Veg - 1].LAIMonthly[0][NSet];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (y = 0; y < Map->NY; y++) {
+		for (x = 0; x < Map->NX; x++) {
+      /*Allocate memory to LAI values*/
+      if (!((*VegMap)[y][x].LAI = (float *)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers, sizeof(float))))
+        printf("works at line 547\n");
+              // ReportError((char *)Routine, 1);
+      if (!((*VegMap)[y][x].MaxInt = (float *)calloc(VType[(*VegMap)[y][x].Veg - 1].NVegLayers, sizeof(float))))
+                ReportError((char *)Routine, 1);
+    }
+  }
 }
 
 
