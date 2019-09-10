@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-05-31 13:15:41 d3g096
+# Last Change: 2019-09-09 15:01:28 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -57,6 +57,7 @@ endif()
 # Build RBM if desired
 option (DHSVM_USE_RBM "Build RBM and related programs" OFF)
 option (DHSVM_USE_MASS1 "Use MASS1 for channel network routing" OFF)
+
 if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
   enable_language(Fortran)
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
@@ -70,6 +71,21 @@ if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
 
 endif (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
 
+include(CMakeDependentOption)
+cmake_dependent_option(DHSVM_ENABLE_OPENMP
+  "Enable the used of OpenMP with MASS1 channel routing" OFF
+  "DHSVM_USE_MASS1" OFF
+  )
+
+if (DHSVM_ENABLE_OPENMP)
+  find_package(OpenMP)
+  if (OpenMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    option(MASS1_ENABLE_OPENMP "" ON)
+  endif(OpenMP_FOUND)
+endif(DHSVM_ENABLE_OPENMP)
 # -------------------------------------------------------------
 # MPI is required
 # -------------------------------------------------------------

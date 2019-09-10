@@ -10,7 +10,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-06-13 08:01:08 d3g096
+# Last Change: 2019-09-10 10:14:27 d3g096
 
 set -xue
 
@@ -90,6 +90,11 @@ if [ $host == "flophouse" ]; then
     # CFLAGS="-finstrument-functions"
     # export CFLAGS
 
+    # Use OpenMP w/ MASS1
+    if [ "$mass1"x == "ON"x ]; then
+        common_flags="$common_flags -D DHSVM_ENABLE_OPENMP:BOOL=ON"
+    fi
+
     prefix="/net/flophouse/files0/perksoft/linux64"
     cmake3 $options \
         -D MPI_C_COMPILER:STRING="/usr/lib64/openmpi/bin/mpicc" \
@@ -124,8 +129,13 @@ elif [ $host == "tlaloc" ]; then
     FC=/opt/rh/devtoolset-8/root/usr/bin/gfortran
     export CC CXX FC
 
+    # Use OpenMP w/ MASS1
+    if [ "$mass1"x == "ON"x ]; then
+        common_flags="$common_flags -D DHSVM_ENABLE_OPENMP:BOOL=ON"
+    fi
+
     prefix="/file0/perksoft"
-    cmake $options \
+    cmake3 $options \
         -D MPI_C_COMPILER:STRING="mpicc" \
         -D MPI_CXX_COMPILER:STRING="mpicxx" \
         -D MPIEXEC:STRING="mpiexec" \
