@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-09-09 13:41:05 d3g096
+ * LAST CHANGE: 2019-09-19 07:15:00 d3g096
  * COMMENTS:
  */
 
@@ -75,7 +75,7 @@ channel_points(const float length, const float spacing)
 /*                           mass1_write_config                               */
 /******************************************************************************/
 void
-mass1_write_config(const char *outname)
+mass1_write_config(const char *outname, const int dokm)
 {
   const char cfg[] =
     "    MASS1 Configuration File - Version 0.83\n"
@@ -84,7 +84,7 @@ mass1_write_config(const char *outname)
     "0	/	Do Gas\n"
     "0	/	Do Temp\n"
     "0	/	Do Printout\n"
-    "1	/	Do Gage Printout\n"
+    "0	/	Do Gage Printout\n"
     "0	/	Do Profile Printout\n"
     "0	/	Do Gas Dispersion\n"
     "0	/	Do Gas Air/Water Exchange\n"
@@ -98,7 +98,7 @@ mass1_write_config(const char *outname)
     "1	/	units option\n"
     "1	/	time option\n"
     "2	/	time units\n"
-    "1	/	channel length units\n"
+    "%d	/	channel length units\n"
     "0	/	downstream bc type\n"
     "5	/	max links\n"
     "400	/ max points on a link\n"
@@ -142,6 +142,7 @@ mass1_write_config(const char *outname)
                 outfile);
 
   fprintf(out, cfg,
+          (dokm ? 3 : 1),
           outname, outname, outname, outname, outname, outname);
   fclose(out);
 }
@@ -243,7 +244,8 @@ mass1_write_links(const char *outname, Channel *network, const float spacing)
 /*                           mass1_write_points                               */
 /******************************************************************************/
 void
-mass1_write_points(const char *outname, Channel *network, const float spacing)
+mass1_write_points(const char *outname, Channel *network,
+                   const float spacing, const int dokm)
 {
   char outfile[MAXPATHLEN];
   FILE *out;
@@ -261,10 +263,14 @@ mass1_write_points(const char *outname, Channel *network, const float spacing)
 
   for (current = network; current != NULL; current = current->next) {
     int npts;
+    float len = current->length;
+
+    if (dokm) len /= 1000.0;    /* convert m to km */
+    
     npts = channel_points(current->length, spacing);
 
     fprintf(out, "%5d", current->id);                   /* link id */
-    fprintf(out, " %12.2f", current->length);           /* link length */
+    fprintf(out, " %12.2f", len);                       /* link length */
     fprintf(out, " %12.4f", current->inlet_elevation);  /* upstream elevation */
     fprintf(out, " %12.4f", current->outlet_elevation); /* downstream elevation */
     fprintf(out, " %5d", current->class2->id);          /* section id */
@@ -411,10 +417,11 @@ main(int argc, char **argv)
   Channel *network, *l;
   int n, ierr;
   int maxid;
+  int dokm;
   float spacing;
   float elev0;
 
-  const char usage[] = "usage: %s [-v] [-s spacing] [-o basename] class.dat network.dat";
+  const char usage[] = "usage: %s [-v] [-s spacing] [-k] [-o basename] class.dat network.dat";
 
   program = basename(argv[0]);
 
@@ -423,9 +430,10 @@ main(int argc, char **argv)
   strncpy(outname, "", MAXPATHLEN);
   spacing = 250.0;
   elev0 = 0.0;
+  dokm = 0;
   ierr = 0;
 
-  while ((ch = getopt(argc, argv, "vs:o:")) != -1) {
+  while ((ch = getopt(argc, argv, "vks:o:")) != -1) {
     switch (ch) {
     case 'v': 
       error_handler_init(program, NULL, ERRHDL_DEBUG);
@@ -436,6 +444,9 @@ main(int argc, char **argv)
         error_handler(ERRHDL_ERROR, "spacing \"%s\" not understood", optarg);
         ierr++;
       }
+      break;
+    case 'k':
+      dokm = 1;
       break;
     case 'o':
       strncpy(outname, optarg, MAXPATHLEN);
@@ -482,10 +493,10 @@ main(int argc, char **argv)
 
   channel_compute_elevation(network, elev0);
 
-  mass1_write_config(outname);
+  mass1_write_config(outname, dokm);
   mass1_write_sections(outname, classes);
   mass1_write_links(outname, network, spacing);
-  mass1_write_points(outname, network, spacing);
+  mass1_write_points(outname, network, spacing, dokm);
   mass1_write_initial(outname, network, 0);
   mass1_write_bcs(outname, network);
   mass1_write_gage(outname, network);
