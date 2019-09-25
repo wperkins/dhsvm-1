@@ -240,6 +240,10 @@ elif [ $host = "briareus" ]; then
     FC="ifort"
     export FC
 
+    if [ "$mass1"x == "ON"x ]; then
+        common_flags="$common_flags -D DHSVM_ENABLE_OPENMP:BOOL=ON"
+    fi
+
     cmake $options \
         -D DHSVM_USE_NETCDF:BOOL=ON \
         -D MPI_C_COMPILER:STRING="mpicc" \
