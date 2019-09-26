@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-09-06 11:21:22 d3g096
+ * LAST CHANGE: 2019-09-26 08:00:58 d3g096
  * COMMENTS:
  *
  *    All processes have a copy of the channel network.  All processes
@@ -255,52 +255,44 @@ ChannelDistributeState(Channel *net, int ga)
   int gatype, ndim, dims[GA_MAX_DIM];
   int idx;
   int lo[GA_MAX_DIM], hi[GA_MAX_DIM], ld[GA_MAX_DIM];
-  float value[NChannelState];
+  float **tmp, value;
+  int nsegment, nfield, f;
   Channel *current;
 
-  ld[0] = 1;
-  ld[1] = 1;
+  nfield = OutflowTemp - Inflow + 1;
 
-  NGA_Inquire(ga, &gatype, &ndim, &dims[0]);
+  for (idx = 0, current = net; current != NULL; ++idx, current = current->next);
+  nsegment = idx;
 
-  /* collect state from root process (which presumably did the
-     routing) and put it in the channel state GA */
+  tmp = calloc_2D_float(nfield, nsegment);
+  
+  lo[0] = 0;
+  lo[1] = Inflow;
+  hi[0] = nsegment - 1;
+  hi[1] = OutflowTemp;
+
+  ld[0] = nfield;
+  ld[1] = nsegment;
+
   if (ParallelRank() == 0){
     for (idx = 0, current = net; current != NULL; ++idx, current = current->next) {
-      lo[0] = idx;
-      lo[1] = LateralInflow;
-      hi[0] = idx;
-      hi[1] = OutflowTemp;
-      value[LateralInflow] = current->lateral_inflow;
-      value[Inflow] = current->inflow;
-      value[Outflow] = current->outflow;
-      value[Storage] = current->storage;
-      value[InflowTemp] = current->inflow_temp;
-      value[OutflowTemp] = current->outflow_temp;
-      NGA_Put(ga, lo, hi, &value[0], ld);
+      f = 0;
+      tmp[f++][idx] = current->inflow;
+      tmp[f++][idx] = current->outflow;
+      tmp[f++][idx] = current->storage;
+      tmp[f++][idx] = current->inflow_temp;
+      tmp[f++][idx] = current->outflow_temp;
     }
+    NGA_Put(ga, lo, hi, &tmp[0][0], ld);
   }
-
   ParallelBarrier();
-
-  /* get the channel state from the GA and put it in the local copy of
-     the channel network */
-
+  NGA_Get(ga, lo, hi, &tmp[0][0], ld);
   for (idx = 0, current = net; current != NULL; ++idx, current = current->next) {
-    lo[0] = idx;
-    lo[1] = LateralInflow;
-    hi[0] = idx;
-    hi[1] = Storage;
-    NGA_Get(ga, lo, hi, &value[0], ld);
-    current->lateral_inflow = value[LateralInflow];
-    current->inflow = value[Inflow];
-    current->outflow = value[Outflow];
-    current->storage = value[Storage];
-    current->inflow_temp = value[InflowTemp];
-    current->outflow_temp= value[OutflowTemp];
+    f = 0;
+    current->inflow = tmp[f++][idx];
+    current->outflow = tmp[f++][idx];
+    current->storage = tmp[f++][idx];
+    current->inflow_temp = tmp[f++][idx];
+    current->outflow_temp = tmp[f++][idx];
   }
-  ParallelBarrier();
-
-  
-  
 }
