@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-09-25 15:10:23 d3g096
+# Last Change: 2019-09-25 15:10:31 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -24,8 +24,6 @@ list (APPEND CMAKE_MODULE_PATH "${DHSVM_SOURCE_DIR}/cmake")
 # -------------------------------------------------------------
 # Configuration options
 # -------------------------------------------------------------
-
-enable_language(CXX)
 
 # Option to set the surface/subsurface drainage direction
 option(DHSVM_D8
