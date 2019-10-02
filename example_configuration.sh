@@ -10,7 +10,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-09-25 15:09:37 d3g096
+# Last Change: 2019-10-02 08:20:16 d3g096
 
 set -xue
 
@@ -19,11 +19,12 @@ set -xue
 # -------------------------------------------------------------
 usage="$0 [-d|-r] [-8] [-t] [-M] [name]"
 
-set -- `getopt drtM8 $*`
+opts=`getopt drtM8 $*`
 if [ $? != 0 ]; then
     echo $usage >&2
     exit 2
 fi
+set -- $opts
 
 timing="OFF"
 d8="OFF"
