@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-10-16 09:01:46 d3g096
+# Last Change: 2019-10-16 14:24:37 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -153,12 +153,10 @@ if (DHSVM_USE_NETCDF)
 endif (DHSVM_USE_NETCDF)
 
 # -------------------------------------------------------------
-# X11 is optional
+# X11 is no longer supported
 # -------------------------------------------------------------
 if (DHSVM_USE_X11)
-  find_package(X11 REQUIRED)
-  add_definitions(-DHAVE_X11)
-  include_directories(AFTER ${X11_INCLUDE_DIR})
+  message(WARNING "X11 is disabled in parallel DHSVM")
 endif (DHSVM_USE_X11)
 
 # -------------------------------------------------------------

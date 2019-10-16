@@ -37,7 +37,7 @@ __Enhancement & Fixes__
 This branch of DHSVM has been modified to run in parallel using
 [Global Arrays](http://hpc.pnl.gov/globalarrays/).  Performance
 improvements are documented by
-[Perkins et al., 2019](https://doi.org/10.1002/essoar.10500884.2).
+[Perkins et al., 2019](https://doi.org/10.1016/j.envsoft.2019.104533).
 
 ## Hydrologic Processes / Options not Implemented in Parallel 
 
@@ -163,6 +163,14 @@ select optional features.  Here are some terse instructions:
 The original Makefiles are still in the source tree but have not been
 maintained.  
 
+### RBM  ###
+
+To build the RBM program, for stream temperature simulation, add 
+
+    -D DHSVM_USE_RBM:BOOL=ON
+
+to the configuration options. 
+
 ### Experimental Surface/Subsurface Mode ###
 
 The normal DHSVM surface/subsurface routing scheme uses 4 neighbors
@@ -212,6 +220,15 @@ higher detail, but this is documented in the output.
 DHSVM stream channel routing (not roads) can optionally be performed by the
 [Modular Aquatic Simulation System 1D](https://github.com/pnnl/mass1)
 (MASS1).  See [MASS1.md](here) for details.
+
+### Build Test Programs ###
+
+A number of programs can be built that test specific parts of DHSVM
+code.  These are probably only of interest to the DHSVM developer. By
+default, these programs are not built. To enable building the test
+programs, add this configuration option:
+
+    -D DHSVM_BUILD_TESTS:BOOL=ON
 
 
 
