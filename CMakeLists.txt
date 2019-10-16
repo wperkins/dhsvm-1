@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-09-25 15:10:31 d3g096
+# Last Change: 2019-10-16 09:01:46 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -71,7 +71,7 @@ if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
   elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
     # w/ Intel, build static binaries that trap floating point exceptions
     # and turn on the preprocessor for all files
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp -traceback")
   endif()
 
 endif (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
@@ -178,3 +178,32 @@ endif (DHSVM_USE_RBM)
 if (DHSVM_USE_MASS1)
   add_subdirectory(MASS1)
 endif (DHSVM_USE_MASS1)
+
+# -------------------------------------------------------------
+# Installation
+# -------------------------------------------------------------
+install(FILES
+  ${DHSVM_SOURCE_DIR}/README.md
+  DESTINATION share/DHSVM
+  )
+
+install(FILES
+  ${DHSVM_SOURCE_DIR}/Scripts/add_date.pl
+  ${DHSVM_SOURCE_DIR}/Scripts/build_DHSVM_network.pl
+  ${DHSVM_SOURCE_DIR}/Scripts/Extract.Segment.Temp.scr
+  ${DHSVM_SOURCE_DIR}/Scripts/make_stream_connectivity.c
+  ${DHSVM_SOURCE_DIR}/Scripts/postprocess_rbm_output.py
+  DESTINATION share/DHSVM/Scripts
+  )
+
+install(FILES
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/channelclass.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/createstreamnetwork.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/createstreamnetwork_tutorial.pdf
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/roadaspect.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/rowcolmap.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/soildepthscript.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/streammapfile.py
+  ${DHSVM_SOURCE_DIR}/CreateStreamNetwork_PythonV/wshdslope.py
+  DESTINATION share/DHSVM/Scripts/CreateStreamNetwork_PythonV
+  )

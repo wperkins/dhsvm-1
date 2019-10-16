@@ -207,6 +207,13 @@ The `DHSVM_TIMING_LEVEL` can be from 1 to 4, where 4 produces the most
 detailed information.  The timing routines can impact performance with
 higher detail, but this is documented in the output.  
 
+### MASS1 Channel Routing ###
+
+DHSVM stream channel routing (not roads) can optionally be performed by the
+[Modular Aquatic Simulation System 1D](https://github.com/pnnl/mass1)
+(MASS1).  See [MASS1.md](here) for details.
+
+
 
 
 
