@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-10-08 14:51:21 d3g096
+# Last Change: 2019-10-16 09:01:46 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -71,7 +71,7 @@ if (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
   elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
     # w/ Intel, build static binaries that trap floating point exceptions
     # and turn on the preprocessor for all files
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fpe0 -fpp -traceback")
   endif()
 
 endif (DHSVM_USE_MASS1 OR DHSVM_USE_RBM)
@@ -185,7 +185,7 @@ endif (DHSVM_USE_MASS1)
 install(FILES
   ${DHSVM_SRC_DIR}/README.md
   ${DHSVM_SRC_DIR}/tutorial DHSVM-RBM.pdf
-  ${DHSVM_SRC_DIR}/tutorial DHSVM v3.1.pdf
+  ${DHSVM_SRC_DIR}/tutorial "DHSVM v3.1.pdf"
   DESTINATION share/DHSVM
   )
 
