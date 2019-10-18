@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-09-26 08:00:58 d3g096
+ * LAST CHANGE: 2019-10-18 06:49:25 d3g096
  * COMMENTS:
  *
  *    All processes have a copy of the channel network.  All processes
@@ -295,4 +295,6 @@ ChannelDistributeState(Channel *net, int ga)
     current->inflow_temp = tmp[f++][idx];
     current->outflow_temp = tmp[f++][idx];
   }
+
+  free_2D_float(tmp);
 }
