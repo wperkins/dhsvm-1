@@ -115,7 +115,7 @@ set(ga_test_src "
 
 int main(int argc, char **argv)
 {
-  MPI_Init(&argc, &argv)
+  MPI_Init(&argc, &argv);
   GA_Initialize();
 
   // FIXME: Find a simple but sensible test for GA
