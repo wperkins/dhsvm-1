@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2020-01-02 13:12:00 d3g096
+ * LAST CHANGE: 2020-01-13 10:10:56 d3g096
  * COMMENTS:
  */
 
@@ -179,15 +179,20 @@ mass1_write_sections(SectionType stype, const char *outname, ChannelClass *class
 
   for (current = classes; current != NULL; current = current->next) {
     switch (stype) {
+    default:
     case (Rectangular):
       fprintf(out, "%d     1\n%.2f /\n", current->id, current->width);
       break;
     case (Triangular):
-      area = current->width*current*current->bank_height;
-      z =;
+      area = current->width*current->bank_height;
+      z = area/(current->bank_height*current->bank_height);
       break;
-    case (Trapezoidal)
+    case (Trapezoidal):
+      area = current->width*current->bank_height;
+      b = 0.25*current->width;
+      z = (area - b*current->bank_height)/(current->bank_height*current->bank_height);
       break;
+    }
   }
 
   fclose(out);
