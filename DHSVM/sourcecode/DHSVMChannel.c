@@ -205,10 +205,10 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 
         if (strncmp(StrEnv[mass1_coeff_output].VarStr, "none", 4))  {
           coeff_output = StrEnv[mass1_coeff_output].VarStr;
+	  strncpy(channel->streams_met_coeff_out, coeff_output, BUFSIZE);
         } else {
-          coeff_output = NULL;
+	  strcpy(channel->streams_met_coeff_out, "");
         }
-        strncpy(channel->streams_met_coeff_out, coeff_output, BUFSIZE);
         
         /* set met coefficients and read from a file, if called for */
         set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
