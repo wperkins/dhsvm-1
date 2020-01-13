@@ -11,7 +11,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-09-19 07:15:00 d3g096
+ * LAST CHANGE: 2020-01-02 13:12:00 d3g096
  * COMMENTS:
  */
 
@@ -26,6 +26,13 @@
 
 #include "errorhandler.h"
 #include "channel.h"
+
+enum _section_type_ {
+  Rectangular = 0,
+  Triangular = 1,
+  Trapezoidal = 2
+};
+typedef enum _section_type_ SectionType;
 
 /******************************************************************************/
 /*                             channel_compute_elevation                      */
@@ -153,12 +160,12 @@ mass1_write_config(const char *outname, const int dokm)
 /*                           mass1_write_sections                             */
 /******************************************************************************/
 void
-mass1_write_sections(const char *outname, ChannelClass *classes)
+mass1_write_sections(SectionType stype, const char *outname, ChannelClass *classes)
 {
   ChannelClass *current;
   char outfile[MAXPATHLEN];
   FILE *out;
-  float width;
+  float area, width, z, b;
   
   sprintf(outfile, "%ssection.dat", outname);
   if ((out = fopen(outfile, "wt")) == NULL) {
@@ -171,7 +178,16 @@ mass1_write_sections(const char *outname, ChannelClass *classes)
                 outfile);
 
   for (current = classes; current != NULL; current = current->next) {
-    fprintf(out, "%d     1\n%.2f /\n", current->id, current->width);
+    switch (stype) {
+    case (Rectangular):
+      fprintf(out, "%d     1\n%.2f /\n", current->id, current->width);
+      break;
+    case (Triangular):
+      area = current->width*current*current->bank_height;
+      z =;
+      break;
+    case (Trapezoidal)
+      break;
   }
 
   fclose(out);
@@ -420,6 +436,7 @@ main(int argc, char **argv)
   int dokm;
   float spacing;
   float elev0;
+  SectionType stype;
 
   const char usage[] = "usage: %s [-v] [-s spacing] [-k] [-o basename] class.dat network.dat";
 
@@ -432,8 +449,9 @@ main(int argc, char **argv)
   elev0 = 0.0;
   dokm = 0;
   ierr = 0;
+  stype = Rectangular;
 
-  while ((ch = getopt(argc, argv, "vks:o:")) != -1) {
+  while ((ch = getopt(argc, argv, "vks:o:RtT")) != -1) {
     switch (ch) {
     case 'v': 
       error_handler_init(program, NULL, ERRHDL_DEBUG);
@@ -447,6 +465,15 @@ main(int argc, char **argv)
       break;
     case 'k':
       dokm = 1;
+      break;
+    case 'R':
+      stype = Rectangular;
+      break;
+    case 't':
+      stype = Triangular;
+      break;
+    case 'T':
+      stype = Trapezoidal;
       break;
     case 'o':
       strncpy(outname, optarg, MAXPATHLEN);
@@ -494,7 +521,7 @@ main(int argc, char **argv)
   channel_compute_elevation(network, elev0);
 
   mass1_write_config(outname, dokm);
-  mass1_write_sections(outname, classes);
+  mass1_write_sections(stype, outname, classes);
   mass1_write_links(outname, network, spacing);
   mass1_write_points(outname, network, spacing, dokm);
   mass1_write_initial(outname, network, 0);
