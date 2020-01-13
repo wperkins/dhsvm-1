@@ -20,7 +20,7 @@
 
 static FILE *LOG = NULL;
 static const char *Program = "DHSVM";
-static ErrorLevel Level = (DEBUG ? ERRHDL_WARNING : ERRHDL_DEBUG);
+static ErrorLevel Level = ERRHDL_WARNING;
 
 /* -------------------------------------------------------------
    error_handler_init
