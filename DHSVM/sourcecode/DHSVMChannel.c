@@ -60,6 +60,24 @@ set_or_read_mass1_met_coeff(ChannelPtr net, float ltemp,
     channel_read_mass1_coeff(net, coeff_file);
   }
 }
+
+void
+write_mass1_met_coeff(ChannelPtr net, char *coeff_file)
+{
+  ChannelPtr current;
+  FILE *out;
+
+  OpenFile(&out, coeff_file, "w", TRUE);
+  for (current = net; current != NULL;
+       current = current->next) {
+    fprintf(out, "%6d %8.2f %8.2f %8.2f %8.2f %8.2f\n",
+            current->id,
+            current->wind_function_a, current->wind_function_b,
+            current->conduction, current->brunt,
+            current->lateral_temp);
+  }
+  fclose(out);
+}
 #endif
 
 /* -----------------------------------------------------------------------------
@@ -87,12 +105,13 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 CONDUCTION COEFFICIENT", "", "0.47"},
     {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
+    {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {NULL, NULL, "", NULL}
   };
 #ifdef MASS1_CHANNEL
   char mass1_config_path[BUFSIZE + 1];
   float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond, mass1_coeff_brunt;
-  char *coeff_file;
+  char *coeff_file, *coeff_output;
   ChannelPtr current;
 #endif
 
@@ -183,11 +202,18 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
         } else {
           coeff_file = NULL;
         }
+
+        if (strncmp(StrEnv[mass1_coeff_output].VarStr, "none", 4))  {
+          coeff_output = StrEnv[mass1_coeff_output].VarStr;
+        } else {
+          coeff_output = NULL;
+        }
+        strncpy(channel->streams_met_coeff_out, coeff_output, BUFSIZE);
         
         /* set met coefficients and read from a file, if called for */
         set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
                                     mass1_coeff_a, mass1_coeff_b,
-                                    mass1_conduction, mass1_coeff_brunt,
+                                    mass1_coeff_cond, mass1_coeff_brunt,
                                     coeff_file);
       }
     }
@@ -280,11 +306,18 @@ void InitChannelDump(OPTIONSTRUCT *Options, CHANNEL * channel,
         sprintf(buffer, "%sMelt.Only", DumpPath);
         OpenFile(&(channel->streamMelt), buffer, "w", TRUE);                      
       }
+
+#ifdef MASS1_CHANNEL
       /* Output stream temperature simulated by MASS1, if any */
       if (Options->StreamTemp && Options->UseMASS1) {
         sprintf(buffer, "%sStreamtemp.Only", DumpPath);
         OpenFile(&(channel->streamtempout), buffer, "w", TRUE);
+        if (strlen(channel->streams_met_coeff_out) > 0) {
+          sprintf(buffer, "%s/%s", DumpPath, channel->streams_met_coeff_out);
+          write_mass1_met_coeff(channel->streams, buffer);
+        }
       }
+#endif
     }
     if (channel->roads != NULL) {
       sprintf(buffer, "%sRoad.Flow", DumpPath);

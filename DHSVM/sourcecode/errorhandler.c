@@ -19,8 +19,8 @@
 #include "errorhandler.h"
 
 static FILE *LOG = NULL;
-static const char *Program = "unknown program";
-static ErrorLevel Level;
+static const char *Program = "DHSVM";
+static ErrorLevel Level = (DEBUG ? ERRHDL_WARNING : ERRHDL_DEBUG);
 
 /* -------------------------------------------------------------
    error_handler_init
