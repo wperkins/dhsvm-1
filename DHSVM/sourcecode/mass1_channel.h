@@ -8,7 +8,7 @@
    ------------------------------------------------------------- */
 /* -------------------------------------------------------------
    Created February  8, 2019 by William A. Perkins
-   Last Change: 2020-01-16 07:38:18 d3g096
+   Last Change: 2020-01-16 13:39:03 d3g096
    ------------------------------------------------------------- */
 
 #ifndef _mass1_channel_h_
@@ -39,7 +39,8 @@ extern void mass1_destroy(void *net);
    ------------------------------------------------------------- */
 
 extern void mass1_route_network(void *net, Channel *streams,
-                                DATE *todate, int delatt, int dotemp);
+                                DATE *todate, int delatt,
+                                int dotemp, int doshading);
 
 extern void mass1_set_coefficients(void *met, Channel *streams);
 #endif

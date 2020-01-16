@@ -105,6 +105,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 CONDUCTION COEFFICIENT", "", "0.47"},
     {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
     {"ROUTING", "MASS1 INTERNAL LONGWAVE", "", "FALSE"},
+    {"ROUTING", "MASS1 USE SHADING", "", "TRUE"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {NULL, NULL, "", NULL}
@@ -225,6 +226,13 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 	  strcpy(channel->streams_met_coeff_out, "");
         }
         
+        if (strncmp(StrEnv[mass1_shading].VarStr, "TRUE", 4) == 0)
+          channel->mass1_do_shading = TRUE;
+        else if (strncmp(StrEnv[mass1_shading].VarStr, "FALSE", 5) == 0)
+          channel->mass1_do_shading = FALSE;
+        else
+          ReportError(StrEnv[mass1_shading].KeyName, 51);
+
         /* set met coefficients and read from a file, if called for */
         set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
                                     mass1_coeff_a, mass1_coeff_b,
@@ -455,7 +463,8 @@ RouteChannel(CHANNEL *ChannelData, TIMESTRUCT *Time, MAPSIZE *Map,
 #ifdef MASS1_CHANNEL
       if (Options->UseMASS1) {
         mass1_route_network(ChannelData->mass1_streams, ChannelData->streams,
-                            &(Time->Current), Time->Dt, Options->StreamTemp);
+                            &(Time->Current), Time->Dt, Options->StreamTemp,
+                            ChannelData->mass1_do_shading);
       } else {
         channel_route_network(ChannelData->streams, Time->Dt);
       }

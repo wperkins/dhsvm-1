@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2020-01-16 11:03:37 d3g096
+ * LAST CHANGE: 2020-01-16 13:48:07 d3g096
  * COMMENTS:
  */
 
@@ -88,11 +88,13 @@ mass1_set_coefficients(void *net, Channel *streams)
  * @param dotemp Is temperature simulation enabled?
  */
 void
-mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int dotemp)
+mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat,
+                    int dotemp, int doradshade)
 {
   Channel *current;
   int id;
   float q;
+  float lwrad, swrad;
 
   /* assign collected lateral inflow to each segment */
 
@@ -110,11 +112,19 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
         mass1_update_latt(net, id, current->lateral_temp, todate);
 
         /* update met */
+
+        if (doradshade) {
+          swrad = current->NSW;
+          lwrad = current->NLW;
+        } else {
+          swrad = current->ISW;
+          lwrad = current->ILW;
+        }
         
         mass1_update_met(net, id,
                          current->ATP, current->RH/100.0,
-                         current->WND, current->NSW,
-                         current->NLW, todate);
+                         current->WND, swrad,
+                         lwrad, todate);
       }
     }
   }

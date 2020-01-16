@@ -189,7 +189,7 @@ enum KEYS {
   road_network, road_map, road_class,
   mass1_config, mass1_inflow_temp,
   mass1_wind_a, mass1_wind_b, mass1_conduction, mass1_brunt,
-  mass1_int_lw, mass1_coeff_file, mass1_coeff_output,
+  mass1_int_lw, mass1_shading, mass1_coeff_file, mass1_coeff_output,
   /* number of each type of output */
   output_path =
   0, initial_state_path, npixels, nstates, nmapvars, nimagevars, ngraphics, satextent,

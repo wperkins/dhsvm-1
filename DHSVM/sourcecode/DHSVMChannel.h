@@ -48,6 +48,7 @@ typedef struct {
   FILE *streamtempout;
   void *mass1_streams;
   int mass1_dhsvm_longwave;
+  int mass1_do_shading;
   char streams_met_coeff_out[BUFSIZE + 1];
 } CHANNEL;
 
