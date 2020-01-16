@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2020-01-15 13:48:49 d3g096
+ * LAST CHANGE: 2020-01-16 11:03:37 d3g096
  * COMMENTS:
  */
 
@@ -114,7 +114,7 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
         mass1_update_met(net, id,
                          current->ATP, current->RH/100.0,
                          current->WND, current->NSW,
-                         current->ILW, todate);
+                         current->NLW, todate);
       }
     }
   }
