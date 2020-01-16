@@ -91,15 +91,22 @@ locations and in the same format as `Streamflow.Only`.
 MASS1 has several coefficients that affect simulated stream
 temperature.   They can be specified for each stream segment
 individually. The default values for all stream segments are set using
-the following phrases in the `[ROUTING]` section:
+the following phrases in the `[ROUTING]` section shown with default
+values: 
 ```
 MASS1 Inflow Temperature = 12.0
 MASS1 Wind Function A = 0.46
 MASS1 Wind Function B = 9.2
 MASS1 Conduction Coefficient = 0.47
 MASS1 Brunt Coefficient  = 0.65
+MASS1 Internal Longwave = FALSE
+MASS1 Met Coefficient File = none
+MASS1 Met Coefficient Output = none
 ```
-
+```
+MASS1 Internal Longwave = TRUE
+MASS1 Brunt Coefficient  = 0.65
+```
 
 ```
 MASS1 Met Coefficient File = ../mass1/mass1_met_coeff.dat

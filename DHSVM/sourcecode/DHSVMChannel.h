@@ -47,6 +47,7 @@ typedef struct {
   /* for MASS1 stream network */
   FILE *streamtempout;
   void *mass1_streams;
+  int mass1_dhsvm_longwave;
   char streams_met_coeff_out[BUFSIZE + 1];
 } CHANNEL;
 

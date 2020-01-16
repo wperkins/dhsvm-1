@@ -104,6 +104,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 WIND FUNCTION B", "", "9.2"},
     {"ROUTING", "MASS1 CONDUCTION COEFFICIENT", "", "0.47"},
     {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
+    {"ROUTING", "MASS1 INTERNAL LONGWAVE", "", "FALSE"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {NULL, NULL, "", NULL}
@@ -175,28 +176,39 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     /* only the root process creates and uses a MASS1 network */
     
     if (ParallelRank() == 0) {
+      if (Options->StreamTemp) {
+        if (strncmp(StrEnv[mass1_int_lw].VarStr, "TRUE", 4) == 0)
+          channel->mass1_dhsvm_longwave = FALSE;
+        else if (strncmp(StrEnv[mass1_int_lw].VarStr, "FALSE", 5) == 0)
+          channel->mass1_dhsvm_longwave = TRUE;
+        else
+          ReportError(StrEnv[mass1_int_lw].KeyName, 51);
+        
+      }
+      
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
       channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
                                             &(Time->Start), &(Time->End),
-                                            ParallelRank(), Options->StreamTemp, FALSE);
+                                            ParallelRank(), Options->StreamTemp,
+                                            channel->mass1_dhsvm_longwave);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
-          ReportError(StrEnv[extreme_west].KeyName, 51);
+          ReportError(StrEnv[mass1_inflow_temp].KeyName, 51);
         }
         if (!CopyFloat(&mass1_coeff_a, StrEnv[mass1_wind_a].VarStr, 1)) {
-          ReportError(StrEnv[extreme_west].KeyName, 51);
+          ReportError(StrEnv[mass1_wind_a].KeyName, 51);
         }
         if (!CopyFloat(&mass1_coeff_b, StrEnv[mass1_wind_b].VarStr, 1)) {
-          ReportError(StrEnv[extreme_west].KeyName, 51);
+          ReportError(StrEnv[mass1_wind_b].KeyName, 51);
         }
         if (!CopyFloat(&mass1_coeff_cond, StrEnv[mass1_conduction].VarStr, 1)) {
-          ReportError(StrEnv[extreme_west].KeyName, 51);
+          ReportError(StrEnv[mass1_conduction].KeyName, 51);
         }
         if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
-          ReportError(StrEnv[extreme_west].KeyName, 51);
+          ReportError(StrEnv[mass1_brunt].KeyName, 51);
         }
-        
+
         if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
           coeff_file = StrEnv[mass1_coeff_file].VarStr;
         } else {

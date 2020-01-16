@@ -90,7 +90,7 @@ int main(int argc, char **argv)
      0, 0,
      NULL, NULL, NULL, NULL,
      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-     NULL, NULL
+     NULL, NULL, TRUE
     };
   DUMPSTRUCT Dump;
   EVAPPIX **EvapMap = NULL;
