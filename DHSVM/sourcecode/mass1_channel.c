@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2019-06-17 12:48:38 d3g096
+ * LAST CHANGE: 2020-01-15 13:48:49 d3g096
  * COMMENTS:
  */
 
@@ -30,7 +30,7 @@ extern void mass1_update_latt(void *net, int id, float latt, DATE *ddate);
 extern void mass1_update_met(void *net, int id,
                              float airtemp, float rh,
                              float windspeed, float swradiation,
-                             DATE *ddate);
+                             float lwradiation, DATE *ddate);
 extern void mass1_update_met_coeff(void *net, int id,
                                    float a, float b, float Ccond, float brunt);
 extern double mass1_link_outflow(void *net, int id);
@@ -114,7 +114,7 @@ mass1_route_network(void *net, Channel *streams, DATE *todate, int deltat, int d
         mass1_update_met(net, id,
                          current->ATP, current->RH/100.0,
                          current->WND, current->NSW,
-                         todate);
+                         current->ILW, todate);
       }
     }
   }
