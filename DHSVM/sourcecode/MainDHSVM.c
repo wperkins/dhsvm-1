@@ -86,11 +86,11 @@ int main(int argc, char **argv)
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0l, 0.0, 0.0
   };
   CHANNEL ChannelData = {
-     NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+     NULL, NULL, NULL, NULL, NULL, NULL, 
      0, 0,
      NULL, NULL, NULL, NULL,
-     NULL, NULL, NULL, NULL, NULL, NULL,
-     NULL
+     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+     NULL, NULL
     };
   DUMPSTRUCT Dump;
   EVAPPIX **EvapMap = NULL;

@@ -178,7 +178,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
       channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
                                             &(Time->Start), &(Time->End),
-                                            ParallelRank(), Options->StreamTemp);
+                                            ParallelRank(), Options->StreamTemp, FALSE);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
