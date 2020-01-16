@@ -103,15 +103,42 @@ MASS1 Internal Longwave = FALSE
 MASS1 Met Coefficient File = none
 MASS1 Met Coefficient Output = none
 ```
-```
-MASS1 Internal Longwave = TRUE
-MASS1 Brunt Coefficient  = 0.65
-```
-
+The first 5 phrases set the default values for individual stream
+segments. In the case where different parts of the stream network have
+different coefficients, a separate file can be used to specify those
+coefficients for individual segments. Given this phrase
 ```
 MASS1 Met Coefficient File = ../mass1/mass1_met_coeff.dat
 ```
+the file `../mass1/mass1_met_coeff.dat` will contain a record for each
+segment that should have different coefficients.  Each record needs to
+have the following fields:
+   * segment identifier, as listed in the stream network file,
+   * wind function a,
+   * wind function b,
+   * conduction coefficient, 
+   * Brunt coefficient, and
+   * inflow temperature.
+Comments can be proceeded with `#`. Anything on a line after a `#` and
+empty lines are ignored.  The contents would look something like this
+```
+     1     0.46     9.20     0.47     0.65    12.00
+     2     0.46     9.20     0.47     0.65    12.00
+     3     0.46     9.20     0.47     0.65    12.00
+     4     0.46     9.20     0.47     0.65    12.00
+     5     0.46     9.20     0.47     0.65    12.00
+```
+with the default values.  DHSVM first assigns the coefficients in the
+configuration file to *all* stream segments. Then, this file is read
+and coefficients are updated for *only* those segments listed in the
+file.  
+
+Optionally, this file can be generated in the output directory using a
+phrase like 
 ```
 MASS1 Met Coefficient Output = mass1_met_coeff.dat
 
 ```
+This is to aid in the case where stream temperature is calibrated for
+subbasins then those calibrated coefficients are used in the larger
+domain.  
