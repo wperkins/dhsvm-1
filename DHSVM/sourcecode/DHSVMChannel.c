@@ -111,9 +111,11 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
   };
 #ifdef MASS1_CHANNEL
   char mass1_config_path[BUFSIZE + 1];
+  char mass1_out_path[BUFSIZE + 1];
   float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond, mass1_coeff_brunt;
   char *coeff_file, *coeff_output;
   ChannelPtr current;
+
 #endif
 
   if (ParallelRank() == 0) 
@@ -187,7 +189,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       }
       
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
-      channel->mass1_streams = mass1_create(mass1_config_path, mass1_config_path,
+      strncpy(mass1_out_path, ".", BUFSIZE+1);
+      channel->mass1_streams = mass1_create(mass1_config_path, mass1_out_path,
                                             &(Time->Start), &(Time->End),
                                             ParallelRank(), Options->StreamTemp,
                                             channel->mass1_dhsvm_longwave);
