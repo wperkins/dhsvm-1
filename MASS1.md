@@ -100,6 +100,7 @@ MASS1 Wind Function B = 9.2
 MASS1 Conduction Coefficient = 0.47
 MASS1 Brunt Coefficient  = 0.65
 MASS1 Internal Longwave = FALSE
+MASS1 Use Shading = TRUE
 MASS1 Met Coefficient File = none
 MASS1 Met Coefficient Output = none
 ```
@@ -131,10 +132,8 @@ empty lines are ignored.  The contents would look something like this
 with the default values.  DHSVM first assigns the coefficients in the
 configuration file to *all* stream segments. Then, this file is read
 and coefficients are updated for *only* those segments listed in the
-file.  
-
-Optionally, this file can be generated in the output directory using a
-phrase like 
+file.  Optionally, this file can be generated in the output directory
+using a phrase like 
 ```
 MASS1 Met Coefficient Output = mass1_met_coeff.dat
 
@@ -142,3 +141,20 @@ MASS1 Met Coefficient Output = mass1_met_coeff.dat
 This is to aid in the case where stream temperature is calibrated for
 subbasins then those calibrated coefficients are used in the larger
 domain.  
+
+MASS1 gets all necessary meteorologic data from DHSVM.  A couple of
+configuration phrases control what MASS1 uses.  By default, MASS1 uses
+short- and longwave radiation that is adjusted by topographic, canopy,
+and riparian shading (if enabled).  If 
+``` 
+MASS1 Use Shading = FALSE
+``` 
+is specified, MASS1 will use incoming short- and longwave
+radiation with topographic shading, but ignoring canopy and riparian
+shading.
+
+MASS1 can compute incoming longwave radiation internally. This is
+typically not necessary, but can be enabled with
+```
+MASS1 Internal Longwave = FALSE
+```
