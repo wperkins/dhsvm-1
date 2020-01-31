@@ -191,6 +191,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
       strncpy(mass1_out_path, ".", BUFSIZE+1);
+
+      printf("Reading MASS1 Configuration from %s\n", mass1_config_path);
       channel->mass1_streams = mass1_create(mass1_config_path, mass1_out_path,
                                             &(Time->Start), &(Time->End),
                                             ParallelRank(), Options->StreamTemp,
@@ -238,6 +240,17 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
                                     mass1_coeff_a, mass1_coeff_b,
                                     mass1_coeff_cond, mass1_coeff_brunt,
                                     coeff_file);
+
+        printf("MASS1 Temperature simulation enabled, settings:\n");
+        printf("\tMASS1 Inflow Temperature = %.1f\n", mass1_temp);
+        printf("\tMASS1 Wind Function A = %.3f\n", mass1_coeff_a);
+        printf("\tMASS1 Wind Function B = %.3f\n", mass1_coeff_b);
+        printf("\tMASS1 Conduction Coefficient = %.3f\n", mass1_coeff_cond);
+        printf("\tMASS1 Brunt Coefficient  =  %.3f\n", mass1_coeff_brunt);
+        printf("\tMASS1 Internal Longwave = %s\n",
+               (channel->mass1_dhsvm_longwave ? "FALSE" : "TRUE"));
+        printf("\tMASS1 Use Shading = %s\n",
+               (channel->mass1_do_shading ? "TRUE" : "FALSE"));
       }
     }
   }
