@@ -196,7 +196,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       channel->mass1_streams = mass1_create(mass1_config_path, mass1_out_path,
                                             &(Time->Start), &(Time->End),
                                             ParallelRank(), Options->StreamTemp,
-                                            channel->mass1_dhsvm_longwave);
+                                            channel->mass1_dhsvm_longwave, TRUE);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {

@@ -108,6 +108,7 @@ struct _channel_rec_ {
 
   float inflow_temp;            /* segment inflow temperature (MASS1 only) */
   float outflow_temp;           /* segment outflow temperature (MASS1 only) */
+  float bed_temp;               /* segment bed temperature (MASS1 only) */
 
   struct _channel_rec_ *outlet;	/* NULL if does not drain to another segment */
   struct _channel_rec_ *next;
