@@ -103,6 +103,7 @@ struct _channel_rec_ {
   float conduction;
   float brunt;
   float RH;             /* relative humidity, a little easier for MASS1 */
+  float bed_depth;
 
   CHANRVEG rveg;        /* riparian veg sub-structure */
 

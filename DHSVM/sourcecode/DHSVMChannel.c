@@ -39,7 +39,7 @@
 static void
 set_or_read_mass1_met_coeff(ChannelPtr net, float ltemp,
                             float winda, float windb, float cond,
-                            float brunt, char *coeff_file)
+                            float brunt, float bdepth, char *coeff_file)
 {
   ChannelPtr current, cindex;
 
@@ -52,6 +52,7 @@ set_or_read_mass1_met_coeff(ChannelPtr net, float ltemp,
     current->wind_function_b = windb;
     current->conduction = cond;
     current->brunt = brunt;
+    current->bed_depth = bdepth;
   }
 
   /* if a file is specified, read it and set inflow temperature and
@@ -70,11 +71,11 @@ write_mass1_met_coeff(ChannelPtr net, char *coeff_file)
   OpenFile(&out, coeff_file, "w", TRUE);
   for (current = net; current != NULL;
        current = current->next) {
-    fprintf(out, "%6d %8.2f %8.2f %8.2f %8.2f %8.2f\n",
+    fprintf(out, "%6d %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f\n",
             current->id,
             current->wind_function_a, current->wind_function_b,
             current->conduction, current->brunt,
-            current->lateral_temp);
+            current->lateral_temp, current->bed_depth);
   }
   fclose(out);
 }
@@ -107,6 +108,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 INTERNAL LONGWAVE", "", "FALSE"},
     {"ROUTING", "MASS1 USE SHADING", "", "TRUE"},
     {"ROUTING", "MASS1 USE BED", "", "TRUE"},
+    {"ROUTING", "MASS1 BED DEPTH", "", "2.0"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {NULL, NULL, "", NULL}
@@ -114,7 +116,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
 #ifdef MASS1_CHANNEL
   char mass1_config_path[BUFSIZE + 1];
   char mass1_out_path[BUFSIZE + 1];
-  float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond, mass1_coeff_brunt;
+  float mass1_temp, mass1_coeff_a, mass1_coeff_b, mass1_coeff_cond,
+    mass1_coeff_brunt, mass1_coeff_bdepth;
   char *coeff_file, *coeff_output;
   ChannelPtr current;
 
@@ -223,6 +226,9 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
         if (!CopyFloat(&mass1_coeff_brunt, StrEnv[mass1_brunt].VarStr, 1)) {
           ReportError(StrEnv[mass1_brunt].KeyName, 51);
         }
+        if (!CopyFloat(&mass1_coeff_bdepth, StrEnv[mass1_bed_depth].VarStr, 1)) {
+          ReportError(StrEnv[mass1_bed_depth].KeyName, 51);
+        }
 
         if (strncmp(StrEnv[mass1_coeff_file].VarStr, "none", 4))  {
           coeff_file = StrEnv[mass1_coeff_file].VarStr;
@@ -248,7 +254,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
         set_or_read_mass1_met_coeff(channel->streams, mass1_temp,
                                     mass1_coeff_a, mass1_coeff_b,
                                     mass1_coeff_cond, mass1_coeff_brunt,
-                                    coeff_file);
+                                    mass1_coeff_bdepth, coeff_file);
 
         printf("MASS1 Temperature simulation enabled, settings:\n");
         printf("\tMASS1 Inflow Temperature = %.1f\n", mass1_temp);
@@ -260,6 +266,9 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
                (channel->mass1_dhsvm_longwave ? "FALSE" : "TRUE"));
         printf("\tMASS1 Use Shading = %s\n",
                (channel->mass1_do_shading ? "TRUE" : "FALSE"));
+        printf("\tMASS1 Use Bed = %s\n",
+               (channel->mass1_do_bed ? "TRUE" : "FALSE"));
+        printf("\tMASS1 Bed Depth  =  %.3f\n", mass1_coeff_bdepth);
       }
     }
   }

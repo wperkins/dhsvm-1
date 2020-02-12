@@ -10,7 +10,7 @@
  *
  * DESCRIP-END.cd
  * FUNCTIONS:    
- * LAST CHANGE: 2020-01-16 13:48:07 d3g096
+ * LAST CHANGE: 2020-02-12 09:41:36 d3g096
  * COMMENTS:
  */
 
@@ -32,7 +32,8 @@ extern void mass1_update_met(void *net, int id,
                              float windspeed, float swradiation,
                              float lwradiation, DATE *ddate);
 extern void mass1_update_met_coeff(void *net, int id,
-                                   float a, float b, float Ccond, float brunt);
+                                   float a, float b, float Ccond, float brunt,
+                                   float bdepth);
 extern double mass1_link_outflow(void *net, int id);
 extern double mass1_link_inflow(void *net, int id);
 
@@ -68,7 +69,8 @@ mass1_set_coefficients(void *net, Channel *streams)
                              current->wind_function_a,
                              current->wind_function_b,
                              current->conduction,
-                             current->brunt);
+                             current->brunt,
+                             current->bed_depth);
     }
   }
 }

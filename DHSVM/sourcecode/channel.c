@@ -1163,8 +1163,8 @@ channel_read_mass1_coeff(Channel *net, char *file)
   ChannelIndex *cindex;
   int done, rec;
   int err = 0;
-  static const int fields = 6;
-  static TableField chan_fields[6] =
+  static const int fields = 7;
+  static TableField chan_fields[7] =
     {
      {"ID", TABLE_INTEGER, TRUE, FALSE, {0}, "", NULL},
      {"MASS1 Wind Function A", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
@@ -1172,6 +1172,7 @@ channel_read_mass1_coeff(Channel *net, char *file)
      {"MASS1 Conduction", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
      {"MASS1 Brunt", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
      {"MASS1 Inflow Temperature", TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
+     {"MASS1 Bed Depth",  TABLE_REAL, TRUE, FALSE, {0.0}, "", NULL},
     };
 
   error_handler(ERRHDL_STATUS,
@@ -1223,6 +1224,7 @@ channel_read_mass1_coeff(Channel *net, char *file)
     current->conduction = chan_fields[i++].value.real;
     current->brunt = chan_fields[i++].value.real;
     current->lateral_temp = chan_fields[i++].value.real;
+    current->bed_depth = chan_fields[i++].value.real;
   }
 
   channel_network_index_destroy(cindex);
