@@ -101,6 +101,7 @@ MASS1 Conduction Coefficient = 0.47
 MASS1 Brunt Coefficient  = 0.65
 MASS1 Internal Longwave = FALSE
 MASS1 Use Shading = TRUE
+MASS1 Use Bed = TRUE
 MASS1 Met Coefficient File = none
 MASS1 Met Coefficient Output = none
 ```

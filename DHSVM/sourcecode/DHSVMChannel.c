@@ -106,6 +106,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 BRUNT COEFFICIENT", "", "0.65"},
     {"ROUTING", "MASS1 INTERNAL LONGWAVE", "", "FALSE"},
     {"ROUTING", "MASS1 USE SHADING", "", "TRUE"},
+    {"ROUTING", "MASS1 USE BED", "", "TRUE"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {NULL, NULL, "", NULL}
@@ -187,6 +188,13 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
         else
           ReportError(StrEnv[mass1_int_lw].KeyName, 51);
         
+        if (strncmp(StrEnv[mass1_bed].VarStr, "TRUE", 4) == 0)
+          channel->mass1_do_bed = TRUE;
+        else if (strncmp(StrEnv[mass1_bed].VarStr, "FALSE", 5) == 0)
+          channel->mass1_do_bed = FALSE;
+        else
+          ReportError(StrEnv[mass1_shading].KeyName, 51);
+
       }
       
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
@@ -196,7 +204,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       channel->mass1_streams = mass1_create(mass1_config_path, mass1_out_path,
                                             &(Time->Start), &(Time->End),
                                             ParallelRank(), Options->StreamTemp,
-                                            channel->mass1_dhsvm_longwave, TRUE);
+                                            channel->mass1_dhsvm_longwave,
+                                            channel->mass1_do_bed);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
