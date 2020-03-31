@@ -191,7 +191,7 @@ ReadMASS1ChannelState(char *Path, DATE *Now, void *net)
   /* only the root process needs to store the state */
 
   if (ParallelRank() == 0) {
-    printf("storing channel state \n");
+    printf("Restoring channel state \n");
     /* Create storage file */
     sprintf(Str, "%02d.%02d.%04d.%02d.%02d.%02d", Now->Month, Now->Day,
             Now->Year, Now->Hour, Now->Min, Now->Sec);
