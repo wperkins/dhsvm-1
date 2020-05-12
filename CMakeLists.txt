@@ -9,7 +9,7 @@
 # DESCRIP-END.
 # COMMENTS:
 #
-# Last Change: 2019-10-16 14:24:37 d3g096
+# Last Change: 2020-05-12 12:02:42 d3g096
 
 # -------------------------------------------------------------
 # General set up
@@ -25,10 +25,7 @@ list (APPEND CMAKE_MODULE_PATH "${DHSVM_SOURCE_DIR}/cmake")
 # Configuration options
 # -------------------------------------------------------------
 
-# Option to set the surface/subsurface drainage direction
-option(DHSVM_D8
-  "Switch surface/subsurface drainage algorithm to 8-neighbor steepest descent"
-  OFF)
+enable_language(CXX)
 
 # Option to dump topography maps, for debugging
 option (DHSVM_DUMP_TOPO
