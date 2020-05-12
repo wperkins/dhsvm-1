@@ -159,3 +159,12 @@ typically not necessary, but can be enabled with
 ```
 MASS1 Internal Longwave = FALSE
 ```
+
+## Unorganized Thoughts
+
+  * The upstream-most segments (order = 1) inflow boundary conditions
+    are defined in MASS1 configuration.  
+  * Segments that pass through DHSVM cells have the MASS1-defined
+    lateral inflow and temperature BC's replaced.  
+  * If a segment does not pass through any DHSVM cells, MASS1 has the
+    responsibility to define upstream and lateral BCs.  
