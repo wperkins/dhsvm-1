@@ -19,6 +19,7 @@
 #include "data.h"
 #include "functions.h"
 #include "constants.h"
+#include "ga_helper.h"
 
 /*****************************************************************************
   ResetAggregate()
@@ -32,7 +33,8 @@ void ResetAggregate(LAYER * Soil, LAYER * Veg, AGGREGATED * Total,
   int j;			/* counter */
 
   if (DEBUG)
-    printf("Resetting the aggregate values\n");
+    if (ParallelRank() == 0)
+      printf("Resetting the aggregate values\n");
 
   /* initialize evaporation data */
   Total->Evap.ETot = 0.0;
