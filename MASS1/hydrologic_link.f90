@@ -263,8 +263,9 @@ CONTAINS
     END DO
     this%avgpt%hold = this%avgpt%hnow
     IF (ASSOCIATED(this%species)) THEN
-       this%avgpt%trans%hold = this%avgpt%hold
-       this%avgpt%trans%xspropold = this%avgpt%xsprop
+       this%avgpt%trans%hnow = this%avgpt%hold
+       this%avgpt%trans%xsprop = this%avgpt%xsprop
+       this%trans_storage = this%storage
     END IF
 
     ! get upstream inflow (volume)
@@ -550,7 +551,6 @@ CONTAINS
     INTEGER, INTENT(IN) :: nspecies
 
     INTEGER :: s, iostat
-    DOUBLE PRECISION :: c(nspecies), cold(nspecies)
     CHARACTER (LEN=1024) :: msg
 
     CALL this%linear_link_t%write_trans_restart(iunit, nspecies)
@@ -575,9 +575,6 @@ CONTAINS
     
     CLASS (hydrologic_link), INTENT(INOUT) :: this
     DOUBLE PRECISION, INTENT(IN) :: tnow, htime0, htime1
-    INTEGER :: i
-    CLASS (point_t), POINTER :: pt
-    DOUBLE PRECISION :: depth
     DOUBLE PRECISION :: dlinear_interp
 
     CALL this%linear_link_t%trans_interp(tnow, htime0, htime1)

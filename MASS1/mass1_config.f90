@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created February 17, 2017 by William A. Perkins
-! Last Change: 2020-04-15 13:45:52 d3g096
+! Last Change: 2020-05-28 08:47:55 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE mass1_config
@@ -54,6 +54,14 @@ MODULE mass1_config
      ENUMERATOR :: CHANNEL_KM = 4
   END ENUM
   PUBLIC :: CHANNEL_UNITS, CHANNEL_FOOT, CHANNEL_METER, CHANNEL_MILE, CHANNEL_KM
+
+  ENUM, BIND(C)
+     ENUMERATOR :: DSBC_TYPE = 0
+     ENUMERATOR :: DSBC_STAGE = 1
+     ENUMERATOR :: DSBC_DISCHARGE = 2
+     ENUMERATOR :: DSBC_NORMAL = 3
+  END ENUM
+  PUBLIC :: DSBC_STAGE, DSBC_DISCHARGE, DSBC_NORMAL
 
   TYPE, PUBLIC :: time_frame_t
      INTEGER(KIND(TIME_OPTION)) :: option
@@ -105,7 +113,7 @@ MODULE mass1_config
      DOUBLE PRECISION :: density_h2o
 
      INTEGER(KIND(CHANNEL_UNITS)) :: channel_length_units
-     INTEGER :: dsbc_type
+     INTEGER(KIND(DSBC_TYPE)) :: dsbc_type
      TYPE (time_frame_t) :: time
      CHARACTER(LEN=path_length) :: link_file
      CHARACTER(LEN=path_length) :: point_file
@@ -367,7 +375,18 @@ CONTAINS
 
     READ(iunit,*,ERR=110) dumlog
     line = line + 1
-    this%dsbc_type = dumlog + 1
+    SELECT CASE (dumlog+1)
+    CASE(1)
+       this%dsbc_type = DSBC_STAGE
+    CASE (2)
+       this%dsbc_type = DSBC_DISCHARGE
+    CASE (3)
+       this%dsbc_type = DSBC_NORMAL
+    CASE DEFAULT
+       WRITE(msg, *) 'downstream BC type (', dumlog, ') not understood'
+       CALL error_message(msg, fatal=.FALSE.)
+       GOTO 110
+    END SELECT
 
     READ(iunit,*,ERR=110) this%maxlinks
     line = line + 1

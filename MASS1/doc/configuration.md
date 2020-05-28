@@ -31,7 +31,7 @@ because they are no longer needed or computed internally.  Items
 |17 | 1 | int  | Units used for channel length in the [point file](point.md):
 |   |   |      |  0 = feet, 1 = meters, 2 = miles, 3 = kilometers
 |18 | 1 | int  | Boundary condition at outlet: 
-|   |   |      |  0 = stage, 1 = discharge
+|   |   |      |  0 = stage, 1 = discharge, 2 = normal 
 |19 | 1 | int  | Maximum number of links (>= actual number of links)
 |20 | 1 | int  | Maximum number of points on a link
 |21 | 1 | int  | ~~Maximum number of values in a [BC file](bc.md)~~
