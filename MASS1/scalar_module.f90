@@ -13,7 +13,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created January  7, 2019 by William A. Perkins
-! Last Change: 2020-05-28 08:48:10 d3g096
+! Last Change: 2020-06-03 07:26:08 d3g096
 ! ----------------------------------------------------------------
 
 ! ----------------------------------------------------------------
@@ -189,8 +189,11 @@ CONTAINS
     t%needmet = t%dosource
     t%do_friction = dofrict
     t%do_bed = dobed
-    t%do_limit = .FALSE.
 
+    ! If .TRUE., do not use bad values to compute source term
+    t%do_limit = temperature_limits
+
+    ! This doesn't work yet so don't use it
     t%do_eqlimit = .FALSE.
 
   END FUNCTION new_temperature
