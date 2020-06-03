@@ -1070,7 +1070,7 @@ CONTAINS
           c = this%species(ispec)%usbc%current_value
        ELSEIF (ASSOCIATED(this%ucon)) THEN
           c = this%ucon%conc(ispec)
-       ELSE
+       ELSEIF (qup .GT. 0.0) THEN
           ! this is bad, but shouldn't happen often
           CALL error_message("Upstream link w/o transport BC")
        END IF
@@ -1078,7 +1078,7 @@ CONTAINS
     IF (qdn .LE. 0.0) THEN
        IF (ASSOCIATED(this%dcon)) THEN
           c = this%dcon%conc(ispec)
-       ELSE
+       ELSEIF (qdn .LT. 0.0) THEN
           ! also bad, but shouldn't happen often
           CALL error_message("Reverse flow w/o transport BC")
        END IF
