@@ -7,13 +7,13 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created February  4, 2019 by William A. Perkins
-! Last Change: 2020-02-12 09:45:32 d3g096
+! Last Change: 2020-07-24 07:42:17 d3g096
 ! ----------------------------------------------------------------
 
 ! ----------------------------------------------------------------
 !  FUNCTION mass1_create
 ! ----------------------------------------------------------------
-FUNCTION mass1_create(c_cfgdir, c_outdir, start, end, pid, dotemp, dolwrad, dobed) &
+FUNCTION mass1_create(c_cfgdir, c_outdir, start, end, pid, dotemp, dolwrad, dobed, doquiet) &
      &RESULT(net) BIND(c)
   USE, INTRINSIC :: iso_c_binding
   USE mass1_dhsvm_module
@@ -21,11 +21,11 @@ FUNCTION mass1_create(c_cfgdir, c_outdir, start, end, pid, dotemp, dolwrad, dobe
   TYPE (c_ptr) :: net
   TYPE (c_ptr), VALUE :: c_cfgdir, c_outdir
   TYPE (DHSVM_date), INTENT(INOUT) :: start, end
-  INTEGER(KIND=C_INT), VALUE :: pid, dotemp, dolwrad, dobed
+  INTEGER(KIND=C_INT), VALUE :: pid, dotemp, dolwrad, dobed, doquiet
 
   TYPE (DHSVM_network), POINTER :: f_net
   CHARACTER (LEN=1024) :: cfgdir, outdir, spath, epath, buf
-  LOGICAL :: f_dotemp, f_dolwrad, f_dobed
+  LOGICAL :: f_dotemp, f_dolwrad, f_dobed, f_doquiet
 
   CALL c2fstring(c_cfgdir, cfgdir)
   CALL c2fstring(c_outdir, outdir)
@@ -36,6 +36,7 @@ FUNCTION mass1_create(c_cfgdir, c_outdir, start, end, pid, dotemp, dolwrad, dobe
   f_dotemp = (dotemp .NE. 0)
   f_dolwrad = (dolwrad .NE. 0)
   f_dobed = (dobed .NE. 0)
+  f_doquiet = (doquiet .NE. 0)
 
   utility_error_iounit = 11
   utility_status_iounit = 99
@@ -61,7 +62,7 @@ FUNCTION mass1_create(c_cfgdir, c_outdir, start, end, pid, dotemp, dolwrad, dobe
      CALL banner()
   END IF
 
-  CALL mass1_initialize(f_net, cfgdir, outdir, start, end, .TRUE., &
+  CALL mass1_initialize(f_net, cfgdir, outdir, start, end, f_doquiet, &
        &f_dotemp, f_dolwrad, f_dobed)
 
   net = C_LOC(f_net)

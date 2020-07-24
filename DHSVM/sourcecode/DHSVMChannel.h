@@ -50,6 +50,7 @@ typedef struct {
   int mass1_dhsvm_longwave;
   int mass1_do_shading;
   int mass1_do_bed;
+  int mass1_quiet;
   char streams_met_coeff_out[BUFSIZE + 1];
 } CHANNEL;
 

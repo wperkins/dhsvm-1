@@ -111,6 +111,7 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 BED DEPTH", "", "2.0"},
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
+    {"ROUTING", "MASS1 QUIET", "", "TRUE"},
     {NULL, NULL, "", NULL}
   };
 #ifdef MASS1_CHANNEL
@@ -183,6 +184,14 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     /* only the root process creates and uses a MASS1 network */
     
     if (ParallelRank() == 0) {
+      if (strncmp(StrEnv[mass1_quiet].VarStr, "TRUE", 4) == 0)
+        channel->mass1_quiet = TRUE;
+      else if (strncmp(StrEnv[mass1_quiet].VarStr, "FALSE", 5) == 0)
+        channel->mass1_quiet = FALSE;
+      else
+        ReportError(StrEnv[mass1_quiet].KeyName, 51);
+
+      
       if (Options->StreamTemp) {
         if (strncmp(StrEnv[mass1_int_lw].VarStr, "TRUE", 4) == 0)
           channel->mass1_dhsvm_longwave = FALSE;
@@ -197,7 +206,6 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
           channel->mass1_do_bed = FALSE;
         else
           ReportError(StrEnv[mass1_shading].KeyName, 51);
-
       }
       
       strncpy(mass1_config_path, StrEnv[mass1_config].VarStr, BUFSIZE+1);
@@ -208,7 +216,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
                                             &(Time->Start), &(Time->End),
                                             ParallelRank(), Options->StreamTemp,
                                             channel->mass1_dhsvm_longwave,
-                                            channel->mass1_do_bed);
+                                            channel->mass1_do_bed,
+                                            channel->mass1_quiet);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {
