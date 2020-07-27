@@ -101,7 +101,7 @@ MASS1 Conduction Coefficient = 0.47
 MASS1 Brunt Coefficient  = 0.65
 MASS1 Internal Longwave = FALSE
 MASS1 Use Shading = TRUE
-MASS1 Use Bed = TRUE
+MASS1 Use Bed = FALSE
 MASS1 Met Coefficient File = none
 MASS1 Met Coefficient Output = none
 ```
@@ -159,6 +159,34 @@ typically not necessary, but can be enabled with
 ```
 MASS1 Internal Longwave = FALSE
 ```
+
+MASS1 implements a single layer thermal bed, which can be enabled with
+```
+MASS1 Use Bed = TRUE
+```
+This adds an addition per segment parameter, bed depth. The default
+bed depth can be specified with
+```
+MASS1 Bed Depth = 2.0
+```
+This bed representation does not work well, so it should not be used.  
+
+Several other configuration phrases control MASS1 output during the
+simulation. On its own, MASS1 will report the simulation time and
+transport time steps. Sometimes it is helpful to see this in DHSVM
+output. It can be turned on with
+```
+MASS1 Quiet = FALSE
+```
+It sometimes helps to obtain simulation output directly from
+MASS1. Gage and profile output can be controlled from DHSVM with
+```
+MASS1 Gage Output = FALSE
+MASS1 Profile Output = FALSE
+```
+These are typically not needed, but are sometimes helpful for debugging the
+MASS1 configuration only.  Expect simulations to run considerably
+slower if these outputs are enabled.  
 
 ## Unorganized Thoughts
 
