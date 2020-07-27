@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created March 10, 2017 by William A. Perkins
-! Last Change: 2020-04-15 13:46:08 d3g096
+! Last Change: 2020-07-27 12:45:47 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE network_module
@@ -144,16 +144,19 @@ CONTAINS
   ! SUBROUTINE network_read
   ! 
   ! ----------------------------------------------------------------
-  SUBROUTINE network_read(this, base, dotemp_override, dobed_override, doreduce_override)
+  SUBROUTINE network_read(this, base, dotemp_override, &
+       &dobed_override, doreduce_override, &
+       &dogage_override, doprof_override)
     USE general_vars
     IMPLICIT NONE
     CLASS (network), INTENT(INOUT) :: this
     CHARACTER (LEN=*), INTENT(IN) :: base
     LOGICAL, INTENT(IN), OPTIONAL :: dotemp_override, dobed_override, doreduce_override
+    LOGICAL, INTENT(IN), OPTIONAL :: dogage_override, doprof_override
     INTEGER :: istatus
     CHARACTER(LEN=path_length) :: cwd, mybase
-
-
+    
+    
     istatus = getcwd(cwd)       ! FIXME: GNU specfic
     IF (istatus .NE. 0) THEN 
        CALL error_message("network_read: cannot get current working directory")
@@ -168,11 +171,18 @@ CONTAINS
        CALL error_message("network_read: cannot get current working directory")
     END IF
     this%basedir = mybase
-
+    
     CALL this%config%read()
 
     ! Some things can be overridden (i.e. DHSVM) can override some
     ! things in the configuration
+    IF (PRESENT(dogage_override)) THEN
+       this%config%do_gageout = dogage_override
+    END IF
+    IF (PRESENT(doprof_override)) THEN
+       this%config%do_profileout = doprof_override
+    END IF
+
     IF (PRESENT(dotemp_override)) THEN
        this%config%do_temp = dotemp_override
        this%config%do_transport = this%config%do_temp
