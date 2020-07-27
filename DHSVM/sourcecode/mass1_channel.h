@@ -8,7 +8,7 @@
    ------------------------------------------------------------- */
 /* -------------------------------------------------------------
    Created February  8, 2019 by William A. Perkins
-   Last Change: 2020-07-24 07:43:02 d3g096
+   Last Change: 2020-07-27 12:40:09 d3g096
    ------------------------------------------------------------- */
 
 #ifndef _mass1_channel_h_
@@ -24,7 +24,8 @@
 
 extern void *mass1_create(char *cfgdir, char *outdir,
                           DATE *start, DATE *end,
-                          int pid, int dotemp, int dolwrad, int dobedtemp, int doquiet);
+                          int pid, int dotemp, int dolwrad, int dobedtemp, int doquiet,
+                          int dogage, int doprof);
 
 extern void mass1_prepare_network(void *net, Channel *streams);
 

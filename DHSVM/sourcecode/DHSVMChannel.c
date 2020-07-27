@@ -112,6 +112,8 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
     {"ROUTING", "MASS1 MET COEFFICIENT FILE", "", "none"},
     {"ROUTING", "MASS1 MET COEFFICIENT OUTPUT", "", "none"},
     {"ROUTING", "MASS1 QUIET", "", "TRUE"},
+    {"ROUTING", "MASS1 GAGE OUTPUT", "", "FALSE"},
+    {"ROUTING", "MASS1 PROFILE OUTPUT", "", "FALSE"},
     {NULL, NULL, "", NULL}
   };
 #ifdef MASS1_CHANNEL
@@ -191,6 +193,21 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
       else
         ReportError(StrEnv[mass1_quiet].KeyName, 51);
 
+      /* flag to turn on/off MASS1 gage output (for debugging) */
+      if (strncmp(StrEnv[mass1_gage].VarStr, "TRUE", 4) == 0)
+        channel->mass1_do_gage = TRUE;
+      else if (strncmp(StrEnv[mass1_gage].VarStr, "FALSE", 5) == 0)
+        channel->mass1_do_gage = FALSE;
+      else
+        ReportError(StrEnv[mass1_gage].KeyName, 51);
+
+      /* flag to turn on/off MASS1 profile output (for debugging) */
+      if (strncmp(StrEnv[mass1_prof].VarStr, "TRUE", 4) == 0)
+        channel->mass1_do_profile = TRUE;
+      else if (strncmp(StrEnv[mass1_prof].VarStr, "FALSE", 5) == 0)
+        channel->mass1_do_profile = FALSE;
+      else
+        ReportError(StrEnv[mass1_prof].KeyName, 51);
       
       if (Options->StreamTemp) {
         if (strncmp(StrEnv[mass1_int_lw].VarStr, "TRUE", 4) == 0)
@@ -217,7 +234,9 @@ InitChannel(LISTPTR Input, MAPSIZE *Map, int deltat, CHANNEL *channel,
                                             ParallelRank(), Options->StreamTemp,
                                             channel->mass1_dhsvm_longwave,
                                             channel->mass1_do_bed,
-                                            channel->mass1_quiet);
+                                            channel->mass1_quiet,
+                                            channel->mass1_do_gage,
+                                            channel->mass1_do_profile);
 
       if (Options->StreamTemp) {
         if (!CopyFloat(&mass1_temp, StrEnv[mass1_inflow_temp].VarStr, 1)) {

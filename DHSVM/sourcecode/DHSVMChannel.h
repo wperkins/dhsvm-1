@@ -51,6 +51,7 @@ typedef struct {
   int mass1_do_shading;
   int mass1_do_bed;
   int mass1_quiet;
+  int mass1_do_gage, mass1_do_profile;
   char streams_met_coeff_out[BUFSIZE + 1];
 } CHANNEL;
 
