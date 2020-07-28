@@ -120,7 +120,7 @@ CONTAINS
        reduce_subset = .TRUE.
     END IF
 
-    CALL dnet%net%read(cfgdir, dotemp, dobed, reduce_subset)
+    CALL dnet%net%read(cfgdir, dotemp, dobed, reduce_subset, dogage, doprof)
 
     ASSOCIATE (cfg => dnet%net%config)
       cfg%time%begin = dhsvm_to_decimal(start)
