@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created March 10, 2017 by William A. Perkins
-! Last Change: 2020-07-27 12:45:47 d3g096
+! Last Change: 2020-07-29 09:34:26 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE network_module
@@ -499,6 +499,7 @@ CONTAINS
     DOUBLE PRECISION :: htime0, htime1
     DOUBLE PRECISION :: tnow, tdeltat
     INTEGER :: tsteps, tlink, i, ispec
+    CHARACTER (LEN=1024) :: msg
 
     htime0 = this%config%time%time
     htime1 = htime0 + this%config%time%step
@@ -513,6 +514,11 @@ CONTAINS
        CALL this%links%transport_steps(this%config%time%step, tsteps, tlink)
        IF (.NOT. this%config%quiet) THEN
           WRITE(*, '(" Using ", I5, " transport steps (", I5,")")') tsteps, tlink
+       END IF
+       IF (tsteps .GT. this%config%max_scalar_steps) THEN
+          WRITE(msg, '("Maximum transport steps exceeded (", I5, " > ", I5, ") on link ", I5)') &
+               &tsteps, config%max_scalar_steps, tlink
+          CALL error_message(msg, fatal=.TRUE.)
        END IF
     END IF
     tdeltat = this%config%time%delta_t

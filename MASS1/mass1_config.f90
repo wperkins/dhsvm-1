@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created February 17, 2017 by William A. Perkins
-! Last Change: 2020-05-28 08:47:55 d3g096
+! Last Change: 2020-07-29 09:24:53 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE mass1_config
@@ -105,6 +105,7 @@ MODULE mass1_config
      INTEGER :: maxlinks
      INTEGER :: maxpoint
      INTEGER :: scalar_steps
+     INTEGER :: max_scalar_steps
      INTEGER(KIND(UNIT_SYSTEM)) :: units
 
      DOUBLE PRECISION :: res_coeff
@@ -136,6 +137,7 @@ MODULE mass1_config
      LOGICAL :: quiet
 
      LOGICAL :: do_transport
+     INTEGER :: max_transport_tests
      LOGICAL :: do_temp_bed
      LOGICAL :: do_temp_frict
      LOGICAL :: do_reduce_substep
@@ -404,6 +406,10 @@ CONTAINS
     line = line + 1
 
     READ(iunit,*,ERR=110) this%scalar_steps
+    IF (this%scalar_steps .LT. 0) THEN
+       this%max_scalar_steps = - this%scalar_steps
+       this%scalar_steps = 0
+    END IF
     line = line + 1
 
     READ(iunit,*,ERR=110) dumlog
