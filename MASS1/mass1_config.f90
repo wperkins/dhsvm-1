@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created February 17, 2017 by William A. Perkins
-! Last Change: 2020-07-29 09:24:53 d3g096
+! Last Change: 2020-07-29 12:56:51 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE mass1_config
@@ -409,6 +409,8 @@ CONTAINS
     IF (this%scalar_steps .LT. 0) THEN
        this%max_scalar_steps = - this%scalar_steps
        this%scalar_steps = 0
+    ELSE
+       this%max_scalar_steps = 0
     END IF
     line = line + 1
 
