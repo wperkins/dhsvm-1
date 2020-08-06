@@ -7,7 +7,7 @@
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # Created December 29, 2016 by William A. Perkins
-# Last Change: 2020-08-06 07:14:11 d3g096
+# Last Change: 2020-08-06 12:54:15 d3g096
 # -------------------------------------------------------------
 
 # -------------------------------------------------------------
@@ -163,7 +163,6 @@ if (MASS1_BUILD_OLD)
     read_hotstart.f90
     scalars_module.f90
     section_handler.f90
-    storage_module.f90
     svgrp.f90
     tdg_equation_coeff.f90
     write_restart.f90
@@ -263,6 +262,7 @@ add_library(mass1lib
   profile_module.f90
   scalar_module.f90
   section_handler.f90
+  storage_module.f90
   transport_link_module.f90
   transport_module.f90
   linear_interp.f90

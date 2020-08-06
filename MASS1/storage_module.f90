@@ -7,13 +7,14 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created April  3, 2020 by William A. Perkins
-! Last Change: 2020-07-21 11:41:02 d3g096
+! Last Change: 2020-08-05 08:42:44 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE storage_module
 ! ----------------------------------------------------------------
 MODULE storage_module
 
+  USE table_module
   USE utility
 
   IMPLICIT NONE
@@ -71,6 +72,13 @@ MODULE storage_module
   INTERFACE simple_storage
      MODULE PROCEDURE new_simple_storage
   END INTERFACE simple_storage
+
+  ! ----------------------------------------------------------------
+  ! TYPE storage_ptr
+  ! ----------------------------------------------------------------
+  TYPE, PUBLIC :: storage_ptr
+     CLASS (storage_t), POINTER :: p
+  END type storage_ptr
      
 CONTAINS
 

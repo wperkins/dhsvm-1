@@ -7,7 +7,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created July 17, 2017 by William A. Perkins
-! Last Change: 2020-05-04 11:24:01 d3g096
+! Last Change: 2020-07-23 14:50:40 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE nonfluvial_link_module
@@ -20,6 +20,8 @@ MODULE nonfluvial_link_module
   USE linear_link_module
   USE flow_coeff
   USE bc_module
+  USE storage_module
+  
   IMPLICIT NONE
 
   PRIVATE
@@ -79,6 +81,20 @@ MODULE nonfluvial_link_module
    CONTAINS
      PROCEDURE :: coeff => trib_inflow_link_coeff
   END type trib_inflow_link
+
+  ! ----------------------------------------------------------------
+  ! TYPE offline_storage_link
+  ! 
+  ! ----------------------------------------------------------------
+  TYPE, PUBLIC, EXTENDS(internal_bc_link_t) :: offline_storage_link
+     ! The actual storage bucket
+     TYPE (storage_ptr) :: storage
+
+     
+     DOUBLE PRECISION :: yconnect
+   CONTAINS
+     PROCEDURE :: coeff => offline_storage_link_coeff
+  END type offline_storage_link
 
 
   DOUBLE PRECISION, PARAMETER :: eps = 1.0D-09
@@ -277,6 +293,35 @@ CONTAINS
 
   END SUBROUTINE trib_inflow_link_coeff
 
+
+  ! ----------------------------------------------------------------
+  ! SUBROUTINE offline_storage_link_coeff
+  ! ----------------------------------------------------------------
+  SUBROUTINE offline_storage_link_coeff(this, dt, pt1, pt2, cf)
+
+    IMPLICIT NONE
+
+    CLASS (offline_storage_link), INTENT(INOUT) :: this
+    DOUBLE PRECISION, INTENT(IN) :: dt
+    TYPE (point_t), INTENT(IN) :: pt1, pt2
+    TYPE (coeff), INTENT(OUT) :: cf
+    DOUBLE PRECISION :: dvdy
+
+    dvdy = this%storage%p%dvdy(pt2%hnow%y)
+
+    cf%a = 0.0
+    cf%b = theta
+    cf%c = dvdy
+    cf%d = -theta
+    cf%g = pt2%hnow%q - pt1%hnow%q
+    
+    cf%ap = 1.0
+    cf%bp = 0.0
+    cf%cp = 1.0
+    cf%dp = 0.0
+    cf%gp = pt1%hnow%y - pt2%hnow%y
+    
+  END SUBROUTINE offline_storage_link_coeff
 
 
 END MODULE nonfluvial_link_module
