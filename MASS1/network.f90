@@ -9,7 +9,7 @@
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! Created March 10, 2017 by William A. Perkins
-! Last Change: 2020-07-29 12:54:57 d3g096
+! Last Change: 2020-08-06 09:34:36 d3g096
 ! ----------------------------------------------------------------
 ! ----------------------------------------------------------------
 ! MODULE network_module
@@ -518,7 +518,7 @@ CONTAINS
        IF (this%config%max_scalar_steps .GT. 0) THEN
           IF (tsteps .GT. this%config%max_scalar_steps) THEN
              WRITE(msg, '("Maximum transport steps exceeded (", I5, " > ", I5, ") on link ", I5)') &
-                  &tsteps, config%max_scalar_steps, tlink
+                  &tsteps, this%config%max_scalar_steps, tlink
              CALL error_message(msg, fatal=.TRUE.)
           END IF
        END IF
